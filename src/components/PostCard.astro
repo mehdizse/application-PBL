@@ -1,0 +1,47 @@
+---
+const { title, author, date, content, href } = Astro.props;
+---
+
+<article class="post-card">
+  <div class="flex flex-col h-full">
+    <div class="mb-4">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors duration-200">
+        <a href={href}>{title}</a>
+      </h2>
+      <div class="flex items-center justify-between text-sm text-gray-600 mb-3">
+        <span class="flex items-center space-x-2">
+          <span class="text-blue-500 font-semibold">✍️</span>
+          <span>{author}</span>
+        </span>
+        <span class="flex items-center space-x-2">
+          <span class="text-gray-400">📅</span>
+          <time datetime={date}>{new Date(date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+        </span>
+      </div>
+    </div>
+
+    <div class="prose prose-sm max-w-none flex-grow mb-4 text-gray-700 line-clamp-3">
+      {content}
+    </div>
+
+    <a href={href} class="btn-primary inline-block w-fit">
+      Lire la suite →
+    </a>
+  </div>
+</article>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

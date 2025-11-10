@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+---
+
+<BaseLayout>
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 py-20 md:py-32">
+    <div class="absolute inset-0 opacity-20 bg-pattern"></div>
+    <div class="section-container relative z-10">
+      <div class="text-center text-white animate-fade-in-up">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+          🎓 Écrire & Créer
+        </h1>
+        <p class="text-xl md:text-2xl font-light mb-8 text-blue-100 max-w-3xl mx-auto">
+          Découvrez comment l'apprentissage par projet transforme l'écriture des élèves en un voyage créatif et motivant.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a href="/about" class="btn-primary">
+            En savoir plus ✨
+          </a>
+          <a href="/posts/welcome-to-project-based-writing" class="btn-secondary">
+            Lire nos articles 📚
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="section-container py-16">
+    <h2 class="text-4xl font-bold text-center mb-12 text-gradient">Pourquoi l'apprentissage par projet ?</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div class="card card-hover p-8 text-center">
+        <div class="text-5xl mb-4">💡</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">Créativité</h3>
+        <p class="text-gray-600">Les élèves explorent leur potentiel créatif en réalisant des projets significatifs qui les passionnent.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card card-hover p-8 text-center">
+        <div class="text-5xl mb-4">🎯</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">Motivation</h3>
+        <p class="text-gray-600">Travailler sur des projets concrets augmente l'engagement et la motivation des apprenants.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card card-hover p-8 text-center">
+        <div class="text-5xl mb-4">🚀</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">Compétences</h3>
+        <p class="text-gray-600">Développer des compétences transversales : collaboration, pensée critique et communication.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest Posts Section -->
+  <section class="section-container py-16 bg-white rounded-lg shadow-lg my-12">
+    <h2 class="text-4xl font-bold mb-12 text-center text-gray-900">Dernières Productions 📖</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <PostCard 
+        title="Bienvenue dans l'Apprentissage par Projet en Écriture" 
+        author="Jane Doe"
+        date="2025-11-10"
+        content="Découvrez comment l'apprentissage par projet révolutionne l'éducation en écriture et favorise la créativité et l'engagement des élèves..."
+        href="/posts/welcome-to-project-based-writing"
+      />
+      
+      <!-- Additional post cards can be added here -->
+      <div class="card card-hover p-6 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 min-h-64">
+        <div class="text-center">
+          <p class="text-4xl mb-4">➕</p>
+          <p class="text-gray-600 font-semibold">Ajoutez un nouvel article</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-gradient-to-r from-blue-600 to-purple-600 py-16 rounded-lg shadow-xl">
+    <div class="section-container text-center text-white">
+      <h2 class="text-4xl font-bold mb-6">Valorisez vos Productions Écrites</h2>
+      <p class="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
+        Rejoignez notre communauté d'enseignants et d'élèves partageant leurs créations et leurs histoires de réussite.
+      </p>
+      <button class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg">
+        Créer un Compte 🎨
+      </button>
+    </div>
+  </section>
+</BaseLayout>

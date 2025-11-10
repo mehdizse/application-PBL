@@ -1,0 +1,82 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+const { frontmatter } = Astro.props;
+const { title, author, date } = frontmatter || {};
+---
+
+<BaseLayout>
+  <article class="section-container py-12">
+    <!-- Article Header -->
+    <header class="max-w-3xl mx-auto mb-12">
+      <div class="mb-6">
+        <a href="/" class="text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-200">
+          ← Retour à l'accueil
+        </a>
+      </div>
+      
+      <h1 class="text-5xl font-bold text-gray-900 mb-4 leading-tight">{title}</h1>
+      
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between border-t border-b border-gray-200 py-6">
+        <div class="flex items-center space-x-4 mb-4 md:mb-0">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+            {author?.charAt(0)}
+          </div>
+          <div>
+            <p class="font-semibold text-gray-900">{author}</p>
+            <p class="text-sm text-gray-600">Auteur</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-6 text-gray-600">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">📅</span>
+            <time datetime={date}>
+              {new Date(date).toLocaleDateString('fr-FR', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </time>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">⏱️</span>
+            <span>5 min</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-3xl mx-auto">
+      <div class="prose prose-lg max-w-none mb-16">
+        <slot />
+      </div>
+
+      <!-- Article Footer with CTA -->
+      <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 border border-blue-200">
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">✨ Vous avez aimé cet article ?</h3>
+        <p class="text-gray-700 mb-6">
+          Explorez d'autres productions d'élèves et découvrez comment l'apprentissage par projet transforme l'éducation.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="/" class="btn-primary">
+            Lire d'autres articles
+          </a>
+          <a href="/about" class="btn-secondary">
+            En savoir plus sur le PBL
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose {
+    --tw-prose-body: #374151;
+    --tw-prose-headings: #111827;
+    --tw-prose-links: #2563eb;
+    --tw-prose-code: #dc2626;
+  }
+</style>
