@@ -1,0 +1,247 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-to-r from-green-600 to-blue-600 py-20">
+    <div class="section-container relative z-10">
+      <h1 class="text-5xl font-bold text-white mb-4">📚 Ressources pour Enseignants</h1>
+      <p class="text-xl text-blue-100">Guides pratiques, outils et méthodologies pour implémenter le PBL en classe</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <section class="section-container py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2">
+        <!-- Introduction -->
+        <div class="card p-8 mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Comment Utiliser cette Section?</h2>
+          <p class="text-gray-700 mb-4">
+            Cette page regroupe tous les outils et ressources nécessaires pour mettre en place l'apprentissage par projet dans votre classe. Que vous soyez novice ou expérimenté, vous trouverez des guides pratiques, des modèles de projets et des conseils pédagogiques.
+          </p>
+        </div>
+
+        <!-- Section 1: Getting Started -->
+        <div class="card p-8 mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="text-4xl mr-3">🚀</span>
+            Commencer avec le PBL
+          </h2>
+          
+          <div class="space-y-6">
+            <!-- Resource 1 -->
+            <div class="border-l-4 border-green-500 pl-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-2">📖 Guide Complet du PBL</h3>
+              <p class="text-gray-700 mb-4">
+                Un guide étape par étape pour implémenter l'apprentissage par projet dans votre classe.
+              </p>
+              <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                Télécharger le Guide
+              </button>
+            </div>
+
+            <!-- Resource 2 -->
+            <div class="border-l-4 border-blue-500 pl-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-2">🎯 Les 5 Piliers du PBL</h3>
+              <p class="text-gray-700 mb-4">
+                Découvrez les éléments clés qui rendent le PBL efficace et comment les appliquer.
+              </p>
+              <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                Consulter les Piliers
+              </button>
+            </div>
+
+            <!-- Resource 3 -->
+            <div class="border-l-4 border-purple-500 pl-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-2">📋 Checklist d'Évaluation</h3>
+              <p class="text-gray-700 mb-4">
+                Un outil pour suivre les progrès de votre projet et l'efficacité pédagogique.
+              </p>
+              <button class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                Utiliser la Checklist
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Project Templates -->
+        <div class="card p-8 mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="text-4xl mr-3">🎨</span>
+            Modèles de Projets
+          </h2>
+          
+          <div class="space-y-4">
+            <p class="text-gray-700 mb-4">Modèles prêts à utiliser pour différents niveaux et domaines:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Project Template 1 -->
+              <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg p-6 border-2 border-yellow-300">
+                <h4 class="text-lg font-bold text-gray-900 mb-2">✍️ Projet d'Écriture Créative</h4>
+                <p class="text-gray-700 text-sm mb-4">Pour l'enseignement du français et la créativité narrative</p>
+                <button class="text-orange-600 font-semibold hover:text-orange-700">Voir le modèle →</button>
+              </div>
+
+              <!-- Project Template 2 -->
+              <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-purple-300">
+                <h4 class="text-lg font-bold text-gray-900 mb-2">📚 Projet de Recherche</h4>
+                <p class="text-gray-700 text-sm mb-4">Pour les travaux de recherche et la documentation</p>
+                <button class="text-purple-600 font-semibold hover:text-purple-700">Voir le modèle →</button>
+              </div>
+
+              <!-- Project Template 3 -->
+              <div class="bg-gradient-to-br from-pink-50 to-red-50 rounded-lg p-6 border-2 border-pink-300">
+                <h4 class="text-lg font-bold text-gray-900 mb-2">🎭 Projet de Théâtre</h4>
+                <p class="text-gray-700 text-sm mb-4">Pour les projets de création théâtrale et narratifs</p>
+                <button class="text-pink-600 font-semibold hover:text-pink-700">Voir le modèle →</button>
+              </div>
+
+              <!-- Project Template 4 -->
+              <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-lg p-6 border-2 border-green-300">
+                <h4 class="text-lg font-bold text-gray-900 mb-2">📰 Projet de Journalisme</h4>
+                <p class="text-gray-700 text-sm mb-4">Pour créer un journal ou un magazine scolaire</p>
+                <button class="text-green-600 font-semibold hover:text-green-700">Voir le modèle →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Best Practices -->
+        <div class="card p-8 mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="text-4xl mr-3">💡</span>
+            Bonnes Pratiques
+          </h2>
+          
+          <ul class="space-y-4 text-gray-700">
+            <li class="flex items-start space-x-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <strong>Définir des objectifs clairs</strong>
+                <p>Assurez-vous que chaque projet a des objectifs d'apprentissage bien définis</p>
+              </div>
+            </li>
+            <li class="flex items-start space-x-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <strong>Impliquer les élèves</strong>
+                <p>Laissez les élèves participer à la conception du projet</p>
+              </div>
+            </li>
+            <li class="flex items-start space-x-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <strong>Fournir du support</strong>
+                <p>Guidez les élèves tout en les laissant explorer de manière autonome</p>
+              </div>
+            </li>
+            <li class="flex items-start space-x-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <strong>Évaluer progressivement</strong>
+                <p>Utilisez l'évaluation formative tout au long du projet</p>
+              </div>
+            </li>
+            <li class="flex items-start space-x-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <strong>Célébrer les réussites</strong>
+                <p>Partagez et valorisez les productions des élèves</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section 4: Tools & Software -->
+        <div class="card p-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <span class="text-4xl mr-3">🛠️</span>
+            Outils Recommandés
+          </h2>
+          
+          <div class="space-y-4">
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+              <h4 class="font-bold text-gray-900 mb-2">🎬 Google Workspace</h4>
+              <p class="text-gray-700 text-sm">Docs, Sheets, Slides pour la collaboration en temps réel</p>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
+              <h4 class="font-bold text-gray-900 mb-2">📚 Padlet</h4>
+              <p class="text-gray-700 text-sm">Mur collaboratif pour partager les productions</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+              <h4 class="font-bold text-gray-900 mb-2">✏️ Canva</h4>
+              <p class="text-gray-700 text-sm">Outil de design pour créer des contenus visuels</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4">
+              <h4 class="font-bold text-gray-900 mb-2">📹 Flipgrid</h4>
+              <p class="text-gray-700 text-sm">Plateforme vidéo pour partager les réflexions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="lg:col-span-1">
+        <!-- Quick Stats -->
+        <div class="card p-8 mb-8 bg-gradient-to-br from-green-50 to-blue-50">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Ressources Disponibles</h3>
+          
+          <div class="space-y-4">
+            <div class="text-center">
+              <p class="text-4xl font-bold text-green-600 mb-2">15+</p>
+              <p class="text-gray-700 font-semibold">Guides Pédagogiques</p>
+            </div>
+            
+            <div class="text-center border-t border-gray-200 pt-4">
+              <p class="text-4xl font-bold text-blue-600 mb-2">8</p>
+              <p class="text-gray-700 font-semibold">Modèles de Projets</p>
+            </div>
+
+            <div class="text-center border-t border-gray-200 pt-4">
+              <p class="text-4xl font-bold text-purple-600 mb-2">20+</p>
+              <p class="text-gray-700 font-semibold">Outils Recommandés</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="card p-8 bg-gradient-to-br from-green-500 to-blue-500 text-white mb-8">
+          <h3 class="text-2xl font-bold mb-4">Besoin d'Aide?</h3>
+          <p class="mb-6">Consultez notre communauté d'enseignants ou contactez nos experts.</p>
+          <button class="bg-white text-green-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 w-full">
+            Contacter le Support
+          </button>
+        </div>
+
+        <!-- Newsletter -->
+        <div class="card p-8 border-2 border-green-500">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">📬 Infolettre</h3>
+          <p class="text-gray-700 text-sm mb-4">Recevez des nouveaux guides et ressources chaque mois.</p>
+          <input type="email" placeholder="votre@email.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-green-500">
+          <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg w-full transition-colors duration-200">
+            S'Abonner
+          </button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-gradient-to-r from-green-600 to-blue-600 py-16 rounded-lg shadow-xl mt-12">
+    <div class="section-container text-white text-center">
+      <h2 class="text-4xl font-bold mb-6">Prêt à Transformer Votre Enseignement?</h2>
+      <p class="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
+        Commencez dès maintenant avec nos ressources gratuites et rejoignez des centaines d'enseignants innovants.
+      </p>
+      <a href="/admin" class="bg-white text-green-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors duration-200 inline-block">
+        Accéder à l'Admin → Ajouter une Production
+      </a>
+    </div>
+  </section>
+</BaseLayout>
