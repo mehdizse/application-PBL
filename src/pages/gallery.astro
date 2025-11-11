@@ -225,6 +225,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     `;
 
     if (article.format === 'photo') {
+      // Display photo from base64
+      if (article.photoBase64) {
+        content += `<div class="mt-4"><img src="${article.photoBase64}" alt="${article.title}" class="w-full rounded-lg max-h-96 object-cover"></div>`;
+      }
       content += `<div><strong>📸 Description Photo:</strong> ${article.photoDescription}</div>`;
     } else {
       content += `<div class="mt-6 p-4 bg-gray-50 rounded border border-gray-200"><strong>📄 Contenu:</strong><pre class="whitespace-pre-wrap mt-2">${article.content}</pre></div>`;

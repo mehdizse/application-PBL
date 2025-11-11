@@ -307,10 +307,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  import { auth, db, storage } from '../lib/firebase.js';
+  import { auth, db } from '../lib/firebase.js';
   import { onAuthStateChanged, signOut } from 'firebase/auth';
   import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-  import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
   const authCheck = document.getElementById('auth-check');
   const notAuthenticated = document.getElementById('not-authenticated');
@@ -439,27 +438,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const tags = inputs[3].value.split(',').map(t => t.trim()).filter(t => t);
 
         try {
-          const storageRef = ref(storage, `articles/${Date.now()}_${photoFile.name}`);
-          await uploadBytes(storageRef, photoFile);
-          const photoURL = await getDownloadURL(storageRef);
+          // Convert photo to base64
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            const photoBase64 = event.target.result;
 
-          await addDoc(collection(db, 'articles'), {
-            title,
-            author,
-            level,
-            projectName,
-            description,
-            photoDescription,
-            photoURL,
-            format: 'photo',
-            tags,
-            status: 'published',
-            userId: user.uid,
-            createdAt: serverTimestamp()
-          });
+            await addDoc(collection(db, 'articles'), {
+              title,
+              author,
+              level,
+              projectName,
+              description,
+              photoDescription,
+              photoBase64, // Store as base64 instead of uploading to Storage
+              format: 'photo',
+              tags,
+              status: 'published',
+              userId: user.uid,
+              createdAt: serverTimestamp()
+            });
 
-          alert('✅ Photo publiée avec succès!');
-          photoForm.reset();
+            alert('✅ Photo publiée avec succès!');
+            photoForm.reset();
+          };
+          reader.readAsDataURL(photoFile);
         } catch (error) {
           alert(`❌ Erreur: ${error.message}`);
         }
