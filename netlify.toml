@@ -2,15 +2,6 @@
   command = "npm run build"
   publish = "dist"
 
-# Environment variables for production build
-[build.environment]
-  VITE_FIREBASE_API_KEY = "AIzaSyC_63HQwhIcP_Q0o_qlWYJ0cYk67AUWE4w"
-  VITE_FIREBASE_AUTH_DOMAIN = "learnpbl-1d49f.firebaseapp.com"
-  VITE_FIREBASE_PROJECT_ID = "learnpbl-1d49f"
-  VITE_FIREBASE_STORAGE_BUCKET = "learnpbl-1d49f.firebasestorage.app"
-  VITE_FIREBASE_MESSAGING_SENDER_ID = "548405502023"
-  VITE_FIREBASE_APP_ID = "1:548405502023:web:ca5e19c0bd56fae6de5162"
-
 [dev]
   command = "npm run dev"
   port = 3000
