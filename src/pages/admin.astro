@@ -118,7 +118,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               type="submit"
               class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
             >
-              📝 Publier l'Article Écrit
+              <span class="submit-text">📝 Publier l'Article Écrit</span>
+              <span class="submit-spinner hidden">⏳ Publication en cours...</span>
             </button>
           </form>
 
@@ -200,6 +201,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                   <p class="text-gray-600 text-sm">Format: JPG, PNG (max 5MB)</p>
                 </label>
               </div>
+              <!-- Photo Preview -->
+              <div id="photo-preview-container" class="hidden mt-4">
+                <img id="photo-preview" src="" alt="Preview" class="w-full max-h-64 object-cover rounded-lg">
+                <div class="mt-3 flex gap-2">
+                  <button type="button" id="change-photo-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                    🔄 Changer la photo
+                  </button>
+                  <button type="button" id="remove-photo-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                    ❌ Supprimer
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="mb-6">
@@ -224,7 +237,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               type="submit"
               class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
             >
-              📸 Publier la Photo
+              <span class="submit-text">📸 Publier la Photo</span>
+              <span class="submit-spinner hidden">⏳ Publication en cours...</span>
             </button>
           </form>
         </div>
@@ -350,6 +364,39 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function setupPhotoUpload() {
     const photoInput = document.getElementById('photo-input');
     const dragDropArea = document.getElementById('drag-drop-area');
+    const photoPreviewContainer = document.getElementById('photo-preview-container');
+    const photoPreview = document.getElementById('photo-preview');
+    const changePhotoBtn = document.getElementById('change-photo-btn');
+    const removePhotoBtn = document.getElementById('remove-photo-btn');
+    
+    // Show preview when photo is selected
+    const showPhotoPreview = (file) => {
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          photoPreview.src = e.target.result;
+          photoPreviewContainer.classList.remove('hidden');
+          dragDropArea.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    photoInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        showPhotoPreview(e.target.files[0]);
+      }
+    });
+
+    changePhotoBtn.addEventListener('click', () => {
+      photoInput.click();
+    });
+
+    removePhotoBtn.addEventListener('click', () => {
+      photoInput.value = '';
+      photoPreviewContainer.classList.add('hidden');
+      dragDropArea.classList.remove('hidden');
+    });
     
     if (dragDropArea) {
       dragDropArea.addEventListener('dragover', (e) => {
@@ -366,6 +413,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         dragDropArea.classList.remove('bg-purple-50', 'border-purple-600');
         if (e.dataTransfer.files.length) {
           photoInput.files = e.dataTransfer.files;
+          showPhotoPreview(e.dataTransfer.files[0]);
         }
       });
     }
@@ -378,6 +426,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (textForm) {
       textForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const submitBtn = textForm.querySelector('button[type="submit"]');
+        const submitText = submitBtn.querySelector('.submit-text');
+        const submitSpinner = submitBtn.querySelector('.submit-spinner');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitSpinner.classList.remove('hidden');
         
         const inputs = textForm.querySelectorAll('input[type="text"]');
         const select = textForm.querySelector('select');
@@ -406,10 +463,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             createdAt: serverTimestamp()
           });
 
+          // Show success message
           alert('✅ Article écrit publié avec succès!');
           textForm.reset();
+          submitText.classList.remove('hidden');
+          submitSpinner.classList.add('hidden');
+          submitBtn.disabled = false;
         } catch (error) {
           alert(`❌ Erreur: ${error.message}`);
+          submitText.classList.remove('hidden');
+          submitSpinner.classList.add('hidden');
+          submitBtn.disabled = false;
         }
       });
     }
@@ -417,6 +481,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (photoForm) {
       photoForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const submitBtn = photoForm.querySelector('button[type="submit"]');
+        const submitText = submitBtn.querySelector('.submit-text');
+        const submitSpinner = submitBtn.querySelector('.submit-spinner');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        submitSpinner.classList.remove('hidden');
         
         const inputs = photoForm.querySelectorAll('input[type="text"]');
         const selects = photoForm.querySelectorAll('select');
@@ -426,6 +499,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         if (!photoFile) {
           alert('❌ Veuillez sélectionner une photo');
+          submitText.classList.remove('hidden');
+          submitSpinner.classList.add('hidden');
+          submitBtn.disabled = false;
           return;
         }
 
@@ -441,29 +517,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           // Convert photo to base64
           const reader = new FileReader();
           reader.onload = async (event) => {
-            const photoBase64 = event.target.result;
+            try {
+              const photoBase64 = event.target.result;
 
-            await addDoc(collection(db, 'articles'), {
-              title,
-              author,
-              level,
-              projectName,
-              description,
-              photoDescription,
-              photoBase64, // Store as base64 instead of uploading to Storage
-              format: 'photo',
-              tags,
-              status: 'published',
-              userId: user.uid,
-              createdAt: serverTimestamp()
-            });
+              await addDoc(collection(db, 'articles'), {
+                title,
+                author,
+                level,
+                projectName,
+                description,
+                photoDescription,
+                photoBase64, // Store as base64 instead of uploading to Storage
+                format: 'photo',
+                tags,
+                status: 'published',
+                userId: user.uid,
+                createdAt: serverTimestamp()
+              });
 
-            alert('✅ Photo publiée avec succès!');
-            photoForm.reset();
+              alert('✅ Photo publiée avec succès!');
+              photoForm.reset();
+              document.getElementById('photo-preview-container').classList.add('hidden');
+              document.getElementById('drag-drop-area').classList.remove('hidden');
+              submitText.classList.remove('hidden');
+              submitSpinner.classList.add('hidden');
+              submitBtn.disabled = false;
+            } catch (error) {
+              alert(`❌ Erreur: ${error.message}`);
+              submitText.classList.remove('hidden');
+              submitSpinner.classList.add('hidden');
+              submitBtn.disabled = false;
+            }
           };
           reader.readAsDataURL(photoFile);
         } catch (error) {
           alert(`❌ Erreur: ${error.message}`);
+          submitText.classList.remove('hidden');
+          submitSpinner.classList.add('hidden');
+          submitBtn.disabled = false;
         }
       });
     }
