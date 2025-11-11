@@ -187,17 +187,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const toggleSignupBtn = document.getElementById('toggle-signup');
   const toggleLoginBtn = document.getElementById('toggle-login');
   const signupContainer = document.getElementById('signup-form-container');
+  const loginContainer = document.querySelector('[id="login-form"]').parentElement;
   const errorMessage = document.getElementById('error-message');
   const signupErrorMessage = document.getElementById('signup-error-message');
 
   // Toggle between login and signup
   toggleSignupBtn.addEventListener('click', () => {
-    document.querySelector('[id="login-form"]').parentElement.classList.add('hidden');
+    loginContainer.classList.add('hidden');
     signupContainer.classList.remove('hidden');
   });
 
   toggleLoginBtn.addEventListener('click', () => {
-    document.querySelector('[id="login-form"]').parentElement.classList.remove('hidden');
+    loginContainer.classList.remove('hidden');
     signupContainer.classList.add('hidden');
   });
 
