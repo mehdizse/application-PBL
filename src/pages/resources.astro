@@ -11,6 +11,46 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </section>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Gestion des accordéons
+      const toggleButtons = document.querySelectorAll('[data-toggle-accordion]');
+      toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetId = button.dataset.toggleAccordion;
+          const content = document.getElementById(targetId);
+          if (content) {
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+            content.style.maxHeight = isOpen ? '0' : content.scrollHeight + 'px';
+            button.classList.toggle('active');
+          }
+        });
+      });
+
+      // Gestion de l'infolettre
+      const newsletterBtn = document.getElementById('newsletter-btn');
+      if (newsletterBtn) {
+        newsletterBtn.addEventListener('click', () => {
+          const email = document.getElementById('newsletter-email').value;
+          if (email && email.includes('@')) {
+            alert(`Merci! Nous vous avons envoyé une confirmation à ${email}`);
+            document.getElementById('newsletter-email').value = '';
+          } else {
+            alert('Veuillez entrer une adresse email valide');
+          }
+        });
+      }
+
+      // Gestion du support
+      const supportBtn = document.getElementById('support-btn');
+      if (supportBtn) {
+        supportBtn.addEventListener('click', () => {
+          alert('Merci de votre intérêt! Envoyez-nous un email à: support@pblblog.com');
+        });
+      }
+    });
+  </script>
+
   <!-- Main Content -->
   <section class="section-container py-16">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -31,38 +71,115 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             Commencer avec le PBL
           </h2>
           
-          <div class="space-y-6">
+          <div class="space-y-4">
             <!-- Resource 1 -->
-            <div class="border-l-4 border-green-500 pl-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">📖 Guide Complet du PBL</h3>
-              <p class="text-gray-700 mb-4">
-                Un guide étape par étape pour implémenter l'apprentissage par projet dans votre classe.
-              </p>
-              <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-                Télécharger le Guide
+            <div class="border-2 border-green-200 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="guide-complet" 
+                class="w-full p-4 bg-green-50 hover:bg-green-100 border-l-4 border-green-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">📖 Guide Complet du PBL</h3>
+                  <p class="text-sm text-gray-600">Cliquez pour voir le guide détaillé</p>
+                </div>
+                <span class="text-2xl">▼</span>
               </button>
+              <div id="guide-complet" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-6 bg-white">
+                  <h4 class="font-bold text-green-600 mb-3">5 Étapes pour Implémenter le PBL:</h4>
+                  <ol class="space-y-3 list-decimal list-inside text-gray-700">
+                    <li><strong>Définir le Projet:</strong> Choisissez un sujet qui engage les élèves et se connecte aux objectifs d'apprentissage</li>
+                    <li><strong>Poser une Question Ouverte:</strong> Lancez avec une question stimulante qui guide la recherche</li>
+                    <li><strong>Laisser Explorer:</strong> Permettez aux élèves de découvrir des ressources, collaborer et itérer</li>
+                    <li><strong>Guider le Processus:</strong> Offrez du support et des retours réguliers sans imposer la solution</li>
+                    <li><strong>Partager les Résultats:</strong> Créez une audience authentique pour les productions finales</li>
+                  </ol>
+                  <div class="mt-4 p-3 bg-green-50 rounded border-l-4 border-green-500">
+                    <p class="text-sm"><strong>💡 Conseil:</strong> Les meilleurs projets PBL resolvent des problèmes réels ou créent quelque chose de tangible.</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Resource 2 -->
-            <div class="border-l-4 border-blue-500 pl-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">🎯 Les 5 Piliers du PBL</h3>
-              <p class="text-gray-700 mb-4">
-                Découvrez les éléments clés qui rendent le PBL efficace et comment les appliquer.
-              </p>
-              <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-                Consulter les Piliers
+            <div class="border-2 border-blue-200 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="5-piliers" 
+                class="w-full p-4 bg-blue-50 hover:bg-blue-100 border-l-4 border-blue-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">🎯 Les 5 Piliers du PBL</h3>
+                  <p class="text-sm text-gray-600">Cliquez pour découvrir les éléments clés</p>
+                </div>
+                <span class="text-2xl">▼</span>
               </button>
+              <div id="5-piliers" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-6 bg-white">
+                  <div class="space-y-4">
+                    <div class="p-3 bg-blue-50 rounded">
+                      <strong class="text-blue-700">1. Authenticité</strong>
+                      <p class="text-sm text-gray-700">Le projet doit résoudre un problème réel ou créer un produit authentique</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded">
+                      <strong class="text-blue-700">2. Rigor</strong>
+                      <p class="text-sm text-gray-700">Les élèves doivent faire preuve de pensée critique et de recherche approfondie</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded">
+                      <strong class="text-blue-700">3. Agencément</strong>
+                      <p class="text-sm text-gray-700">Les élèves ont une certaine autonomie dans la planification et l'exécution</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded">
+                      <strong class="text-blue-700">4. Opportunité de Réflexion</strong>
+                      <p class="text-sm text-gray-700">Temps dédié à la métacognition et à l'apprentissage des processus</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded">
+                      <strong class="text-blue-700">5. Audience Publique</strong>
+                      <p class="text-sm text-gray-700">Les résultats sont partagés avec une audience au-delà de la classe</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Resource 3 -->
-            <div class="border-l-4 border-purple-500 pl-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">📋 Checklist d'Évaluation</h3>
-              <p class="text-gray-700 mb-4">
-                Un outil pour suivre les progrès de votre projet et l'efficacité pédagogique.
-              </p>
-              <button class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-                Utiliser la Checklist
+            <div class="border-2 border-purple-200 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="checklist" 
+                class="w-full p-4 bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">📋 Checklist d'Évaluation</h3>
+                  <p class="text-sm text-gray-600">Cliquez pour voir la checklist complète</p>
+                </div>
+                <span class="text-2xl">▼</span>
               </button>
+              <div id="checklist" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-6 bg-white">
+                  <h4 class="font-bold text-purple-600 mb-3">Avant le Projet:</h4>
+                  <ul class="space-y-1 text-sm text-gray-700 mb-4">
+                    <li>☐ Objectifs d'apprentissage clairement définis</li>
+                    <li>☐ Question centrale engageante</li>
+                    <li>☐ Ressources disponibles pour les élèves</li>
+                    <li>☐ Critères d'évaluation explicites</li>
+                  </ul>
+                  
+                  <h4 class="font-bold text-purple-600 mb-3">Pendant le Projet:</h4>
+                  <ul class="space-y-1 text-sm text-gray-700 mb-4">
+                    <li>☐ Retours réguliers aux élèves</li>
+                    <li>☐ Opportunités de révision et d'amélioration</li>
+                    <li>☐ Documentation du processus</li>
+                    <li>☐ Collaboration entre élèves encouragée</li>
+                  </ul>
+
+                  <h4 class="font-bold text-purple-600 mb-3">Après le Projet:</h4>
+                  <ul class="space-y-1 text-sm text-gray-700">
+                    <li>☐ Présentation/partage public</li>
+                    <li>☐ Réflexion sur l'apprentissage</li>
+                    <li>☐ Célébration des réussites</li>
+                    <li>☐ Recueil de retours sur l'expérience</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -75,35 +192,167 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </h2>
           
           <div class="space-y-4">
-            <p class="text-gray-700 mb-4">Modèles prêts à utiliser pour différents niveaux et domaines:</p>
+            <p class="text-gray-700 mb-6">Modèles prêts à utiliser - cliquez sur chaque projet pour voir les détails:</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-3">
               <!-- Project Template 1 -->
-              <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg p-6 border-2 border-yellow-300">
-                <h4 class="text-lg font-bold text-gray-900 mb-2">✍️ Projet d'Écriture Créative</h4>
-                <p class="text-gray-700 text-sm mb-4">Pour l'enseignement du français et la créativité narrative</p>
-                <button class="text-orange-600 font-semibold hover:text-orange-700">Voir le modèle →</button>
+              <div class="border-2 border-yellow-300 rounded-lg overflow-hidden">
+                <button 
+                  data-toggle-accordion="projet-ecriture" 
+                  class="w-full p-4 bg-gradient-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-l-4 border-yellow-400 text-left flex items-center justify-between transition-colors duration-200"
+                >
+                  <div>
+                    <h4 class="text-lg font-bold text-gray-900">✍️ Projet d'Écriture Créative</h4>
+                    <p class="text-sm text-gray-600">Pour l'enseignement du français et la créativité narrative</p>
+                  </div>
+                  <span class="text-2xl">▼</span>
+                </button>
+                <div id="projet-ecriture" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                  <div class="p-6 bg-white space-y-3">
+                    <div>
+                      <strong class="text-yellow-700">Objectif:</strong>
+                      <p class="text-sm text-gray-700">Créer une histoire originale basée sur une situation donnée</p>
+                    </div>
+                    <div>
+                      <strong class="text-yellow-700">Durée:</strong>
+                      <p class="text-sm text-gray-700">3-4 semaines</p>
+                    </div>
+                    <div>
+                      <strong class="text-yellow-700">Étapes:</strong>
+                      <ol class="text-sm text-gray-700 list-decimal list-inside space-y-1">
+                        <li>Brainstorming d'idées</li>
+                        <li>Création de personnages et synopsis</li>
+                        <li>Premier brouillon</li>
+                        <li>Révision par pairs</li>
+                        <li>Version finale illustrée</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <strong class="text-yellow-700">Produit Final:</strong>
+                      <p class="text-sm text-gray-700">Recueil d'histoires publié et partagé</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Project Template 2 -->
-              <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-purple-300">
-                <h4 class="text-lg font-bold text-gray-900 mb-2">📚 Projet de Recherche</h4>
-                <p class="text-gray-700 text-sm mb-4">Pour les travaux de recherche et la documentation</p>
-                <button class="text-purple-600 font-semibold hover:text-purple-700">Voir le modèle →</button>
+              <div class="border-2 border-purple-300 rounded-lg overflow-hidden">
+                <button 
+                  data-toggle-accordion="projet-recherche" 
+                  class="w-full p-4 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border-l-4 border-purple-400 text-left flex items-center justify-between transition-colors duration-200"
+                >
+                  <div>
+                    <h4 class="text-lg font-bold text-gray-900">📚 Projet de Recherche</h4>
+                    <p class="text-sm text-gray-600">Pour les travaux de recherche et la documentation</p>
+                  </div>
+                  <span class="text-2xl">▼</span>
+                </button>
+                <div id="projet-recherche" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                  <div class="p-6 bg-white space-y-3">
+                    <div>
+                      <strong class="text-purple-700">Objectif:</strong>
+                      <p class="text-sm text-gray-700">Investiguer un sujet de manière approfondie et présenter les découvertes</p>
+                    </div>
+                    <div>
+                      <strong class="text-purple-700">Durée:</strong>
+                      <p class="text-sm text-gray-700">4-6 semaines</p>
+                    </div>
+                    <div>
+                      <strong class="text-purple-700">Étapes:</strong>
+                      <ol class="text-sm text-gray-700 list-decimal list-inside space-y-1">
+                        <li>Formulation de la question de recherche</li>
+                        <li>Collecte de sources variées</li>
+                        <li>Analyse critique des informations</li>
+                        <li>Synthèse et conclusions</li>
+                        <li>Présentation multimédia</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <strong class="text-purple-700">Produit Final:</strong>
+                      <p class="text-sm text-gray-700">Rapport d'investigation + présentation</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Project Template 3 -->
-              <div class="bg-gradient-to-br from-pink-50 to-red-50 rounded-lg p-6 border-2 border-pink-300">
-                <h4 class="text-lg font-bold text-gray-900 mb-2">🎭 Projet de Théâtre</h4>
-                <p class="text-gray-700 text-sm mb-4">Pour les projets de création théâtrale et narratifs</p>
-                <button class="text-pink-600 font-semibold hover:text-pink-700">Voir le modèle →</button>
+              <div class="border-2 border-pink-300 rounded-lg overflow-hidden">
+                <button 
+                  data-toggle-accordion="projet-theatre" 
+                  class="w-full p-4 bg-gradient-to-r from-pink-50 to-red-50 hover:from-pink-100 hover:to-red-100 border-l-4 border-pink-400 text-left flex items-center justify-between transition-colors duration-200"
+                >
+                  <div>
+                    <h4 class="text-lg font-bold text-gray-900">🎭 Projet de Théâtre</h4>
+                    <p class="text-sm text-gray-600">Pour les projets de création théâtrale</p>
+                  </div>
+                  <span class="text-2xl">▼</span>
+                </button>
+                <div id="projet-theatre" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                  <div class="p-6 bg-white space-y-3">
+                    <div>
+                      <strong class="text-pink-700">Objectif:</strong>
+                      <p class="text-sm text-gray-700">Créer et performer une pièce de théâtre originale</p>
+                    </div>
+                    <div>
+                      <strong class="text-pink-700">Durée:</strong>
+                      <p class="text-sm text-gray-700">6-8 semaines</p>
+                    </div>
+                    <div>
+                      <strong class="text-pink-700">Étapes:</strong>
+                      <ol class="text-sm text-gray-700 list-decimal list-inside space-y-1">
+                        <li>Sélection du thème ou création du scénario</li>
+                        <li>Écriture du script</li>
+                        <li>Distribution des rôles</li>
+                        <li>Répétitions</li>
+                        <li>Performance publique</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <strong class="text-pink-700">Produit Final:</strong>
+                      <p class="text-sm text-gray-700">Représentation théâtrale + vidéo</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Project Template 4 -->
-              <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-lg p-6 border-2 border-green-300">
-                <h4 class="text-lg font-bold text-gray-900 mb-2">📰 Projet de Journalisme</h4>
-                <p class="text-gray-700 text-sm mb-4">Pour créer un journal ou un magazine scolaire</p>
-                <button class="text-green-600 font-semibold hover:text-green-700">Voir le modèle →</button>
+              <div class="border-2 border-green-300 rounded-lg overflow-hidden">
+                <button 
+                  data-toggle-accordion="projet-journalisme" 
+                  class="w-full p-4 bg-gradient-to-r from-green-50 to-teal-50 hover:from-green-100 hover:to-teal-100 border-l-4 border-green-400 text-left flex items-center justify-between transition-colors duration-200"
+                >
+                  <div>
+                    <h4 class="text-lg font-bold text-gray-900">📰 Projet de Journalisme</h4>
+                    <p class="text-sm text-gray-600">Pour créer un journal ou magazine scolaire</p>
+                  </div>
+                  <span class="text-2xl">▼</span>
+                </button>
+                <div id="projet-journalisme" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                  <div class="p-6 bg-white space-y-3">
+                    <div>
+                      <strong class="text-green-700">Objectif:</strong>
+                      <p class="text-sm text-gray-700">Produire un journal/magazine scolaire professionnel</p>
+                    </div>
+                    <div>
+                      <strong class="text-green-700">Durée:</strong>
+                      <p class="text-sm text-gray-700">Continu (1 par mois ou trimestre)</p>
+                    </div>
+                    <div>
+                      <strong class="text-green-700">Étapes:</strong>
+                      <ol class="text-sm text-gray-700 list-decimal list-inside space-y-1">
+                        <li>Planification du contenu</li>
+                        <li>Interviews et collecte d'informations</li>
+                        <li>Rédaction d'articles</li>
+                        <li>Révision par éditeurs</li>
+                        <li>Mise en page et publication</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <strong class="text-green-700">Produit Final:</strong>
+                      <p class="text-sm text-gray-700">Journal physique et digital publié</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -162,25 +411,137 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             Outils Recommandés
           </h2>
           
-          <div class="space-y-4">
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
-              <h4 class="font-bold text-gray-900 mb-2">🎬 Google Workspace</h4>
-              <p class="text-gray-700 text-sm">Docs, Sheets, Slides pour la collaboration en temps réel</p>
-            </div>
-            
-            <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
-              <h4 class="font-bold text-gray-900 mb-2">📚 Padlet</h4>
-              <p class="text-gray-700 text-sm">Mur collaboratif pour partager les productions</p>
+          <div class="space-y-3">
+            <!-- Tool 1 -->
+            <div class="border-2 border-blue-300 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="outil-google" 
+                class="w-full p-4 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-l-4 border-blue-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h4 class="font-bold text-gray-900">🎬 Google Workspace</h4>
+                  <p class="text-sm text-gray-600">Cliquez pour plus de détails</p>
+                </div>
+                <span class="text-2xl">▼</span>
+              </button>
+              <div id="outil-google" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-4 bg-white">
+                  <p class="text-sm text-gray-700 mb-2"><strong>Utilité:</strong> Docs, Sheets, Slides pour la collaboration en temps réel</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Prix:</strong> Gratuit pour les écoles (compte Google Classroom)</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Meilleur pour:</strong> Travail collaboratif, écriture en groupe, présentations</p>
+                  <p class="text-sm text-gray-700"><strong>Avantage PBL:</strong> Les élèves peuvent collaborer en temps réel et vous voir à tout moment</p>
+                </div>
+              </div>
             </div>
 
-            <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
-              <h4 class="font-bold text-gray-900 mb-2">✏️ Canva</h4>
-              <p class="text-gray-700 text-sm">Outil de design pour créer des contenus visuels</p>
+            <!-- Tool 2 -->
+            <div class="border-2 border-purple-300 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="outil-padlet" 
+                class="w-full p-4 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-l-4 border-purple-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h4 class="font-bold text-gray-900">📚 Padlet</h4>
+                  <p class="text-sm text-gray-600">Cliquez pour plus de détails</p>
+                </div>
+                <span class="text-2xl">▼</span>
+              </button>
+              <div id="outil-padlet" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-4 bg-white">
+                  <p class="text-sm text-gray-700 mb-2"><strong>Utilité:</strong> Mur collaboratif pour partager textes, images, vidéos</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Prix:</strong> Gratuit (avec limites) / Premium 12€/an</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Meilleur pour:</strong> Galeries de projets, inspiration boards, feedback collectif</p>
+                  <p class="text-sm text-gray-700"><strong>Avantage PBL:</strong> Parfait pour exposer et célébrer les productions finales</p>
+                </div>
+              </div>
             </div>
 
-            <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4">
-              <h4 class="font-bold text-gray-900 mb-2">📹 Flipgrid</h4>
-              <p class="text-gray-700 text-sm">Plateforme vidéo pour partager les réflexions</p>
+            <!-- Tool 3 -->
+            <div class="border-2 border-green-300 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="outil-canva" 
+                class="w-full p-4 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border-l-4 border-green-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h4 class="font-bold text-gray-900">✏️ Canva</h4>
+                  <p class="text-sm text-gray-600">Cliquez pour plus de détails</p>
+                </div>
+                <span class="text-2xl">▼</span>
+              </button>
+              <div id="outil-canva" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-4 bg-white">
+                  <p class="text-sm text-gray-700 mb-2"><strong>Utilité:</strong> Outil de design pour créer des contenus visuels attractifs</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Prix:</strong> Gratuit / Canva Pro 13€/mois</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Meilleur pour:</strong> Affiches, infographies, bannières, présentations visuelles</p>
+                  <p class="text-sm text-gray-700"><strong>Avantage PBL:</strong> Rend les projets plus professionnels et visuellement attrayants</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tool 4 -->
+            <div class="border-2 border-orange-300 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="outil-flipgrid" 
+                class="w-full p-4 bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-l-4 border-orange-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h4 class="font-bold text-gray-900">📹 Flipgrid</h4>
+                  <p class="text-sm text-gray-600">Cliquez pour plus de détails</p>
+                </div>
+                <span class="text-2xl">▼</span>
+              </button>
+              <div id="outil-flipgrid" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-4 bg-white">
+                  <p class="text-sm text-gray-700 mb-2"><strong>Utilité:</strong> Plateforme vidéo pour partager les réflexions et présentations</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Prix:</strong> Gratuit pour les éducateurs (compte Microsoft)</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Meilleur pour:</strong> Vidéos courtes, témoignages, réflexions personnelles</p>
+                  <p class="text-sm text-gray-700"><strong>Avantage PBL:</strong> Permet aux élèves de présenter et de commenter les projets des autres</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tool 5 (NEW) -->
+            <div class="border-2 border-red-300 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="outil-mindmeister" 
+                class="w-full p-4 bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-l-4 border-red-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h4 class="font-bold text-gray-900">🧠 MindMeister</h4>
+                  <p class="text-sm text-gray-600">Cliquez pour plus de détails</p>
+                </div>
+                <span class="text-2xl">▼</span>
+              </button>
+              <div id="outil-mindmeister" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-4 bg-white">
+                  <p class="text-sm text-gray-700 mb-2"><strong>Utilité:</strong> Créer des cartes mentales collaboratives</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Prix:</strong> Gratuit (limité) / Premium 9.99€/mois</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Meilleur pour:</strong> Brainstorming, planification de projets, organisation d'idées</p>
+                  <p class="text-sm text-gray-700"><strong>Avantage PBL:</strong> Idéal pour la phase de planification du projet</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tool 6 (NEW) -->
+            <div class="border-2 border-indigo-300 rounded-lg overflow-hidden">
+              <button 
+                data-toggle-accordion="outil-trello" 
+                class="w-full p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-l-4 border-indigo-500 text-left flex items-center justify-between transition-colors duration-200"
+              >
+                <div>
+                  <h4 class="font-bold text-gray-900">✅ Trello</h4>
+                  <p class="text-sm text-gray-600">Cliquez pour plus de détails</p>
+                </div>
+                <span class="text-2xl">▼</span>
+              </button>
+              <div id="outil-trello" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+                <div class="p-4 bg-white">
+                  <p class="text-sm text-gray-700 mb-2"><strong>Utilité:</strong> Gestion de projets avec tableaux kanban</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Prix:</strong> Gratuit / Premium 9.99€/mois</p>
+                  <p class="text-sm text-gray-700 mb-2"><strong>Meilleur pour:</strong> Suivi des tâches, organisation du travail en groupe</p>
+                  <p class="text-sm text-gray-700"><strong>Avantage PBL:</strong> Aide les élèves à gérer leur projet et respecter les délais</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -214,18 +575,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="card p-8 bg-gradient-to-br from-green-500 to-blue-500 text-white mb-8">
           <h3 class="text-2xl font-bold mb-4">Besoin d'Aide?</h3>
           <p class="mb-6">Consultez notre communauté d'enseignants ou contactez nos experts.</p>
-          <button class="bg-white text-green-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 w-full">
-            Contacter le Support
+          <button id="support-btn" class="bg-white text-green-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 w-full cursor-pointer">
+            📧 Contacter le Support
           </button>
         </div>
 
         <!-- Newsletter -->
         <div class="card p-8 border-2 border-green-500">
-          <h3 class="text-xl font-bold text-gray-900 mb-4">📬 Infolettre</h3>
-          <p class="text-gray-700 text-sm mb-4">Recevez des nouveaux guides et ressources chaque mois.</p>
-          <input type="email" placeholder="votre@email.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-green-500">
-          <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg w-full transition-colors duration-200">
-            S'Abonner
+          <h3 class="text-xl font-bold text-gray-900 mb-4">📬 Infolettre Mensuelle</h3>
+          <p class="text-gray-700 text-sm mb-4">Recevez nos nouveaux guides, cas d'études et ressources chaque mois.</p>
+          <input 
+            type="email" 
+            id="newsletter-email"
+            placeholder="votre@email.com" 
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+          <button id="newsletter-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg w-full transition-colors duration-200 cursor-pointer">
+            ✉️ S'Abonner
           </button>
         </div>
       </aside>
