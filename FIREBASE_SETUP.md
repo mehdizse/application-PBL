@@ -6,6 +6,21 @@ Votre blog utilise maintenant **Firebase** pour:
 - ✅ **Authentification** - Système de login pour les enseignants
 - ✅ **Firestore Database** - Stockage des articles publiés
 - ✅ **Cloud Storage** - Stockage des photos uploadées
+- ✅ **Variables d'Environnement** - Credentials sécurisées (NON publiques)
+
+---
+
+## 🔐 IMPORTANT: Sécurité des Credentials
+
+### ⚠️ Le projet est PUBLIC sur GitHub!
+
+Vos credentials Firebase ne doivent JAMAIS être publics. Je les ai configurés en **variables d'environnement**:
+
+- ✅ `.env.local` - Contient VOS vraies credentials (NON committé)
+- ✅ `.env.example` - Template public (committé)
+- ✅ `.gitignore` - Ignore automatiquement `.env.local`
+
+**Consultez:** `SECURITY_ENV.md` pour les détails complets!
 
 ---
 
@@ -76,25 +91,44 @@ La configuration ressemble à:
 
 ### Étape 3: Configurer le fichier firebase.js
 
-Remplacez dans `src/lib/firebase.js`:
+~~Remplacez dans `src/lib/firebase.js`:~~
 
-```javascript
-// YOUR_API_KEY → votre apiKey
-// YOUR_PROJECT.firebaseapp.com → votre authDomain
-// YOUR_PROJECT_ID → votre projectId
-// YOUR_PROJECT.appspot.com → votre storageBucket
-// etc...
-```
+**Le fichier `src/lib/firebase.js` est déjà configuré** pour charger les credentials depuis des variables d'environnement!
+
+Il utilise `import.meta.env.VITE_*` pour lire les valeurs du fichier `.env.local`.
+
+**À FAIRE:**
+
+1. **Copier** `.env.example` en `.env.local`:
+   ```bash
+   # Windows:
+   copy .env.example .env.local
+   
+   # Mac/Linux:
+   cp .env.example .env.local
+   ```
+
+2. **Remplir** `.env.local` avec vos credentials Firebase:
+   ```bash
+   VITE_FIREBASE_API_KEY=AIzaSyD12345abcdef_YOUR_KEY
+   VITE_FIREBASE_AUTH_DOMAIN=pbl-blog-12345.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=pbl-blog-12345
+   VITE_FIREBASE_STORAGE_BUCKET=pbl-blog-12345.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+   VITE_FIREBASE_APP_ID=1:123456789012:web:abc123def456ghi789
+   ```
+
+3. **NE PAS commiter** `.env.local`:
+   - ✅ Le fichier `.gitignore` l'ignore automatiquement
+   - ✅ Seul `.env.example` est committé
 
 **Exemple complet:**
 ```javascript
+// Code dans src/lib/firebase.js (déjà fait):
 const firebaseConfig = {
-  apiKey: "AIzaSyD12345abcdef_YOUR_KEY",
-  authDomain: "pbl-blog-12345.firebaseapp.com",
-  projectId: "pbl-blog-12345",
-  storageBucket: "pbl-blog-12345.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456ghi789"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,  // Depuis .env.local
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  // etc...
 };
 ```
 

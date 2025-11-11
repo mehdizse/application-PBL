@@ -5,15 +5,21 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
-// ⚠️ À REMPLACER par vos credentials Firebase
+// Loaded from environment variables (NOT hardcoded!)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
+
+// Check if Firebase config is properly set
+if (!firebaseConfig.apiKey) {
+  console.error('❌ Firebase configuration is not set! Please configure .env.local with your Firebase credentials.');
+  console.error('📝 Copy .env.example to .env.local and fill in your Firebase project details.');
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
