@@ -1,0 +1,305 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-to-r from-pink-600 to-orange-600 py-20">
+    <div class="section-container relative z-10">
+      <h1 class="text-5xl font-bold text-white mb-4">🌟 Galerie des Productions</h1>
+      <p class="text-xl text-pink-100">Découvrez les meilleures productions des élèves</p>
+    </div>
+  </section>
+
+  <!-- Filters & Search -->
+  <section class="section-container py-12 border-b border-gray-200">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Search Bar -->
+      <input 
+        type="text" 
+        id="search-input"
+        placeholder="🔍 Chercher par titre, auteur ou tag..."
+        class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-pink-600"
+      >
+
+      <!-- Filter by Format -->
+      <select id="format-filter" class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-pink-600">
+        <option value="">Tous les formats</option>
+        <option value="écrit">📝 Format Écrit</option>
+        <option value="photo">📸 Format Photo</option>
+      </select>
+
+      <!-- Filter by Level -->
+      <select id="level-filter" class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-pink-600">
+        <option value="">Tous les niveaux</option>
+        <option value="cp">CP</option>
+        <option value="ce1">CE1</option>
+        <option value="ce2">CE2</option>
+        <option value="cm1">CM1</option>
+        <option value="cm2">CM2</option>
+        <option value="6e">6e</option>
+        <option value="5e">5e</option>
+        <option value="4e">4e</option>
+        <option value="3e">3e</option>
+      </select>
+
+      <!-- Sort -->
+      <select id="sort-filter" class="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-pink-600">
+        <option value="">Trier par...</option>
+        <option value="recent">Plus récent</option>
+        <option value="ancien">Plus ancien</option>
+        <option value="titre">Titre (A-Z)</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Publications Grid -->
+  <section class="section-container py-16">
+    <div id="loading" class="text-center py-12">
+      <p class="text-gray-600 font-semibold">⏳ Chargement des productions...</p>
+    </div>
+
+    <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+      <!-- Les articles seront ajoutés ici par JavaScript -->
+    </div>
+
+    <div id="no-articles" class="text-center py-12 hidden">
+      <p class="text-gray-600 text-lg font-semibold">📭 Aucune production trouvée</p>
+      <p class="text-gray-500">Revenez bientôt pour découvrir les premières publications!</p>
+    </div>
+
+    <div id="empty-state" class="text-center py-12">
+      <p class="text-gray-600 text-lg font-semibold">🎨 Pas encore de productions</p>
+      <p class="text-gray-500 mb-6">Les productions des élèves apparaîtront ici après publication par les enseignants.</p>
+      <a href="/login" class="inline-block bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+        🔐 Espace Admin
+      </a>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="bg-gradient-to-r from-pink-100 to-orange-100 py-16">
+    <div class="section-container">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">📊 Statistiques de la Galerie</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+          <p class="text-4xl font-bold text-pink-600 mb-2" id="stat-total">0</p>
+          <p class="text-gray-700 font-semibold">Productions Totales</p>
+        </div>
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+          <p class="text-4xl font-bold text-orange-600 mb-2" id="stat-text">0</p>
+          <p class="text-gray-700 font-semibold">Textes Publiés</p>
+        </div>
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+          <p class="text-4xl font-bold text-red-600 mb-2" id="stat-photos">0</p>
+          <p class="text-gray-700 font-semibold">Photos Publiées</p>
+        </div>
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+          <p class="text-4xl font-bold text-purple-600 mb-2" id="stat-students">0</p>
+          <p class="text-gray-700 font-semibold">Élèves Participants</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal for Full View -->
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+      <div class="p-6">
+        <button id="close-modal" class="float-right text-2xl text-gray-500 hover:text-gray-700">✕</button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { db } from '../lib/firebase.js';
+  import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+
+  const articlesGrid = document.getElementById('articles-grid');
+  const loading = document.getElementById('loading');
+  const noArticles = document.getElementById('no-articles');
+  const emptyState = document.getElementById('empty-state');
+  const modal = document.getElementById('modal');
+  const closeModalBtn = document.getElementById('close-modal');
+  const modalContent = document.getElementById('modal-content');
+
+  // Filters
+  const searchInput = document.getElementById('search-input');
+  const formatFilter = document.getElementById('format-filter');
+  const levelFilter = document.getElementById('level-filter');
+  const sortFilter = document.getElementById('sort-filter');
+
+  let allArticles = [];
+
+  // Load articles from Firestore
+  async function loadArticles() {
+    try {
+      const articlesRef = collection(db, 'articles');
+      const q = query(articlesRef, where('status', '==', 'published'));
+      const querySnapshot = await getDocs(q);
+      
+      allArticles = [];
+      querySnapshot.forEach((doc) => {
+        allArticles.push({ id: doc.id, ...doc.data() });
+      });
+
+      updateStats();
+      displayArticles(allArticles);
+    } catch (error) {
+      console.log('Erreur de chargement:', error);
+      loading.innerHTML = '<p class="text-red-600">❌ Erreur lors du chargement des articles</p>';
+    }
+  }
+
+  // Display articles
+  function displayArticles(articles) {
+    loading.classList.add('hidden');
+
+    if (articles.length === 0) {
+      articlesGrid.classList.add('hidden');
+      noArticles.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      return;
+    }
+
+    articlesGrid.innerHTML = '';
+    articles.forEach(article => {
+      const card = createArticleCard(article);
+      articlesGrid.appendChild(card);
+    });
+
+    articlesGrid.classList.remove('hidden');
+    noArticles.classList.add('hidden');
+    emptyState.classList.add('hidden');
+  }
+
+  // Create article card
+  function createArticleCard(article) {
+    const card = document.createElement('div');
+    card.className = 'card p-6 hover:shadow-xl transition-all duration-300 cursor-pointer';
+    
+    const typeIcon = article.format === 'photo' ? '📸' : '✍️';
+    const typeLabel = article.format === 'photo' ? 'Format Photo' : 'Format Écrit';
+    const typeColor = article.format === 'photo' ? 'pink' : 'purple';
+
+    let preview = article.content;
+    if (article.format === 'photo') {
+      preview = article.photoDescription || 'Photo de production';
+    }
+
+    const tagsHTML = (article.tags || [])
+      .map(tag => `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">${tag}</span>`)
+      .join('');
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-3xl">${typeIcon}</span>
+        <span class="text-xs bg-${typeColor}-200 text-${typeColor}-700 px-3 py-1 rounded-full">${typeLabel}</span>
+      </div>
+      <h4 class="text-lg font-bold text-gray-900 mb-2">${article.title}</h4>
+      <p class="text-sm text-gray-600 mb-3"><strong>👤 ${article.author}</strong> (${article.level})</p>
+      <p class="text-sm text-gray-600 mb-3"><strong>📚 ${article.projectName}</strong></p>
+      <p class="text-sm text-gray-700 mb-4 line-clamp-3">${preview}</p>
+      <div class="flex flex-wrap gap-2 mb-4">${tagsHTML}</div>
+      <p class="text-xs text-gray-500">📅 ${new Date(article.createdAt).toLocaleDateString('fr-FR')}</p>
+    `;
+
+    card.addEventListener('click', () => showArticleModal(article));
+    return card;
+  }
+
+  // Show article in modal
+  function showArticleModal(article) {
+    const typeIcon = article.format === 'photo' ? '📸' : '✍️';
+    
+    let content = `
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">${article.title} ${typeIcon}</h2>
+        <div class="space-y-4 text-gray-700">
+          <div><strong>👤 Auteur:</strong> ${article.author}</div>
+          <div><strong>📚 Niveau:</strong> ${article.level}</div>
+          <div><strong>📖 Projet:</strong> ${article.projectName}</div>
+          <div><strong>📝 Contexte:</strong> ${article.description}</div>
+    `;
+
+    if (article.format === 'photo') {
+      content += `<div><strong>📸 Description Photo:</strong> ${article.photoDescription}</div>`;
+    } else {
+      content += `<div class="mt-6 p-4 bg-gray-50 rounded border border-gray-200"><strong>📄 Contenu:</strong><pre class="whitespace-pre-wrap mt-2">${article.content}</pre></div>`;
+    }
+
+    content += '</div></div>';
+    modalContent.innerHTML = content;
+    modal.classList.remove('hidden');
+  }
+
+  // Filter articles
+  function filterArticles() {
+    let filtered = allArticles;
+
+    // Search
+    const searchTerm = searchInput.value.toLowerCase();
+    if (searchTerm) {
+      filtered = filtered.filter(a => 
+        a.title.toLowerCase().includes(searchTerm) ||
+        a.author.toLowerCase().includes(searchTerm) ||
+        (a.tags || []).some(t => t.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    // Format filter
+    if (formatFilter.value) {
+      filtered = filtered.filter(a => a.format === formatFilter.value);
+    }
+
+    // Level filter
+    if (levelFilter.value) {
+      filtered = filtered.filter(a => a.level === levelFilter.value);
+    }
+
+    // Sort
+    if (sortFilter.value === 'recent') {
+      filtered.sort((a, b) => b.createdAt - a.createdAt);
+    } else if (sortFilter.value === 'ancien') {
+      filtered.sort((a, b) => a.createdAt - b.createdAt);
+    } else if (sortFilter.value === 'titre') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    displayArticles(filtered);
+  }
+
+  // Update statistics
+  function updateStats() {
+    const total = allArticles.length;
+    const textCount = allArticles.filter(a => a.format === 'écrit').length;
+    const photoCount = allArticles.filter(a => a.format === 'photo').length;
+    const students = new Set(allArticles.map(a => a.author)).size;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-text').textContent = textCount;
+    document.getElementById('stat-photos').textContent = photoCount;
+    document.getElementById('stat-students').textContent = students;
+  }
+
+  // Event listeners
+  searchInput.addEventListener('input', filterArticles);
+  formatFilter.addEventListener('change', filterArticles);
+  levelFilter.addEventListener('change', filterArticles);
+  sortFilter.addEventListener('change', filterArticles);
+
+  closeModalBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+    }
+  });
+
+  // Initial load
+  loadArticles();
+</script>

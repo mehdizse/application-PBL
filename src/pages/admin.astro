@@ -3,427 +3,474 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout>
-  <!-- Hero Section -->
-  <section class="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 py-20">
-    <div class="section-container relative z-10">
-      <h1 class="text-5xl font-bold text-white mb-4">🎨 Espace Admin - Ajouter une Production</h1>
-      <p class="text-xl text-purple-100">Publiez les écritures et photos des élèves facilement</p>
-    </div>
-  </section>
-
-  <!-- Main Content -->
-  <section class="section-container py-16">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Main Form -->
-      <div class="lg:col-span-2">
-        <!-- Tabs for Format Selection -->
-        <div class="flex space-x-4 mb-8 border-b-2 border-gray-200">
-          <button class="format-tab active pb-4 px-6 border-b-4 border-purple-600 font-bold text-gray-900 transition-all duration-200" data-format="text">
-            📝 Format Écrit
-          </button>
-          <button class="format-tab pb-4 px-6 border-b-4 border-transparent font-bold text-gray-600 hover:text-gray-900 transition-all duration-200" data-format="photo">
-            📸 Format Photo
-          </button>
+  <!-- Auth Check will be done in JavaScript -->
+  <div id="auth-check" class="hidden">
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 py-20">
+      <div class="section-container relative z-10 flex items-center justify-between">
+        <div>
+          <h1 class="text-5xl font-bold text-white mb-4">🎨 Espace Admin - Ajouter une Production</h1>
+          <p class="text-xl text-purple-100">Publiez les écritures et photos des élèves facilement</p>
         </div>
+        <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
+          🚪 Déconnexion
+        </button>
+      </div>
+    </section>
 
-        <!-- Form Section: Text Format -->
-        <form id="text-form" class="format-content card p-8 mb-8">
-          <h2 class="text-3xl font-bold text-gray-900 mb-6">📝 Ajouter un Article Écrit</h2>
-
-          <!-- Form Group: Title -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Titre de la Production *</label>
-            <input 
-              type="text" 
-              placeholder="Ex: Mon premier poème sur la nature"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              required
-            >
+    <!-- Main Content -->
+    <section class="section-container py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Form -->
+        <div class="lg:col-span-2">
+          <!-- Tabs for Format Selection -->
+          <div class="flex space-x-4 mb-8 border-b-2 border-gray-200">
+            <button class="format-tab active pb-4 px-6 border-b-4 border-purple-600 font-bold text-gray-900 transition-all duration-200" data-format="text">
+              📝 Format Écrit
+            </button>
+            <button class="format-tab pb-4 px-6 border-b-4 border-transparent font-bold text-gray-600 hover:text-gray-900 transition-all duration-200" data-format="photo">
+              📸 Format Photo
+            </button>
           </div>
 
-          <!-- Form Group: Author -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label class="block text-sm font-bold text-gray-900 mb-2">Nom de l'Auteur *</label>
+          <!-- Form Section: Text Format -->
+          <form id="text-form" class="format-content card p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">📝 Ajouter un Article Écrit</h2>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Titre de la Production *</label>
               <input 
                 type="text" 
-                placeholder="Ex: Marie Dupont"
+                placeholder="Ex: Mon premier poème sur la nature"
                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
                 required
               >
             </div>
 
-            <div>
-              <label class="block text-sm font-bold text-gray-900 mb-2">Classe/Niveau *</label>
-              <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200" required>
-                <option value="">Sélectionnez...</option>
-                <option value="cp">CP</option>
-                <option value="ce1">CE1</option>
-                <option value="ce2">CE2</option>
-                <option value="cm1">CM1</option>
-                <option value="cm2">CM2</option>
-                <option value="6e">6e</option>
-                <option value="5e">5e</option>
-                <option value="4e">4e</option>
-                <option value="3e">3e</option>
-              </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Nom de l'Auteur *</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: Marie Dupont"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+                  required
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Classe/Niveau *</label>
+                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200" required>
+                  <option value="">Sélectionnez...</option>
+                  <option value="cp">CP</option>
+                  <option value="ce1">CE1</option>
+                  <option value="ce2">CE2</option>
+                  <option value="cm1">CM1</option>
+                  <option value="cm2">CM2</option>
+                  <option value="6e">6e</option>
+                  <option value="5e">5e</option>
+                  <option value="4e">4e</option>
+                  <option value="3e">3e</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <!-- Form Group: Project Name -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Nom du Projet *</label>
-            <input 
-              type="text" 
-              placeholder="Ex: Découvrir la Poésie"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              required
-            >
-          </div>
-
-          <!-- Form Group: Description -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Description du Projet (Contexte) *</label>
-            <textarea 
-              rows="4"
-              placeholder="Expliquez le contexte du projet et ses objectifs pédagogiques..."
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              required
-            ></textarea>
-          </div>
-
-          <!-- Form Group: Content -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Contenu de la Production *</label>
-            <textarea 
-              rows="10"
-              placeholder="Collez le texte de l'élève ici..."
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200 font-mono text-sm"
-              required
-            ></textarea>
-          </div>
-
-          <!-- Form Group: Tags -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Tags (séparés par des virgules)</label>
-            <input 
-              type="text" 
-              placeholder="Ex: poésie, nature, créatif"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-            >
-          </div>
-
-          <!-- Submit Button -->
-          <button 
-            type="submit"
-            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
-          >
-            📝 Publier l'Article Écrit
-          </button>
-        </form>
-
-        <!-- Form Section: Photo Format -->
-        <form id="photo-form" class="format-content hidden card p-8">
-          <h2 class="text-3xl font-bold text-gray-900 mb-6">📸 Ajouter une Photo d'Écrit</h2>
-
-          <!-- Form Group: Title -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Titre de la Production *</label>
-            <input 
-              type="text" 
-              placeholder="Ex: Mon dessin et mon texte"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              required
-            >
-          </div>
-
-          <!-- Form Group: Author & Class -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label class="block text-sm font-bold text-gray-900 mb-2">Nom de l'Auteur *</label>
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Nom du Projet *</label>
               <input 
                 type="text" 
-                placeholder="Ex: Jean Martin"
+                placeholder="Ex: Découvrir la Poésie"
                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
                 required
               >
             </div>
 
-            <div>
-              <label class="block text-sm font-bold text-gray-900 mb-2">Classe/Niveau *</label>
-              <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200" required>
-                <option value="">Sélectionnez...</option>
-                <option value="cp">CP</option>
-                <option value="ce1">CE1</option>
-                <option value="ce2">CE2</option>
-                <option value="cm1">CM1</option>
-                <option value="cm2">CM2</option>
-                <option value="6e">6e</option>
-                <option value="5e">5e</option>
-                <option value="4e">4e</option>
-                <option value="3e">3e</option>
-              </select>
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Description du Projet (Contexte) *</label>
+              <textarea 
+                rows="4"
+                placeholder="Expliquez le contexte du projet et ses objectifs pédagogiques..."
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+                required
+              ></textarea>
             </div>
-          </div>
 
-          <!-- Form Group: Project Name -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Nom du Projet *</label>
-            <input 
-              type="text" 
-              placeholder="Ex: Illustrer une Histoire"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              required
-            >
-          </div>
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Contenu de la Production *</label>
+              <textarea 
+                rows="10"
+                placeholder="Collez le texte de l'élève ici..."
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200 font-mono text-sm"
+                required
+              ></textarea>
+            </div>
 
-          <!-- Form Group: Description -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Description du Projet *</label>
-            <textarea 
-              rows="4"
-              placeholder="Contexte et objectifs du projet..."
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              required
-            ></textarea>
-          </div>
-
-          <!-- Form Group: Photo Upload -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Photo de la Production *</label>
-            <div class="border-2 border-dashed border-purple-300 rounded-lg p-8 text-center hover:bg-purple-50 transition-colors duration-200 cursor-pointer">
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Tags (séparés par des virgules)</label>
               <input 
-                type="file" 
-                accept="image/*"
-                class="hidden"
-                id="photo-input"
+                type="text" 
+                placeholder="Ex: poésie, nature, créatif"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+              >
+            </div>
+
+            <button 
+              type="submit"
+              class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
+            >
+              📝 Publier l'Article Écrit
+            </button>
+          </form>
+
+          <!-- Form Section: Photo Format -->
+          <form id="photo-form" class="format-content hidden card p-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">📸 Ajouter une Photo d'Écrit</h2>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Titre de la Production *</label>
+              <input 
+                type="text" 
+                placeholder="Ex: Mon dessin et mon texte"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
                 required
               >
-              <label for="photo-input" class="cursor-pointer">
-                <p class="text-4xl mb-2">📸</p>
-                <p class="text-gray-900 font-bold mb-1">Cliquez ou glissez votre photo</p>
-                <p class="text-gray-600 text-sm">Format: JPG, PNG (max 5MB)</p>
-              </label>
             </div>
-          </div>
 
-          <!-- Form Group: Description of Photo -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Description de la Photo</label>
-            <textarea 
-              rows="4"
-              placeholder="Expliquez ce qu'on voit sur la photo et le contexte..."
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-            ></textarea>
-          </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Nom de l'Auteur *</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: Jean Martin"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+                  required
+                >
+              </div>
 
-          <!-- Form Group: Tags -->
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">Tags</label>
-            <input 
-              type="text" 
-              placeholder="Ex: dessin, histoire, créatif"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+              <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Classe/Niveau *</label>
+                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200" required>
+                  <option value="">Sélectionnez...</option>
+                  <option value="cp">CP</option>
+                  <option value="ce1">CE1</option>
+                  <option value="ce2">CE2</option>
+                  <option value="cm1">CM1</option>
+                  <option value="cm2">CM2</option>
+                  <option value="6e">6e</option>
+                  <option value="5e">5e</option>
+                  <option value="4e">4e</option>
+                  <option value="3e">3e</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Nom du Projet *</label>
+              <input 
+                type="text" 
+                placeholder="Ex: Illustrer une Histoire"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+                required
+              >
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Description du Projet *</label>
+              <textarea 
+                rows="4"
+                placeholder="Contexte et objectifs du projet..."
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+                required
+              ></textarea>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Photo de la Production *</label>
+              <div class="border-2 border-dashed border-purple-300 rounded-lg p-8 text-center hover:bg-purple-50 transition-colors duration-200 cursor-pointer" id="drag-drop-area">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  class="hidden"
+                  id="photo-input"
+                  required
+                >
+                <label for="photo-input" class="cursor-pointer">
+                  <p class="text-4xl mb-2">📸</p>
+                  <p class="text-gray-900 font-bold mb-1">Cliquez ou glissez votre photo</p>
+                  <p class="text-gray-600 text-sm">Format: JPG, PNG (max 5MB)</p>
+                </label>
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Description de la Photo</label>
+              <textarea 
+                rows="4"
+                placeholder="Expliquez ce qu'on voit sur la photo et le contexte..."
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+              ></textarea>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">Tags</label>
+              <input 
+                type="text" 
+                placeholder="Ex: dessin, histoire, créatif"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
+              >
+            </div>
+
+            <button 
+              type="submit"
+              class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
             >
+              📸 Publier la Photo
+            </button>
+          </form>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="lg:col-span-1">
+          <div class="card p-8 mb-8 bg-gradient-to-br from-purple-50 to-pink-50">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">📋 Instructions</h3>
+            <div class="space-y-4 text-sm text-gray-700">
+              <div>
+                <p class="font-bold text-purple-600 mb-1">✅ Format Écrit</p>
+                <p>Collez directement le texte ou la production écrite de l'élève</p>
+              </div>
+              <div class="border-t border-gray-200 pt-4">
+                <p class="font-bold text-purple-600 mb-1">✅ Format Photo</p>
+                <p>Uploadez une photo de la production (dessin + texte, travail manuels, etc.)</p>
+              </div>
+              <div class="border-t border-gray-200 pt-4">
+                <p class="font-bold text-purple-600 mb-1">✅ Informations Requises</p>
+                <p>Titre, auteur, classe et contexte du projet</p>
+              </div>
+              <div class="border-t border-gray-200 pt-4">
+                <p class="font-bold text-purple-600 mb-1">✅ Utilité des Tags</p>
+                <p>Catégorisez pour une meilleure organisation</p>
+              </div>
+            </div>
           </div>
 
-          <!-- Submit Button -->
-          <button 
-            type="submit"
-            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
-          >
-            📸 Publier la Photo
-          </button>
-        </form>
+          <div class="card p-8 mb-8 border-2 border-purple-500">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">💡 Conseils Utiles</h3>
+            <ul class="space-y-3 text-sm text-gray-700">
+              <li class="flex items-start space-x-2">
+                <span class="text-purple-600 font-bold">•</span>
+                <span>Obtenez l'accord des parents/tuteurs avant de publier</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-purple-600 font-bold">•</span>
+                <span>Variez les types de productions (poèmes, histoires, articles...)</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-purple-600 font-bold">•</span>
+                <span>Partagez les photos au moins une fois par mois</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-purple-600 font-bold">•</span>
+                <span>Célébrez toutes les productions pour motiver les élèves</span>
+              </li>
+              <li class="flex items-start space-x-2">
+                <span class="text-purple-600 font-bold">•</span>
+                <span>Utilisez les meilleurs travaux pour inspirer d'autres élèves</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card p-8 bg-gradient-to-br from-pink-500 to-purple-500 text-white">
+            <h3 class="text-2xl font-bold mb-4">🌟 Galerie Publique</h3>
+            <p class="mb-6">Consultez tous les articles publiés et les meilleures productions</p>
+            <a href="/gallery" class="inline-block bg-white text-purple-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors">
+              👁️ Voir la Galerie
+            </a>
+          </div>
+        </aside>
       </div>
+    </section>
+  </div>
 
-      <!-- Sidebar: Guidelines & Tips -->
-      <aside class="lg:col-span-1">
-        <!-- Instructions Card -->
-        <div class="card p-8 mb-8 bg-gradient-to-br from-purple-50 to-pink-50">
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">📋 Instructions</h3>
-          
-          <div class="space-y-4 text-sm text-gray-700">
-            <div>
-              <p class="font-bold text-purple-600 mb-1">✅ Format Écrit</p>
-              <p>Collez directement le texte ou la production écrite de l'élève</p>
-            </div>
-
-            <div class="border-t border-gray-200 pt-4">
-              <p class="font-bold text-purple-600 mb-1">✅ Format Photo</p>
-              <p>Uploadez une photo de la production (dessin + texte, travail manuels, etc.)</p>
-            </div>
-
-            <div class="border-t border-gray-200 pt-4">
-              <p class="font-bold text-purple-600 mb-1">✅ Informations Requises</p>
-              <p>Titre, auteur, classe et contexte du projet</p>
-            </div>
-
-            <div class="border-t border-gray-200 pt-4">
-              <p class="font-bold text-purple-600 mb-1">✅ Utilité des Tags</p>
-              <p>Catégorisez pour une meilleure organisation</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tips Card -->
-        <div class="card p-8 mb-8 border-2 border-purple-500">
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">💡 Conseils Utiles</h3>
-          
-          <ul class="space-y-3 text-sm text-gray-700">
-            <li class="flex items-start space-x-2">
-              <span class="text-purple-600 font-bold">•</span>
-              <span>Obtenez l'accord des parents/tuteurs avant de publier</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-purple-600 font-bold">•</span>
-              <span>Variez les types de productions (poèmes, histoires, articles...)</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-purple-600 font-bold">•</span>
-              <span>Partagez les photos au moins une fois par mois</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-purple-600 font-bold">•</span>
-              <span>Célébrez toutes les productions pour motiver les élèves</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-purple-600 font-bold">•</span>
-              <span>Utilisez les meilleurs travaux pour inspirer d'autres élèves</span>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Recent Submissions -->
-        <div class="card p-8 bg-gradient-to-br from-gray-50 to-gray-100">
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">📊 Statistiques</h3>
-          
-          <div class="space-y-6">
-            <div class="text-center">
-              <p class="text-4xl font-bold text-purple-600 mb-2">24</p>
-              <p class="text-gray-700 font-semibold">Contributions ce mois</p>
-            </div>
-            
-            <div class="text-center border-t border-gray-200 pt-4">
-              <p class="text-4xl font-bold text-pink-600 mb-2">156</p>
-              <p class="text-gray-700 font-semibold">Total publications</p>
-            </div>
-
-            <div class="text-center border-t border-gray-200 pt-4">
-              <p class="text-4xl font-bold text-blue-600 mb-2">45</p>
-              <p class="text-gray-700 font-semibold">Élèves participants</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </div>
-  </section>
-
-  <!-- Preview Section -->
-  <section class="bg-gradient-to-r from-purple-100 to-pink-100 py-16 rounded-lg mt-12">
-    <div class="section-container">
-      <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">👀 Aperçu des Récentes Publications</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Sample Card 1 -->
-        <div class="card p-6 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-3xl">✍️</span>
-            <span class="text-xs bg-purple-200 text-purple-700 px-3 py-1 rounded-full">Format Écrit</span>
-          </div>
-          <h4 class="text-lg font-bold text-gray-900 mb-2">Mon Rêve</h4>
-          <p class="text-sm text-gray-600 mb-3"><strong>Auteur:</strong> Sophie B. (CM2)</p>
-          <p class="text-sm text-gray-700 mb-4 line-clamp-3">Un texte poétique sur les rêves et les aspirations...</p>
-          <div class="flex space-x-2">
-            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">poésie</span>
-            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">créatif</span>
-          </div>
-        </div>
-
-        <!-- Sample Card 2 -->
-        <div class="card p-6 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-3xl">📸</span>
-            <span class="text-xs bg-pink-200 text-pink-700 px-3 py-1 rounded-full">Format Photo</span>
-          </div>
-          <h4 class="text-lg font-bold text-gray-900 mb-2">Le Monde du Futur</h4>
-          <p class="text-sm text-gray-600 mb-3"><strong>Auteur:</strong> Lucas M. (CE2)</p>
-          <p class="text-sm text-gray-700 mb-4">Dessin et texte sur une vision futuriste...</p>
-          <div class="flex space-x-2">
-            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">dessin</span>
-            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">imaginaire</span>
-          </div>
-        </div>
-
-        <!-- Sample Card 3 -->
-        <div class="card p-6 hover:shadow-xl transition-all duration-300">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-3xl">✍️</span>
-            <span class="text-xs bg-purple-200 text-purple-700 px-3 py-1 rounded-full">Format Écrit</span>
-          </div>
-          <h4 class="text-lg font-bold text-gray-900 mb-2">L'Aventure en Forêt</h4>
-          <p class="text-sm text-gray-600 mb-3"><strong>Auteur:</strong> Emma L. (CM1)</p>
-          <p class="text-sm text-gray-700 mb-4">Une histoire de découverte et d'amitié...</p>
-          <div class="flex space-x-2">
-            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">histoire</span>
-            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">aventure</span>
-          </div>
-        </div>
+  <!-- Not Authenticated -->
+  <div id="not-authenticated" class="section-container py-20">
+    <div class="max-w-md mx-auto text-center">
+      <div class="card p-8">
+        <p class="text-4xl mb-4">🔐</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Accès Restreint</h2>
+        <p class="text-gray-700 mb-6">Vous devez être connecté pour accéder à cet espace.</p>
+        <a href="/login" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+          🔓 Se Connecter
+        </a>
       </div>
     </div>
-  </section>
+  </div>
 </BaseLayout>
 
 <script>
-  // Tab switching functionality
-  document.querySelectorAll('.format-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const format = tab.dataset.format;
-      
-      // Update tab styles
-      document.querySelectorAll('.format-tab').forEach(t => {
-        t.classList.remove('active', 'border-purple-600', 'border-b-4');
-        t.classList.add('border-transparent', 'text-gray-600');
-      });
-      tab.classList.add('active', 'border-purple-600', 'border-b-4', 'text-gray-900');
-      
-      // Update form visibility
-      document.querySelectorAll('.format-content').forEach(content => {
-        content.classList.add('hidden');
-      });
-      document.getElementById(`${format}-form`).classList.remove('hidden');
-    });
+  import { auth, db, storage } from '../lib/firebase.js';
+  import { onAuthStateChanged, signOut } from 'firebase/auth';
+  import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+  import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+  const authCheck = document.getElementById('auth-check');
+  const notAuthenticated = document.getElementById('not-authenticated');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      authCheck.classList.remove('hidden');
+      notAuthenticated.classList.add('hidden');
+      setupFormHandlers(user);
+      setupTabSwitching();
+      setupPhotoUpload();
+    } else {
+      authCheck.classList.add('hidden');
+      notAuthenticated.classList.remove('hidden');
+    }
   });
 
-  // Photo upload drag & drop
-  const photoInput = document.getElementById('photo-input');
-  const uploadArea = photoInput?.parentElement.parentElement;
-  
-  if (uploadArea) {
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('bg-purple-50', 'border-purple-600');
-    });
-    
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('bg-purple-50', 'border-purple-600');
-    });
-    
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('bg-purple-50', 'border-purple-600');
-      photoInput.files = e.dataTransfer.files;
+  function setupTabSwitching() {
+    document.querySelectorAll('.format-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const format = tab.dataset.format;
+        
+        document.querySelectorAll('.format-tab').forEach(t => {
+          t.classList.remove('active', 'border-purple-600', 'border-b-4');
+          t.classList.add('border-transparent', 'text-gray-600');
+        });
+        tab.classList.add('active', 'border-purple-600', 'border-b-4', 'text-gray-900');
+        
+        document.querySelectorAll('.format-content').forEach(content => {
+          content.classList.add('hidden');
+        });
+        document.getElementById(`${format}-form`).classList.remove('hidden');
+      });
     });
   }
 
-  // Form submission
-  document.getElementById('text-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert('✅ Article écrit soumis avec succès!\n\nVotre production sera bientôt publiée après vérification.');
-  });
+  function setupPhotoUpload() {
+    const photoInput = document.getElementById('photo-input');
+    const dragDropArea = document.getElementById('drag-drop-area');
+    
+    if (dragDropArea) {
+      dragDropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragDropArea.classList.add('bg-purple-50', 'border-purple-600');
+      });
+      
+      dragDropArea.addEventListener('dragleave', () => {
+        dragDropArea.classList.remove('bg-purple-50', 'border-purple-600');
+      });
+      
+      dragDropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragDropArea.classList.remove('bg-purple-50', 'border-purple-600');
+        if (e.dataTransfer.files.length) {
+          photoInput.files = e.dataTransfer.files;
+        }
+      });
+    }
+  }
 
-  document.getElementById('photo-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert('✅ Photo soumise avec succès!\n\nVotre production sera bientôt publiée après vérification.');
-  });
+  function setupFormHandlers(user) {
+    const textForm = document.getElementById('text-form');
+    const photoForm = document.getElementById('photo-form');
+
+    if (textForm) {
+      textForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const inputs = textForm.querySelectorAll('input[type="text"]');
+        const select = textForm.querySelector('select');
+        const textareas = textForm.querySelectorAll('textarea');
+
+        const title = inputs[0].value;
+        const author = inputs[1].value;
+        const level = select.value;
+        const projectName = inputs[2].value;
+        const description = textareas[0].value;
+        const content = textareas[1].value;
+        const tags = inputs[3].value.split(',').map(t => t.trim()).filter(t => t);
+
+        try {
+          await addDoc(collection(db, 'articles'), {
+            title,
+            author,
+            level,
+            projectName,
+            description,
+            content,
+            format: 'écrit',
+            tags,
+            status: 'published',
+            userId: user.uid,
+            createdAt: serverTimestamp()
+          });
+
+          alert('✅ Article écrit publié avec succès!');
+          textForm.reset();
+        } catch (error) {
+          alert(`❌ Erreur: ${error.message}`);
+        }
+      });
+    }
+
+    if (photoForm) {
+      photoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const inputs = photoForm.querySelectorAll('input[type="text"]');
+        const selects = photoForm.querySelectorAll('select');
+        const textareas = photoForm.querySelectorAll('textarea');
+        const photoInput = document.getElementById('photo-input');
+        const photoFile = photoInput.files[0];
+
+        if (!photoFile) {
+          alert('❌ Veuillez sélectionner une photo');
+          return;
+        }
+
+        const title = inputs[0].value;
+        const author = inputs[1].value;
+        const level = selects[0].value;
+        const projectName = inputs[2].value;
+        const description = textareas[0].value;
+        const photoDescription = textareas[1].value;
+        const tags = inputs[3].value.split(',').map(t => t.trim()).filter(t => t);
+
+        try {
+          const storageRef = ref(storage, `articles/${Date.now()}_${photoFile.name}`);
+          await uploadBytes(storageRef, photoFile);
+          const photoURL = await getDownloadURL(storageRef);
+
+          await addDoc(collection(db, 'articles'), {
+            title,
+            author,
+            level,
+            projectName,
+            description,
+            photoDescription,
+            photoURL,
+            format: 'photo',
+            tags,
+            status: 'published',
+            userId: user.uid,
+            createdAt: serverTimestamp()
+          });
+
+          alert('✅ Photo publiée avec succès!');
+          photoForm.reset();
+        } catch (error) {
+          alert(`❌ Erreur: ${error.message}`);
+        }
+      });
+    }
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = '/login';
+    });
+  }
 </script>
