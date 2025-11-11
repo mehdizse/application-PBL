@@ -192,12 +192,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   // Toggle between login and signup
   toggleSignupBtn.addEventListener('click', () => {
-    loginForm.parentElement.classList.add('hidden');
+    document.querySelector('[id="login-form"]').parentElement.classList.add('hidden');
     signupContainer.classList.remove('hidden');
   });
 
   toggleLoginBtn.addEventListener('click', () => {
-    loginForm.parentElement.parentElement.classList.remove('hidden');
+    document.querySelector('[id="login-form"]').parentElement.classList.remove('hidden');
     signupContainer.classList.add('hidden');
   });
 
