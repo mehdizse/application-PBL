@@ -193,6 +193,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .map(tag => `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">${tag}</span>`)
       .join('');
 
+    // Format date - handle Firestore Timestamp objects
+    let formattedDate = '📅 Date inconnue';
+    if (article.createdAt) {
+      let date;
+      if (article.createdAt.toDate) {
+        // Firestore Timestamp object
+        date = article.createdAt.toDate();
+      } else if (typeof article.createdAt === 'number') {
+        // Unix timestamp
+        date = new Date(article.createdAt);
+      } else if (article.createdAt instanceof Date) {
+        // Already a Date object
+        date = article.createdAt;
+      }
+      
+      if (date && !isNaN(date)) {
+        formattedDate = `📅 ${date.toLocaleDateString('fr-FR')}`;
+      }
+    }
+
     card.innerHTML = `
       <div class="flex items-center justify-between mb-4">
         <span class="text-3xl">${typeIcon}</span>
@@ -203,7 +223,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="text-sm text-gray-600 mb-3"><strong>📚 ${article.projectName}</strong></p>
       <p class="text-sm text-gray-700 mb-4 line-clamp-3">${preview}</p>
       <div class="flex flex-wrap gap-2 mb-4">${tagsHTML}</div>
-      <p class="text-xs text-gray-500">📅 ${new Date(article.createdAt).toLocaleDateString('fr-FR')}</p>
+      <p class="text-xs text-gray-500">${formattedDate}</p>
     `;
 
     card.addEventListener('click', () => showArticleModal(article));
@@ -265,9 +285,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // Sort
     if (sortFilter.value === 'recent') {
-      filtered.sort((a, b) => b.createdAt - a.createdAt);
+      filtered.sort((a, b) => {
+        const timeA = a.createdAt?.toDate?.() || a.createdAt || 0;
+        const timeB = b.createdAt?.toDate?.() || b.createdAt || 0;
+        const msA = timeA instanceof Date ? timeA.getTime() : timeA;
+        const msB = timeB instanceof Date ? timeB.getTime() : timeB;
+        return msB - msA;
+      });
     } else if (sortFilter.value === 'ancien') {
-      filtered.sort((a, b) => a.createdAt - b.createdAt);
+      filtered.sort((a, b) => {
+        const timeA = a.createdAt?.toDate?.() || a.createdAt || 0;
+        const timeB = b.createdAt?.toDate?.() || b.createdAt || 0;
+        const msA = timeA instanceof Date ? timeA.getTime() : timeA;
+        const msB = timeB instanceof Date ? timeB.getTime() : timeB;
+        return msA - msB;
+      });
     } else if (sortFilter.value === 'titre') {
       filtered.sort((a, b) => a.title.localeCompare(b.title));
     }
