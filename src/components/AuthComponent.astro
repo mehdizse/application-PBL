@@ -1,0 +1,53 @@
+---
+// This component handles Firebase authentication on the client side
+---
+
+<div id="auth-container"></div>
+
+<script>
+  // Load Firebase dynamically to ensure env vars are available
+  const loadFirebase = async () => {
+    try {
+      // Check if env vars exist
+      const config = {
+        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+        appId: import.meta.env.VITE_FIREBASE_APP_ID
+      };
+
+      console.log('🔍 Checking Firebase config:', {
+        apiKey: config.apiKey ? '✅ Set' : '❌ Missing',
+        authDomain: config.authDomain ? '✅ Set' : '❌ Missing',
+        projectId: config.projectId ? '✅ Set' : '❌ Missing',
+        storageBucket: config.storageBucket ? '✅ Set' : '❌ Missing',
+        messagingSenderId: config.messagingSenderId ? '✅ Set' : '❌ Missing',
+        appId: config.appId ? '✅ Set' : '❌ Missing'
+      });
+
+      if (!config.apiKey || !config.authDomain || !config.projectId) {
+        console.error('❌ Firebase credentials are incomplete!');
+        console.error('Config:', config);
+        return false;
+      }
+
+      console.log('✅ Firebase credentials loaded successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Error loading Firebase config:', error);
+      return false;
+    }
+  };
+
+  // Initialize on page load
+  window.addEventListener('DOMContentLoaded', loadFirebase);
+  
+  // Also try immediately if DOM is already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadFirebase);
+  } else {
+    loadFirebase();
+  }
+</script>

@@ -3,34 +3,50 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { firebaseConfig as importedConfig } from './firebaseConfig.js';
 
 // Your web app's Firebase configuration
-// Loaded from environment variables (NOT hardcoded!)
+// Try to get from environment variables first (for Netlify production)
+// Fall back to imported config (for local development)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || importedConfig.apiKey,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || importedConfig.authDomain,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || importedConfig.projectId,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || importedConfig.storageBucket,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || importedConfig.messagingSenderId,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || importedConfig.appId
 };
 
+console.log('🔧 Firebase Config Debug:', {
+  apiKey: firebaseConfig.apiKey ? '✅ ' + firebaseConfig.apiKey.substring(0, 10) + '...' : '❌ EMPTY',
+  authDomain: firebaseConfig.authDomain || '❌ EMPTY',
+  projectId: firebaseConfig.projectId || '❌ EMPTY',
+  storageBucket: firebaseConfig.storageBucket || '❌ EMPTY',
+  messagingSenderId: firebaseConfig.messagingSenderId || '❌ EMPTY',
+  appId: firebaseConfig.appId || '❌ EMPTY'
+});
+
 // Check if Firebase config is properly set
-if (!firebaseConfig.apiKey) {
-  console.error('❌ Firebase configuration is not set! Please configure .env.local with your Firebase credentials.');
-  console.error('📝 Copy .env.example to .env.local and fill in your Firebase project details.');
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.error('❌ Firebase configuration is not set!');
+  console.error('Config received:', firebaseConfig);
 }
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+let auth;
+let db;
+let storage;
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+  console.log('✅ Firebase initialized successfully');
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase:', error);
+}
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
-
-// Initialize Cloud Storage and get a reference to the service
-export const storage = getStorage(app);
-
+export { auth, db, storage };
 export default app;
