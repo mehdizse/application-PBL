@@ -20,7 +20,7 @@ title: "Écrire et Créer - Blog Éducatif"
       <li><a href="/resources" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">📚 Ressources</a></li>
       <li><a href="/gallery" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🌟 Galerie</a></li>
       <li><a href="/posts/welcome-to-project-based-writing" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">Blog</a></li>
-      <li><a href="/login" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🔐 Connexion</a></li>
+      <li id="auth-link"><a href="/login" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🔐 Connexion</a></li>
       <li><a href="/admin" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 font-semibold transition-colors duration-200">🎨 Admin</a></li>
     </ul>
 
@@ -30,3 +30,31 @@ title: "Écrire et Créer - Blog Éducatif"
     </button>
   </nav>
 </header>
+
+<script>
+  import { auth } from '../lib/firebase.js';
+  import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+  onAuthStateChanged(auth, (user) => {
+    const authLink = document.getElementById('auth-link');
+    if (authLink) {
+      if (user) {
+        // User is logged in - show Logout button
+        authLink.innerHTML = `<button id="logout-header-btn" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🚪 Déconnexion (${user.displayName || user.email})</button>`;
+        
+        const logoutBtn = document.getElementById('logout-header-btn');
+        logoutBtn.addEventListener('click', async () => {
+          try {
+            await signOut(auth);
+            window.location.href = '/';
+          } catch (error) {
+            console.error('Erreur de déconnexion:', error);
+          }
+        });
+      } else {
+        // User is logged out - show Login link
+        authLink.innerHTML = '<a href="/login" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🔐 Connexion</a>';
+      }
+    }
+  });
+</script>
