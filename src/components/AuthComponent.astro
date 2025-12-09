@@ -4,13 +4,16 @@
 
 <div id="auth-container"></div>
 
-<script>
-  // Load Firebase dynamically
-  const loadFirebase = async () => {
+<script is:inline>
+  // This script will be inlined in the HTML
+  (async function() {
     try {
-      // Dynamically import Firebase modules
-      const { initializeApp } = await import('firebase/app');
-      const { getAuth, onAuthStateChanged } = await import('firebase/auth');
+      // Dynamically import Firebase modules from CDN
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
+      const { 
+        getAuth, 
+        onAuthStateChanged 
+      } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
 
       // Check if env vars exist
       const config = {
@@ -22,7 +25,7 @@
         appId: import.meta.env.VITE_FIREBASE_APP_ID
       };
 
-      console.log('🔍 Checking Firebase config:', {
+      console.log('🔍 Firebase config:', {
         apiKey: config.apiKey ? '✅ Set' : '❌ Missing',
         authDomain: config.authDomain ? '✅ Set' : '❌ Missing',
         projectId: config.projectId ? '✅ Set' : '❌ Missing',
@@ -32,58 +35,35 @@
       });
 
       if (!config.apiKey || !config.authDomain || !config.projectId) {
-        console.error('❌ Firebase credentials are incomplete!');
-        console.error('Config:', config);
-        return () => {}; // Return empty cleanup function
+        throw new Error('Firebase credentials are incomplete!');
       }
 
+      console.log('🚀 Initializing Firebase...');
+      
       // Initialize Firebase
       const app = initializeApp(config);
       const auth = getAuth(app);
 
       // Set up auth state observer
       const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log('User is signed in:', user);
-          // User is signed in
-          document.dispatchEvent(new CustomEvent('auth-state-changed', { 
-            detail: { user } 
-          }));
-        } else {
-          console.log('No user is signed in');
-          // User is signed out
-          document.dispatchEvent(new CustomEvent('auth-state-changed', { 
-            detail: { user: null } 
-          }));
-        }
+        console.log('🔑 Auth state changed:', user ? 'User signed in' : 'No user');
+        document.dispatchEvent(new CustomEvent('auth-state-changed', { 
+          detail: { user } 
+        }));
       });
 
       console.log('✅ Firebase initialized successfully');
       
-      // Cleanup function
-      return () => {
+      // Cleanup on page unload
+      window.addEventListener('beforeunload', () => {
         console.log('🧹 Cleaning up Firebase auth listener');
         unsubscribe();
-      };
+      });
     } catch (error) {
       console.error('❌ Error initializing Firebase:', error);
-      return () => {}; // Return empty cleanup function
+      document.dispatchEvent(new CustomEvent('auth-error', { 
+        detail: { error: error.message } 
+      }));
     }
-  };
-
-  // Initialize on page load
-  let cleanup = () => {};
-  
-  const initialize = async () => {
-    cleanup = await loadFirebase() || (() => {});
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialize);
-  } else {
-    initialize();
-  }
-
-  // Cleanup on component unmount
-  window.addEventListener('beforeunload', cleanup);
+  })();
 </script>
