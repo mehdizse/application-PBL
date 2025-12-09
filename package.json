@@ -4,7 +4,9 @@
   "description": "An educational blog showcasing the effectiveness of project-based learning in writing.",
   "main": "index.js",
   "scripts": {
+    "clean": "node scripts/clean.js",
     "dev": "astro dev",
+    "prebuild": "npm run clean",
     "build": "astro build",
     "preview": "astro preview"
   },
