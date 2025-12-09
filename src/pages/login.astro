@@ -50,9 +50,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <!-- Submit Button -->
           <button 
             type="submit"
-            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={false}
           >
-            🔓 Se Connecter
+            <span class="flex items-center justify-center">
+              <span class="btn-text">🔓 Se Connecter</span>
+              <span class="spinner hidden ml-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </span>
           </button>
         </form>
 
@@ -142,12 +151,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <!-- Submit Button -->
-            <button 
-              type="submit"
-              class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
-            >
-              ✅ Créer le Compte
-            </button>
+          <button 
+            type="submit"
+            class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={false}
+          >
+            <span class="flex items-center justify-center">
+              <span class="btn-text">Créer mon compte</span>
+              <span class="spinner hidden ml-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </span>
+          </button>
 
             <!-- Back to Login -->
             <div class="text-center">
@@ -177,56 +195,87 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </section>
 </BaseLayout>
 
+<!-- Import des modules Firebase dans une balise script séparée -->
 <script>
-  import { auth } from '../lib/firebase.js';
   import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+  import { auth } from '../lib/firebase.js';
+
+  // Fonction pour afficher les erreurs
+  function showError(elementId, message) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = message;
+      element.parentElement.classList.remove('hidden');
+    }
+  }
+
+  // Fonction pour masquer les erreurs
+  function hideError(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = '';
+      element.parentElement.classList.add('hidden');
+    }
+  }
+
+  // Fonction pour basculer entre les formulaires
+  function toggleForms(showSignup = false) {
+    const loginContainer = document.getElementById('login-form')?.parentElement;
+    const signupContainer = document.getElementById('signup-form-container');
+    
+    if (loginContainer && signupContainer) {
+      if (showSignup) {
+        loginContainer.classList.add('hidden');
+        signupContainer.classList.remove('hidden');
+        // Faire défiler vers le formulaire d'inscription
+        signupContainer.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        loginContainer.classList.remove('hidden');
+        signupContainer.classList.add('hidden');
+        // Faire défiler vers le haut de la page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }
 
   // Attendre que le DOM soit complètement chargé
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM chargé, recherche des éléments...');
+    console.log('DOM chargé, initialisation du formulaire de connexion...');
     
+    // Éléments du DOM
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const toggleSignupBtn = document.getElementById('toggle-signup');
     const toggleLoginBtn = document.getElementById('toggle-login');
-    const signupContainer = document.getElementById('signup-form-container');
-    const loginContainer = document.getElementById('login-form')?.parentElement;
-    const errorMessage = document.getElementById('error-message');
-    const signupErrorMessage = document.getElementById('signup-error-message');
 
-    console.log('Éléments trouvés:', {
+    // Afficher les éléments trouvés dans la console pour le débogage
+    console.log('Éléments du DOM:', {
       loginForm: !!loginForm,
       signupForm: !!signupForm,
       toggleSignupBtn: !!toggleSignupBtn,
-      toggleLoginBtn: !!toggleLoginBtn,
-      signupContainer: !!signupContainer,
-      loginContainer: !!loginContainer,
-      errorMessage: !!errorMessage,
-      signupErrorMessage: !!signupErrorMessage
+      toggleLoginBtn: !!toggleLoginBtn
     });
 
-    // Toggle between login and signup
+    // Gestion du clic sur le bouton "Créer un compte"
     if (toggleSignupBtn) {
       toggleSignupBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Bouton toggleSignupBtn cliqué');
-        if (loginContainer) loginContainer.classList.add('hidden');
-        if (signupContainer) signupContainer.classList.remove('hidden');
+        console.log('Bouton "Créer un compte" cliqué');
+        toggleForms(true);
       });
     } else {
-      console.error('toggleSignupBtn non trouvé');
+      console.error('Bouton "Créer un compte" non trouvé');
     }
 
     // Gestion du bouton de retour à la connexion
     if (toggleLoginBtn) {
       toggleLoginBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Bouton toggleLoginBtn cliqué');
-        if (loginContainer) loginContainer.classList.remove('hidden');
-        if (signupContainer) signupContainer.classList.add('hidden');
+        console.log('Bouton "Retour à la connexion" cliqué');
+        toggleForms(false);
       });
     } else {
-      console.error('toggleLoginBtn non trouvé');
+      console.error('Bouton de retour à la connexion non trouvé');
     }
 
     // Gestion de la soumission du formulaire de connexion
@@ -234,36 +283,71 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         console.log('Tentative de connexion...');
-        const email = document.getElementById('login-email')?.value;
+        
+        const email = document.getElementById('login-email')?.value.trim();
         const password = document.getElementById('login-password')?.value;
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        const submitText = submitBtn?.querySelector('.btn-text');
+        const submitSpinner = submitBtn?.querySelector('.spinner');
 
+        // Vérifier les champs vides
         if (!email || !password) {
-          console.error('Email ou mot de passe manquant');
+          showError('error-text', '❌ Veuillez remplir tous les champs obligatoires');
+          return;
+        }
+
+        // Valider le format de l'email
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showError('error-text', '❌ Veuillez entrer une adresse email valide');
           return;
         }
 
         try {
-          console.log('Tentative de connexion avec:', { email });
-          if (errorMessage) errorMessage.classList.add('hidden');
+          // Afficher l'indicateur de chargement
+          if (submitBtn && submitText && submitSpinner) {
+            submitBtn.disabled = true;
+            submitText.classList.add('hidden');
+            submitSpinner.classList.remove('hidden');
+          }
+
+          // Masquer les erreurs précédentes
+          hideError('error-text');
           
+          console.log('Tentative de connexion avec:', { email });
+          
+          // Tenter de se connecter
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           console.log('Utilisateur connecté:', userCredential.user);
-          // Rediriger vers la page admin
+          
+          // Rediriger vers la page admin après une connexion réussie
           window.location.href = '/admin';
+          
         } catch (error) {
           console.error('Erreur de connexion:', error);
-          if (errorMessage) {
-            errorMessage.classList.remove('hidden');
-            const errorText = document.getElementById('error-text');
-            if (errorText) {
-              if (error.code === 'auth/user-not-found') {
-                errorText.textContent = '❌ Cet email n\'existe pas.';
-              } else if (error.code === 'auth/wrong-password') {
-                errorText.textContent = '❌ Mot de passe incorrect.';
-              } else {
-                errorText.textContent = `❌ Erreur: ${error.message}`;
-              }
-            }
+          
+          // Afficher un message d'erreur approprié
+          let errorMessage = 'Une erreur est survenue lors de la connexion';
+          
+          if (error.code === 'auth/user-not-found') {
+            errorMessage = '❌ Aucun compte trouvé avec cet email.';
+          } else if (error.code === 'auth/wrong-password') {
+            errorMessage = '❌ Mot de passe incorrect.';
+          } else if (error.code === 'auth/too-many-requests') {
+            errorMessage = '❌ Trop de tentatives échouées. Veuillez réessayer plus tard.';
+          } else if (error.code === 'auth/invalid-email') {
+            errorMessage = '❌ Adresse email invalide.';
+          } else if (error.code === 'auth/user-disabled') {
+            errorMessage = '❌ Ce compte a été désactivé.';
+          }
+          
+          showError('error-text', errorMessage);
+          
+        } finally {
+          // Réactiver le bouton et masquer l'indicateur de chargement
+          if (submitBtn && submitText && submitSpinner) {
+            submitBtn.disabled = false;
+            submitText.classList.remove('hidden');
+            submitSpinner.classList.add('hidden');
           }
         }
       });
@@ -277,69 +361,101 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         e.preventDefault();
         console.log('Tentative d\'inscription...');
         
-        const name = document.getElementById('signup-name')?.value;
-        const school = document.getElementById('signup-school')?.value;
-        const email = document.getElementById('signup-email')?.value;
+        // Récupération des valeurs des champs
+        const name = document.getElementById('signup-name')?.value.trim();
+        const school = document.getElementById('signup-school')?.value.trim();
+        const email = document.getElementById('signup-email')?.value.trim();
         const password = document.getElementById('signup-password')?.value;
         const confirmPassword = document.getElementById('signup-password-confirm')?.value;
+        
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
+        const submitText = submitBtn?.querySelector('.btn-text');
+        const submitSpinner = submitBtn?.querySelector('.spinner');
 
-        // Validation
+        // Validation des champs
         if (!name || !email || !password || !confirmPassword) {
-          console.error('Tous les champs sont obligatoires');
+          showError('signup-error-text', '❌ Tous les champs marqués d\'un astérisque sont obligatoires');
           return;
         }
 
+        // Validation du format de l'email
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showError('signup-error-text', '❌ Veuillez entrer une adresse email valide');
+          return;
+        }
+
+        // Vérification de la correspondance des mots de passe
         if (password !== confirmPassword) {
-          console.error('Les mots de passe ne correspondent pas');
-          if (signupErrorMessage) {
-            signupErrorMessage.classList.remove('hidden');
-            const errorText = document.getElementById('signup-error-text');
-            if (errorText) errorText.textContent = '❌ Les mots de passe ne correspondent pas.';
-          }
+          showError('signup-error-text', '❌ Les mots de passe ne correspondent pas');
           return;
         }
 
+        // Vérification de la longueur du mot de passe
         if (password.length < 6) {
-          console.error('Le mot de passe est trop court');
-          if (signupErrorMessage) {
-            signupErrorMessage.classList.remove('hidden');
-            const errorText = document.getElementById('signup-error-text');
-            if (errorText) errorText.textContent = '❌ Le mot de passe doit contenir au moins 6 caractères.';
-          }
+          showError('signup-error-text', '❌ Le mot de passe doit contenir au moins 6 caractères');
+          return;
+        }
+
+        // Vérification de la complexité du mot de passe
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+          showError('signup-error-text', '❌ Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre');
           return;
         }
 
         try {
-          console.log('Tentative de création de compte avec:', { email, name });
-          if (signupErrorMessage) signupErrorMessage.classList.add('hidden');
+          // Afficher l'indicateur de chargement
+          if (submitBtn && submitText && submitSpinner) {
+            submitBtn.disabled = true;
+            submitText.classList.add('hidden');
+            submitSpinner.classList.remove('hidden');
+          }
+
+          // Masquer les erreurs précédentes
+          hideError('signup-error-text');
           
+          console.log('Tentative de création de compte avec:', { email, name });
+          
+          // Création du compte utilisateur
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           
-          // Mise à jour du profil avec le nom
+          // Mise à jour du profil avec le nom complet et l'école
           await updateProfile(userCredential.user, {
-            displayName: name
+            displayName: name,
+            photoURL: school || ''
           });
 
           console.log('Compte créé avec succès:', userCredential.user);
-          alert('✅ Compte créé avec succès! Vous êtes maintenant connecté.');
+          
+          // Afficher un message de succès
+          alert('✅ Compte créé avec succès ! Vous allez être redirigé vers l\'espace d\'administration.');
+          
           // Rediriger vers la page admin
           window.location.href = '/admin';
+          
         } catch (error) {
           console.error('Erreur lors de la création du compte:', error);
-          if (signupErrorMessage) {
-            signupErrorMessage.classList.remove('hidden');
-            const errorText = document.getElementById('signup-error-text');
-            if (errorText) {
-              if (error.code === 'auth/email-already-in-use') {
-                errorText.textContent = '❌ Cet email est déjà utilisé.';
-              } else if (error.code === 'auth/weak-password') {
-                errorText.textContent = '❌ Le mot de passe est trop faible.';
-              } else if (error.code === 'auth/invalid-email') {
-                errorText.textContent = '❌ L\'adresse email est invalide.';
-              } else {
-                errorText.textContent = `❌ Erreur: ${error.message}`;
-              }
-            }
+          
+          // Afficher un message d'erreur approprié
+          let errorMessage = 'Une erreur est survenue lors de la création du compte';
+          
+          if (error.code === 'auth/email-already-in-use') {
+            errorMessage = '❌ Cette adresse email est déjà utilisée par un autre compte.';
+          } else if (error.code === 'auth/weak-password') {
+            errorMessage = '❌ Le mot de passe est trop faible. Utilisez au moins 6 caractères avec des lettres et des chiffres.';
+          } else if (error.code === 'auth/invalid-email') {
+            errorMessage = '❌ L\'adresse email est invalide.';
+          } else if (error.code === 'auth/operation-not-allowed') {
+            errorMessage = '❌ La création de compte est désactivée pour le moment.';
+          }
+          
+          showError('signup-error-text', errorMessage);
+          
+        } finally {
+          // Réactiver le bouton et masquer l'indicateur de chargement
+          if (submitBtn && submitText && submitSpinner) {
+            submitBtn.disabled = false;
+            submitText.classList.remove('hidden');
+            submitSpinner.classList.add('hidden');
           }
         }
       });
