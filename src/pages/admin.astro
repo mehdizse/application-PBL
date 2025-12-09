@@ -327,21 +327,50 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
   import { auth as firebaseAuth, db } from '../lib/firebase.js';
 
-  const authCheck = document.getElementById('auth-check');
-  const notAuthenticated = document.getElementById('not-authenticated');
-  const logoutBtn = document.getElementById('logout-btn');
+  // Attendre que le DOM soit complètement chargé
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM chargé, initialisation de l\'administration...');
+    
+    const authCheck = document.getElementById('auth-check');
+    const notAuthenticated = document.getElementById('not-authenticated');
+    const logoutBtn = document.getElementById('logout-btn');
 
-  onAuthStateChanged(firebaseAuth, (user) => {
-    if (user) {
-      authCheck.classList.remove('hidden');
-      notAuthenticated.classList.add('hidden');
-      setupFormHandlers(user);
-      setupTabSwitching();
-      setupPhotoUpload();
-    } else {
-      authCheck.classList.add('hidden');
-      notAuthenticated.classList.remove('hidden');
+    // Vérifier si les éléments existent
+    if (!authCheck || !notAuthenticated) {
+      console.error('Éléments d\'authentification introuvables dans le DOM');
+      return;
     }
+
+    // Écouter les changements d'état d'authentification
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+      console.log('Changement d\'état d\'authentification détecté', { user: user ? user.email : 'non connecté' });
+      
+      if (user) {
+        console.log('Utilisateur connecté:', user.email);
+        authCheck.classList.remove('hidden');
+        notAuthenticated.classList.add('hidden');
+        
+        // Initialiser les gestionnaires de formulaire
+        try {
+          setupFormHandlers(user);
+          setupTabSwitching();
+          setupPhotoUpload();
+        } catch (error) {
+          console.error('Erreur lors de l\'initialisation des gestionnaires:', error);
+        }
+      } else {
+        console.log('Aucun utilisateur connecté, redirection vers la page de connexion');
+        authCheck.classList.add('hidden');
+        notAuthenticated.classList.remove('hidden');
+        // Rediriger vers la page de connexion après un court délai
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      }
+    });
+
+    // Nettoyer l'écouteur lors du démontage du composant
+    return () => unsubscribe();
   });
 
   function setupTabSwitching() {
@@ -562,10 +591,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 
+  // Gestion du bouton de déconnexion
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      await signOut(firebaseAuth);
-      window.location.href = '/login';
+      try {
+        console.log('Tentative de déconnexion...');
+        await signOut(firebaseAuth);
+        console.log('Déconnexion réussie, redirection vers la page de connexion');
+        window.location.href = '/login';
+      } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+        // Afficher un message d'erreur à l'utilisateur si nécessaire
+        alert('Une erreur est survenue lors de la déconnexion. Veuillez réessayer.');
+      }
     });
   }
 </script>
