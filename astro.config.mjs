@@ -1,10 +1,18 @@
 import { defineConfig } from 'astro/config';
+import path from 'path';
 
 export default defineConfig({
   site: 'https://your-blog-url.netlify.app',
   base: '/',
   integrations: [],
   vite: {
+    resolve: {
+      alias: {
+        '@layouts': path.resolve(__dirname, './src/layouts'),
+        '@components': path.resolve(__dirname, './src/components'),
+        '@styles': path.resolve(__dirname, './src/styles')
+      }
+    },
     define: {
       'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(process.env.VITE_FIREBASE_API_KEY || ''),
       'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(process.env.VITE_FIREBASE_AUTH_DOMAIN || ''),
