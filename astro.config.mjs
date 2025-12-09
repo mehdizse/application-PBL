@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import path from 'path';
 
 export default defineConfig({
   site: 'https://your-blog-url.netlify.app',
@@ -7,11 +6,20 @@ export default defineConfig({
   integrations: [],
   vite: {
     resolve: {
-      alias: {
-        '@layouts': path.resolve(__dirname, './src/layouts'),
-        '@components': path.resolve(__dirname, './src/components'),
-        '@styles': path.resolve(__dirname, './src/styles')
-      }
+      alias: [
+        {
+          find: '@layouts',
+          replacement: '/src/layouts'
+        },
+        {
+          find: '@components',
+          replacement: '/src/components'
+        },
+        {
+          find: '@styles',
+          replacement: '/src/styles'
+        }
+      ]
     },
     define: {
       'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(process.env.VITE_FIREBASE_API_KEY || ''),
@@ -20,6 +28,7 @@ export default defineConfig({
       'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(process.env.VITE_FIREBASE_STORAGE_BUCKET || ''),
       'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || ''),
       'import.meta.env.VITE_FIREBASE_APP_ID': JSON.stringify(process.env.VITE_FIREBASE_APP_ID || ''),
+      'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': JSON.stringify(process.env.VITE_FIREBASE_MEASUREMENT_ID || '')
     }
   }
 });
