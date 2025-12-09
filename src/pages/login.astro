@@ -181,94 +181,170 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   import { auth } from '../lib/firebase.js';
   import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
-  const loginForm = document.getElementById('login-form');
-  const signupForm = document.getElementById('signup-form');
-  const toggleSignupBtn = document.getElementById('toggle-signup');
-  const toggleLoginBtn = document.getElementById('toggle-login');
-  const signupContainer = document.getElementById('signup-form-container');
-  const loginContainer = document.querySelector('[id="login-form"]').parentElement;
-  const errorMessage = document.getElementById('error-message');
-  const signupErrorMessage = document.getElementById('signup-error-message');
+  // Attendre que le DOM soit complètement chargé
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM chargé, recherche des éléments...');
+    
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const toggleSignupBtn = document.getElementById('toggle-signup');
+    const toggleLoginBtn = document.getElementById('toggle-login');
+    const signupContainer = document.getElementById('signup-form-container');
+    const loginContainer = document.getElementById('login-form')?.parentElement;
+    const errorMessage = document.getElementById('error-message');
+    const signupErrorMessage = document.getElementById('signup-error-message');
 
-  // Toggle between login and signup
-  toggleSignupBtn.addEventListener('click', () => {
-    loginContainer.classList.add('hidden');
-    signupContainer.classList.remove('hidden');
-  });
+    console.log('Éléments trouvés:', {
+      loginForm: !!loginForm,
+      signupForm: !!signupForm,
+      toggleSignupBtn: !!toggleSignupBtn,
+      toggleLoginBtn: !!toggleLoginBtn,
+      signupContainer: !!signupContainer,
+      loginContainer: !!loginContainer,
+      errorMessage: !!errorMessage,
+      signupErrorMessage: !!signupErrorMessage
+    });
 
-  toggleLoginBtn.addEventListener('click', () => {
-    loginContainer.classList.remove('hidden');
-    signupContainer.classList.add('hidden');
-  });
-
-  // Login Form Handler
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-
-    try {
-      errorMessage.classList.add('hidden');
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Utilisateur connecté:', userCredential.user);
-      // Rediriger vers la page admin
-      window.location.href = '/admin';
-    } catch (error) {
-      errorMessage.classList.remove('hidden');
-      if (error.code === 'auth/user-not-found') {
-        document.getElementById('error-text').textContent = '❌ Cet email n\'existe pas.';
-      } else if (error.code === 'auth/wrong-password') {
-        document.getElementById('error-text').textContent = '❌ Mot de passe incorrect.';
-      } else {
-        document.getElementById('error-text').textContent = `❌ Erreur: ${error.message}`;
-      }
-    }
-  });
-
-  // Sign Up Form Handler
-  signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('signup-name').value;
-    const school = document.getElementById('signup-school').value;
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('signup-password-confirm').value;
-
-    // Validation
-    if (password !== confirmPassword) {
-      signupErrorMessage.classList.remove('hidden');
-      document.getElementById('signup-error-text').textContent = '❌ Les mots de passe ne correspondent pas.';
-      return;
-    }
-
-    if (password.length < 6) {
-      signupErrorMessage.classList.remove('hidden');
-      document.getElementById('signup-error-text').textContent = '❌ Le mot de passe doit contenir au moins 6 caractères.';
-      return;
-    }
-
-    try {
-      signupErrorMessage.classList.add('hidden');
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // Update user profile with name
-      await updateProfile(userCredential.user, {
-        displayName: name
+    // Toggle between login and signup
+    if (toggleSignupBtn) {
+      toggleSignupBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Bouton toggleSignupBtn cliqué');
+        if (loginContainer) loginContainer.classList.add('hidden');
+        if (signupContainer) signupContainer.classList.remove('hidden');
       });
-
-      console.log('Compte créé:', userCredential.user);
-      alert('✅ Compte créé avec succès! Vous êtes maintenant connecté.');
-      // Rediriger vers la page admin
-      window.location.href = '/admin';
-    } catch (error) {
-      signupErrorMessage.classList.remove('hidden');
-      if (error.code === 'auth/email-already-in-use') {
-        document.getElementById('signup-error-text').textContent = '❌ Cet email est déjà utilisé.';
-      } else if (error.code === 'auth/weak-password') {
-        document.getElementById('signup-error-text').textContent = '❌ Le mot de passe est trop faible.';
-      } else {
-        document.getElementById('signup-error-text').textContent = `❌ Erreur: ${error.message}`;
-      }
+    } else {
+      console.error('toggleSignupBtn non trouvé');
     }
-  });
+
+    // Gestion du bouton de retour à la connexion
+    if (toggleLoginBtn) {
+      toggleLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Bouton toggleLoginBtn cliqué');
+        if (loginContainer) loginContainer.classList.remove('hidden');
+        if (signupContainer) signupContainer.classList.add('hidden');
+      });
+    } else {
+      console.error('toggleLoginBtn non trouvé');
+    }
+
+    // Gestion de la soumission du formulaire de connexion
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('Tentative de connexion...');
+        const email = document.getElementById('login-email')?.value;
+        const password = document.getElementById('login-password')?.value;
+
+        if (!email || !password) {
+          console.error('Email ou mot de passe manquant');
+          return;
+        }
+
+        try {
+          console.log('Tentative de connexion avec:', { email });
+          if (errorMessage) errorMessage.classList.add('hidden');
+          
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          console.log('Utilisateur connecté:', userCredential.user);
+          // Rediriger vers la page admin
+          window.location.href = '/admin';
+        } catch (error) {
+          console.error('Erreur de connexion:', error);
+          if (errorMessage) {
+            errorMessage.classList.remove('hidden');
+            const errorText = document.getElementById('error-text');
+            if (errorText) {
+              if (error.code === 'auth/user-not-found') {
+                errorText.textContent = '❌ Cet email n\'existe pas.';
+              } else if (error.code === 'auth/wrong-password') {
+                errorText.textContent = '❌ Mot de passe incorrect.';
+              } else {
+                errorText.textContent = `❌ Erreur: ${error.message}`;
+              }
+            }
+          }
+        }
+      });
+    } else {
+      console.error('loginForm non trouvé');
+    }
+
+    // Gestion de la soumission du formulaire d'inscription
+    if (signupForm) {
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('Tentative d\'inscription...');
+        
+        const name = document.getElementById('signup-name')?.value;
+        const school = document.getElementById('signup-school')?.value;
+        const email = document.getElementById('signup-email')?.value;
+        const password = document.getElementById('signup-password')?.value;
+        const confirmPassword = document.getElementById('signup-password-confirm')?.value;
+
+        // Validation
+        if (!name || !email || !password || !confirmPassword) {
+          console.error('Tous les champs sont obligatoires');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          console.error('Les mots de passe ne correspondent pas');
+          if (signupErrorMessage) {
+            signupErrorMessage.classList.remove('hidden');
+            const errorText = document.getElementById('signup-error-text');
+            if (errorText) errorText.textContent = '❌ Les mots de passe ne correspondent pas.';
+          }
+          return;
+        }
+
+        if (password.length < 6) {
+          console.error('Le mot de passe est trop court');
+          if (signupErrorMessage) {
+            signupErrorMessage.classList.remove('hidden');
+            const errorText = document.getElementById('signup-error-text');
+            if (errorText) errorText.textContent = '❌ Le mot de passe doit contenir au moins 6 caractères.';
+          }
+          return;
+        }
+
+        try {
+          console.log('Tentative de création de compte avec:', { email, name });
+          if (signupErrorMessage) signupErrorMessage.classList.add('hidden');
+          
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          
+          // Mise à jour du profil avec le nom
+          await updateProfile(userCredential.user, {
+            displayName: name
+          });
+
+          console.log('Compte créé avec succès:', userCredential.user);
+          alert('✅ Compte créé avec succès! Vous êtes maintenant connecté.');
+          // Rediriger vers la page admin
+          window.location.href = '/admin';
+        } catch (error) {
+          console.error('Erreur lors de la création du compte:', error);
+          if (signupErrorMessage) {
+            signupErrorMessage.classList.remove('hidden');
+            const errorText = document.getElementById('signup-error-text');
+            if (errorText) {
+              if (error.code === 'auth/email-already-in-use') {
+                errorText.textContent = '❌ Cet email est déjà utilisé.';
+              } else if (error.code === 'auth/weak-password') {
+                errorText.textContent = '❌ Le mot de passe est trop faible.';
+              } else if (error.code === 'auth/invalid-email') {
+                errorText.textContent = '❌ L\'adresse email est invalide.';
+              } else {
+                errorText.textContent = `❌ Erreur: ${error.message}`;
+              }
+            }
+          }
+        }
+      });
+    } else {
+      console.error('signupForm non trouvé');
+    }
+  }); // Fin du DOMContentLoaded
 </script>
