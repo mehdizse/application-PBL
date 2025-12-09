@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const title = 'Ressources Pédagogiques';
+const description = 'Ressources pour les enseignants algériens sur la méthode PBL et l\'amélioration des compétences en écriture';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
+      Ressources Pédagogiques
+    </h1>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Section Méthodologie PBL -->
+      <div class="card card-hover p-6">
+        <div class="flex items-center mb-4">
+          <div class="bg-blue-100 p-3 rounded-full mr-4">
+            <span class="text-blue-600 text-xl">📚</span>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">Méthodologie PBL</h2>
+        </div>
+        <p class="text-gray-600 mb-4">
+          Découvrez comment intégrer l'apprentissage par projet dans votre classe en Algérie, en tenant compte de notre contexte éducatif spécifique.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start">
+            <span class="text-green-500 mr-2">•</span>
+            <a href="/ressources/pbl-pour-debutants" class="text-blue-600 hover:underline">
+              Guide du débutant en PBL - Édition Algérie
+            </a>
+          </li>
+          <li class="flex items-start">
+            <span class="text-green-500 mr-2">•</span>
+            <a href="/ressources/pbl-maths-algerie" class="text-blue-600 hover:underline">
+              Exemples concrets de projets en mathématiques
+            </a>
+          </li>
+          <li class="flex items-start">
+            <span class="text-green-500 mr-2">•</span>
+            <a href="/ressources/evaluation-pbl" class="text-blue-600 hover:underline">
+              Grilles d'évaluation adaptées au système éducatif algérien
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Section Guides Pédagogiques -->
+      <div class="card card-hover p-6">
+        <div class="flex items-center mb-4">
+          <div class="bg-green-100 p-3 rounded-full mr-4">
+            <span class="text-green-600 text-xl">📝</span>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">Guides Pédagogiques</h2>
+        </div>
+        <p class="text-gray-600 mb-4">
+          Ressources pratiques pour améliorer votre enseignement et l'apprentissage de l'écriture en classe.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-2">•</span>
+            <a href="/ressources/ecriture-creative" class="text-blue-600 hover:underline">
+              Ateliers d'écriture créative pour les élèves algériens
+            </a>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-2">•</span>
+            <a href="/ressources/arabe-francais" class="text-blue-600 hover:underline">
+              Stratégies pour l'apprentissage bilingue (Arabe-Français)
+            </a>
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-500 mr-2">•</span>
+            <a href="/ressources/outils-numeriques" class="text-blue-600 hover:underline">
+              Outils numériques adaptés aux écoles algériennes
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Section Contacts -->
+    <div class="card mt-8 p-6">
+      <div class="flex items-center mb-4">
+        <div class="bg-amber-100 p-3 rounded-full mr-4">
+          <span class="text-amber-600 text-xl">📞</span>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">Contacts</h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-3">Coordonnées</h3>
+          <p class="text-gray-600 mb-2">
+            <span class="font-medium">Email :</span> contact@ecrireetcreer.dz
+          </p>
+          <p class="text-gray-600 mb-4">
+            <span class="font-medium">Téléphone :</span> +213 XX XX XX XX XX
+          </p>
+          <p class="text-gray-600">
+            Alger, Algérie
+          </p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-3">Réseaux Sociaux</h3>
+          <div class="flex space-x-4">
+            <a href="#" class="text-blue-600 hover:text-blue-800">
+              <span class="sr-only">Facebook</span>
+              <span class="text-2xl">📘</span>
+            </a>
+            <a href="#" class="text-blue-400 hover:text-blue-600">
+              <span class="sr-only">Twitter</span>
+              <span class="text-2xl">🐦</span>
+            </a>
+            <a href="#" class="text-pink-600 hover:text-pink-800">
+              <span class="sr-only">Instagram</span>
+              <span class="text-2xl">📸</span>
+            </a>
+          </div>
+          <p class="text-sm text-gray-500 mt-4">
+            Suivez-nous pour des mises à jour régulières et des ressources supplémentaires.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

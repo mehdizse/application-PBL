@@ -1,0 +1,254 @@
+---
+// Composant de formulaire de contact
+---
+
+<form 
+  class="space-y-6"
+  id="contact-form"
+  action="/api/contact"
+  method="POST"
+>
+  <!-- Champs du formulaire -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="form-group">
+      <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">
+        Prénom <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="first-name" 
+        name="first-name" 
+        required
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+        placeholder="Votre prénom"
+      >
+      <p class="mt-1 text-sm text-red-600 hidden" id="first-name-error">
+        Veuillez entrer votre prénom
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">
+        Nom <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="last-name" 
+        name="last-name" 
+        required
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+        placeholder="Votre nom"
+      >
+      <p class="mt-1 text-sm text-red-600 hidden" id="last-name-error">
+        Veuillez entrer votre nom
+      </p>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+      Email <span class="text-red-500">*</span>
+    </label>
+    <input 
+      type="email" 
+      id="email" 
+      name="email" 
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      placeholder="votre@email.com"
+    >
+    <p class="mt-1 text-sm text-red-600 hidden" id="email-error">
+      Veuillez entrer une adresse email valide
+    </p>
+  </div>
+  
+  <div class="form-group">
+    <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">
+      Sujet <span class="text-red-500">*</span>
+    </label>
+    <select 
+      id="subject" 
+      name="subject" 
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+    >
+      <option value="" disabled selected>Sélectionnez un sujet</option>
+      <option value="question">Question générale</option>
+      <option value="support">Support technique</option>
+      <option value="partnership">Partenariat</option>
+      <option value="other">Autre demande</option>
+    </select>
+    <p class="mt-1 text-sm text-red-600 hidden" id="subject-error">
+      Veuillez sélectionner un sujet
+    </p>
+  </div>
+  
+  <div class="form-group">
+    <label for="message" class="block text-sm font-medium text-gray-700 mb-1">
+      Votre message <span class="text-red-500">*</span>
+    </label>
+    <textarea 
+      id="message" 
+      name="message" 
+      rows="5" 
+      required
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      placeholder="Décrivez-nous votre demande..."
+    ></textarea>
+    <p class="mt-1 text-sm text-red-600 hidden" id="message-error">
+      Veuillez entrer votre message
+    </p>
+  </div>
+  
+  <div class="flex items-start">
+    <div class="flex items-center h-5">
+      <input 
+        id="privacy" 
+        name="privacy" 
+        type="checkbox" 
+        required
+        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+      >
+    </div>
+    <div class="ml-3 text-sm">
+      <label for="privacy" class="text-gray-600">
+        J'accepte la <a href="/politique-de-confidentialite" class="text-blue-600 hover:underline">politique de confidentialité</a> <span class="text-red-500">*</span>
+      </label>
+      <p class="mt-1 text-sm text-red-600 hidden" id="privacy-error">
+        Vous devez accepter la politique de confidentialité
+      </p>
+    </div>
+  </div>
+  
+  <!-- Message de succès/erreur -->
+  <div id="form-message" class="hidden p-4 rounded-lg">
+    <p class="text-center text-sm"></p>
+  </div>
+  
+  <div class="pt-2">
+    <button 
+      type="submit" 
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+      id="submit-button"
+    >
+      <span id="button-text">Envoyer le message</span>
+      <svg id="button-spinner" class="animate-spin -ml-1 ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </button>
+  </div>
+</form>
+
+<!-- Script de validation et d'envoi du formulaire -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('contact-form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const buttonSpinner = document.getElementById('button-spinner');
+    const formMessage = document.getElementById('form-message');
+    
+    // Fonction de validation du formulaire
+    function validateForm() {
+      let isValid = true;
+      const requiredFields = [
+        { id: 'first-name', errorId: 'first-name-error', message: 'Veuillez entrer votre prénom' },
+        { id: 'last-name', errorId: 'last-name-error', message: 'Veuillez entrer votre nom' },
+        { id: 'email', errorId: 'email-error', message: 'Veuillez entrer une adresse email valide' },
+        { id: 'subject', errorId: 'subject-error', message: 'Veuillez sélectionner un sujet' },
+        { id: 'message', errorId: 'message-error', message: 'Veuillez entrer votre message' },
+        { id: 'privacy', errorId: 'privacy-error', message: 'Vous devez accepter la politique de confidentialité' }
+      ];
+      
+      // Réinitialiser les messages d'erreur
+      document.querySelectorAll('[id$="-error"]').forEach(el => {
+        el.classList.add('hidden');
+      });
+      
+      // Valider chaque champ requis
+      requiredFields.forEach(field => {
+        const element = document.getElementById(field.id);
+        const errorElement = document.getElementById(field.errorId);
+        
+        if (!element) return;
+        
+        if (element.type === 'checkbox') {
+          if (!element.checked) {
+            errorElement.classList.remove('hidden');
+            isValid = false;
+          }
+        } else if (element.tagName === 'SELECT') {
+          if (!element.value) {
+            errorElement.classList.remove('hidden');
+            isValid = false;
+          }
+        } else {
+          if (!element.value.trim()) {
+            errorElement.classList.remove('hidden');
+            element.focus();
+            isValid = false;
+          } else if (field.id === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(element.value)) {
+            errorElement.textContent = 'Veuillez entrer une adresse email valide';
+            errorElement.classList.remove('hidden');
+            element.focus();
+            isValid = false;
+          }
+        }
+      });
+      
+      return isValid;
+    }
+    
+    // Gestion de la soumission du formulaire
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+      
+      // Désactiver le bouton et afficher le spinner
+      submitButton.disabled = true;
+      buttonText.textContent = 'Envoi en cours...';
+      buttonSpinner.classList.remove('hidden');
+      
+      try {
+        // Simuler l'envoi du formulaire (à remplacer par un vrai appel API)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Afficher le message de succès
+        formMessage.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative';
+        formMessage.querySelector('p').textContent = 'Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.';
+        formMessage.classList.remove('hidden');
+        
+        // Réinitialiser le formulaire
+        form.reset();
+        
+        // Faire défiler jusqu'au message de succès
+        formMessage.scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (error) {
+        // En cas d'erreur
+        formMessage.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative';
+        formMessage.querySelector('p').textContent = 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer plus tard.';
+        formMessage.classList.remove('hidden');
+      } finally {
+        // Réactiver le bouton et masquer le spinner
+        submitButton.disabled = false;
+        buttonText.textContent = 'Envoyer le message';
+        buttonSpinner.classList.add('hidden');
+      }
+    });
+    
+    // Réinitialiser le message d'erreur lors de la modification d'un champ
+    form.querySelectorAll('input, textarea, select').forEach(input => {
+      input.addEventListener('input', () => {
+        const errorElement = document.getElementById(`${input.id}-error`);
+        if (errorElement) {
+          errorElement.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>

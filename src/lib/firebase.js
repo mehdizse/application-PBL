@@ -3,19 +3,10 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { firebaseConfig as importedConfig } from './firebaseConfig.js';
+import { getFirebaseConfig } from './firebaseConfigProd.js';
 
-// Your web app's Firebase configuration
-// Try to get from environment variables first (for Netlify production)
-// Fall back to imported config (for local development)
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || importedConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || importedConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || importedConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || importedConfig.storageBucket,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || importedConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || importedConfig.appId
-};
+// Get Firebase configuration
+const firebaseConfig = getFirebaseConfig();
 
 console.log('🔧 Firebase Config Debug:', {
   apiKey: firebaseConfig.apiKey ? '✅ ' + firebaseConfig.apiKey.substring(0, 10) + '...' : '❌ EMPTY',

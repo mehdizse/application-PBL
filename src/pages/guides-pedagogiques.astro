@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const title = 'Guides Pédagogiques';
+const description = 'Ressources et guides pour les enseignants';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
+      Guides Pédagogiques
+    </h1>
+    
+    <p class="text-lg text-gray-600 mb-12 text-center max-w-3xl mx-auto">
+      Ressources pratiques pour enrichir votre enseignement et favoriser l'apprentissage actif dans vos classes.
+    </p>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Guide 1 -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-blue-600 text-xl">📚</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-3">L'Écriture Créative</h2>
+          <p class="text-gray-600 mb-4">Techniques et activités pour stimuler l'imagination et l'expression écrite de vos élèves.</p>
+          <a href="/guides/ecriture-creative" class="text-blue-600 hover:underline font-medium inline-flex items-center">
+            Voir le guide
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Guide 2 -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-green-600 text-xl">🔢</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-3">Mathématiques Ludiques</h2>
+          <p class="text-gray-600 mb-4">Approches innovantes pour rendre les mathématiques plus accessibles et amusantes.</p>
+          <a href="/guides/mathematiques-ludiques" class="text-blue-600 hover:underline font-medium inline-flex items-center">
+            Voir le guide
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Guide 3 -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-amber-600 text-xl">🌍</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-3">Sciences et Découverte</h2>
+          <p class="text-gray-600 mb-4">Expériences et projets scientifiques adaptés aux écoles algériennes.</p>
+          <a href="/guides/sciences-decouverte" class="text-blue-600 hover:underline font-medium inline-flex items-center">
+            Voir le guide
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Guide 4 -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-purple-600 text-xl">🔄</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-3">Évaluation Positive</h2>
+          <p class="text-gray-600 mb-4">Méthodes d'évaluation bienveillantes et motivantes pour vos élèves.</p>
+          <a href="/guides/evaluation-positive" class="text-blue-600 hover:underline font-medium inline-flex items-center">
+            Voir le guide
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Guide 5 -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-red-600 text-xl">💡</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-3">Gestion de Classe</h2>
+          <p class="text-gray-600 mb-4">Stratégies pour gérer efficacement votre classe et favoriser un climat propice aux apprentissages.</p>
+          <a href="/guides/gestion-classe" class="text-blue-600 hover:underline font-medium inline-flex items-center">
+            Voir le guide
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Guide 6 -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-teal-600 text-xl">📱</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800 mb-3">Numérique Éducatif</h2>
+          <p class="text-gray-600 mb-4">Outils et ressources numériques adaptés au contexte algérien.</p>
+          <a href="/guides/numerique-educatif" class="text-blue-600 hover:underline font-medium inline-flex items-center">
+            Voir le guide
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-16 bg-blue-50 rounded-xl p-8 text-center">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Vous ne trouvez pas ce que vous cherchez ?</h2>
+      <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+        Notre équipe pédagogique est là pour vous aider. N'hésitez pas à nous contacter pour des conseils personnalisés.
+      </p>
+      <a href="/contact" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+        Nous contacter
+      </a>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,188 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Guide de l\'Évaluation Positive';
+const description = 'Stratégies pour une évaluation bienveillante et motivante des élèves en Algérie';
+
+// Données du guide
+const guide = {
+  title: 'Évaluation Positive',
+  description: 'Découvrez comment mettre en place une évaluation formative qui encourage les progrès et renforce la confiance en soi des élèves',
+  author: 'Équipe Écrire & Créer',
+  date: 'Décembre 2025',
+  level: 'Tous niveaux',
+  duration: 'Toute l\'année scolaire',
+  image: '/images/evaluation-positive.jpg',
+  tags: ['évaluation', 'bienveillance', 'pédagogie positive']
+};
+
+const sections = [
+  {
+    title: 'Introduction',
+    content: `
+      <p>L'évaluation positive est une approche qui met l'accent sur les acquis et les progrès des élèves plutôt que sur leurs échecs. Ce guide propose des méthodes adaptées au contexte éducatif algérien pour une évaluation plus juste et motivante.</p>
+    `
+  },
+  {
+    title: 'Principes de Base',
+    content: `
+      <ul class="list-disc pl-6 space-y-2">
+        <li><strong>Valoriser les progrès</strong> plutôt que de sanctionner les erreurs</li>
+        <li>Utiliser une <strong>communication bienveillante</strong> et constructive</li>
+        <li>Impliquer les élèves dans leur propre évaluation</li>
+        <li>Adapter les critères d'évaluation aux profils d'apprentissage</li>
+        <li>Privilégier une évaluation <strong>continue et formative</strong></li>
+      </ul>
+    `
+  },
+  {
+    title: 'Outils et Méthodes',
+    content: `
+      <h3 class="text-xl font-semibold mt-6 mb-3">1. La Grille d'Observation Continue</h3>
+      <p>Création d'une grille d'observation pour suivre les progrès des élèves de manière individualisée, en mettant en avant leurs forces et défis spécifiques.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">2. Le Cahier de Suivi des Progrès</h3>
+      <p>Mise en place d'un outil où chaque élève peut suivre ses propres progrès et se fixer des objectifs personnels, favorisant ainsi l'auto-évaluation.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">3. Les Ceintures de Compétences</h3>
+      <p>Système d'évaluation inspiré des arts martiaux où les élèves progressent à leur rythme en validant des compétences spécifiques.</p>
+    `
+  },
+  {
+    title: 'Ressources',
+    content: `
+      <ul class="space-y-3">
+        <li class="flex items-start">
+          <span class="mr-2">📊</span>
+          <span>Modèles de grilles d'évaluation adaptables</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">📝</span>
+          <span>Fiches d'auto-évaluation pour les élèves</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">💡</span>
+          <span>Idées de rétroactions constructives à utiliser en classe</span>
+        </li>
+      </ul>
+    `
+  },
+  {
+    title: 'Mise en Œuvre',
+    content: `
+      <p>Pour mettre en place l'évaluation positive dans votre classe :</p>
+      <ol class="list-decimal pl-6 mt-3 space-y-2">
+        <li>Commencez par expliquer la démarche aux élèves et à leurs parents</li>
+        <li>Impliquez les élèves dans la définition des critères de réussite</li>
+        <li>Utilisez des outils de suivi visuels et accessibles</li>
+        <li>Prévoyez des temps de régulation et d'ajustement</li>
+        <li>Célébrez les progrès, même minimes</li>
+      </ol>
+    `
+  }
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      {/* En-tête du guide */}
+      <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <nav class="mb-4 text-sm text-yellow-100">
+              <a href="/guides-pedagogiques" class="hover:underline">Guides Pédagogiques</a> / <span class="text-white font-medium">{guide.title}</span>
+            </nav>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">{guide.title}</h1>
+            <p class="text-yellow-100 text-lg">{guide.description}</p>
+          </div>
+          <div class="mt-4 md:mt-0 bg-white/10 p-4 rounded-lg">
+            <div class="text-sm space-y-1">
+              <div class="flex items-center">
+                <span class="w-24 text-yellow-100">Niveau :</span>
+                <span class="font-medium">{guide.level}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-yellow-100">Durée :</span>
+                <span class="font-medium">{guide.duration}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-yellow-100">Auteur :</span>
+                <span class="font-medium">{guide.author}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex flex-wrap gap-2">
+          {guide.tags.map(tag => (
+            <span class="bg-white/20 text-sm px-3 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenu du guide */}
+      <div class="p-8">
+        {sections.map(section => (
+          <div class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
+              {section.title}
+            </h2>
+            <div class="prose max-w-none text-gray-700" set:html={section.content} />
+          </div>
+        ))}
+
+        <div class="mt-12 pt-8 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">À propos de ce guide</h3>
+          <p class="text-gray-600 mb-6">
+            Ce guide a été conçu pour soutenir les enseignants algériens dans leur pratique évaluative. 
+            Il propose des méthodes concrètes pour mettre en place une évaluation bienveillante et motivante, 
+            adaptée aux réalités des classes en Algérie.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a 
+              href="/guides-pedagogiques" 
+              class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-center transition-colors"
+            >
+              ← Retour aux guides
+            </a>
+            <a 
+              href="/guides-pdf/evaluation-positive.pdf" 
+              class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg text-center transition-colors"
+              download="Guide_Evaluation_Positive.pdf"
+            >
+              Télécharger le PDF
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .prose h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    color: #1f2937;
+    font-weight: 600;
+  }
+  .prose ul, .prose ol {
+    margin-top: 0.75em;
+    margin-bottom: 1.25em;
+    padding-left: 1.5em;
+  }
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.625;
+  }
+  .prose li {
+    margin-bottom: 0.5em;
+  }
+  .prose strong {
+    color: #1f2937;
+  }
+</style>

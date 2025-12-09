@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Guide des Mathématiques Ludiques';
+const description = 'Approches innovantes pour rendre les mathématiques plus accessibles et amusantes pour tous les élèves';
+
+// Données du guide
+const guide = {
+  title: 'Mathématiques Ludiques',
+  description: 'Découvrez des méthodes innovantes pour enseigner les mathématiques de manière attrayante et efficace.',
+  author: 'Équipe Écrire & Créer',
+  date: 'Décembre 2025',
+  level: 'Primaire et Collège',
+  duration: 'Variables selon les activités',
+  image: '/images/mathematiques-ludiques.jpg',
+  tags: ['mathématiques', 'pédagogie active', 'jeux éducatifs']
+};
+
+const sections = [
+  {
+    title: 'Introduction',
+    content: `
+      <p>Les mathématiques sont souvent perçues comme une matière difficile. Ce guide propose des approches ludiques pour aider les élèves à surmonter leurs appréhensions et à développer un rapport positif avec cette discipline essentielle.</p>
+    `
+  },
+  {
+    title: 'Objectifs Pédagogiques',
+    content: `
+      <ul class="list-disc pl-6 space-y-2">
+        <li>Rendre les mathématiques concrètes et attrayantes</li>
+        <li>Développer le raisonnement logique et la résolution de problèmes</li>
+        <li>Adapter l'enseignement aux différents contextes culturels</li>
+        <li>Favoriser le travail d'équipe et la coopération</li>
+        <li>Utiliser des ressources locales pour l'apprentissage</li>
+      </ul>
+    `
+  },
+  {
+    title: 'Activités Ludiques',
+    content: `
+      <h3 class="text-xl font-semibold mt-6 mb-3">1. Le Marché des Nombres</h3>
+      <p>Simulation d'un marché où les élèves utilisent des situations concrètes pour résoudre des problèmes de calcul mental et de pourcentages dans un contexte réel.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">2. Géométrie dans l'Art</h3>
+      <p>Découverte des motifs géométriques pour enseigner les formes, les symétries et les transformations géométriques.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">3. Jeu de Société Mathématique</h3>
+      <p>Création de jeux de société basés sur des concepts mathématiques, adaptés aux différents niveaux scolaires.</p>
+    `
+  },
+  {
+    title: 'Ressources',
+    content: `
+      <ul class="space-y-3">
+        <li class="flex items-start">
+          <span class="mr-2">🎲</span>
+          <span>Jeux de société mathématiques adaptés au programme algérien</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">📱</span>
+          <span>Applications éducatives en français et arabe pour pratiquer les maths</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">📐</span>
+          <span>Kits de géométrie inspirés des motifs traditionnels algériens</span>
+        </li>
+      </ul>
+    `
+  },
+  {
+    title: 'Évaluation',
+    content: `
+      <p>L'évaluation en mathématiques ludiques se veut formative et encourageante :</p>
+      <ul class="list-disc pl-6 mt-3 space-y-2">
+        <li>Portfolio des activités réalisées</li>
+        <li>Auto-évaluation des compétences acquises</li>
+        <li>Projets de groupe notés sur le processus plus que le résultat</li>
+        <li>Jeux-questionnaires interactifs</li>
+      </ul>
+    `
+  }
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      {/* En-tête du guide */}
+      <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <nav class="mb-4 text-sm text-green-100">
+              <a href="/guides-pedagogiques" class="hover:underline">Guides Pédagogiques</a> / <span class="text-white font-medium">{guide.title}</span>
+            </nav>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">{guide.title}</h1>
+            <p class="text-green-100 text-lg">{guide.description}</p>
+          </div>
+          <div class="mt-4 md:mt-0 bg-white/10 p-4 rounded-lg">
+            <div class="text-sm space-y-1">
+              <div class="flex items-center">
+                <span class="w-24 text-green-100">Niveau :</span>
+                <span class="font-medium">{guide.level}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-green-100">Durée :</span>
+                <span class="font-medium">{guide.duration}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-green-100">Auteur :</span>
+                <span class="font-medium">{guide.author}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex flex-wrap gap-2">
+          {guide.tags.map(tag => (
+            <span class="bg-white/20 text-sm px-3 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenu du guide */}
+      <div class="p-8">
+        {sections.map(section => (
+          <div class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
+              {section.title}
+            </h2>
+            <div class="prose max-w-none text-gray-700" set:html={section.content} />
+          </div>
+        ))}
+
+        <div class="mt-12 pt-8 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">À propos de ce guide</h3>
+          <p class="text-gray-600 mb-6">
+            Ce guide a été conçu pour aider les enseignants à rendre leurs cours de mathématiques plus attrayants et efficaces. 
+            Les activités proposées sont adaptables à différents contextes éducatifs.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a 
+              href="/guides-pedagogiques" 
+              class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-center transition-colors"
+            >
+              ← Retour aux guides
+            </a>
+            <a 
+              href="/guides-pdf/mathematiques-ludiques.pdf" 
+              class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-center transition-colors"
+              download="Guide_Mathematiques_Ludiques.pdf"
+            >
+              Télécharger le PDF
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .prose h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    color: #1f2937;
+    font-weight: 600;
+  }
+  .prose ul {
+    margin-top: 0.75em;
+    margin-bottom: 1.25em;
+  }
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.625;
+  }
+</style>

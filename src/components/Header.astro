@@ -1,70 +1,207 @@
 ---
-title: "Écrire et Créer - Blog Éducatif"
+// Importations Astro
+import { auth } from '../lib/firebase.js';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+// Configuration du composant
+const title = "Écrire et Créer - Blog Éducatif";
 ---
 
-<header class="sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 shadow-lg">
-  <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-    <!-- Logo Section -->
-    <a href="/" class="flex items-center space-x-2 hover:opacity-90 transition-opacity">
-      <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md">
-        <span class="text-xl">✍️</span>
+<header class="sticky top-0 z-50 bg-gradient-to-r from-green-600 to-blue-600 shadow-lg">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+    <div class="flex items-center justify-between">
+      <!-- Logo Section -->
+      <div class="flex-shrink-0">
+        <a href="/" class="flex items-start group">
+          <div class="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white border border-white/20 group-hover:bg-white/30 transition-all duration-200 mr-3 mt-1">
+            <span class="text-xl">✍️</span>
+          </div>
+          <div class="hidden sm:block">
+            <h1 class="text-lg font-bold text-white leading-none">Écrire & Créer</h1>
+            <p class="text-xs text-white/90 leading-tight mt-0.5">Apprentissage par projet</p>
+          </div>
+        </a>
       </div>
-      <div class="hidden sm:block">
-        <h1 class="text-lg md:text-xl font-bold text-white leading-tight">Écrire & Créer</h1>
-        <p class="text-blue-100 text-xs">Apprentissage par projet</p>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden lg:ml-6 lg:flex lg:items-center lg:space-x-1">
+        <a href="/" class="px-3 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-all duration-200 data-[active=true]:bg-white/30">
+          Accueil
+        </a>
+        <a href="/about" class="px-3 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-all duration-200 data-[active=true]:bg-white/30">
+          À propos
+        </a>
+        <a href="/resources" class="px-3 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-all duration-200 data-[active=true]:bg-white/30">
+          Ressources
+        </a>
+        <a href="/gallery" class="px-3 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-all duration-200 data-[active=true]:bg-white/30">
+          Galerie
+        </a>
+        <a href="/posts/welcome-to-project-based-writing" class="px-3 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-all duration-200 data-[active=true]:bg-white/30">
+          Blog
+        </a>
       </div>
-    </a>
 
-    <!-- Desktop Navigation -->
-    <ul class="hidden lg:flex space-x-6 items-center text-sm">
-      <li><a href="/" class="text-white hover:text-blue-200 font-semibold transition-colors">Accueil</a></li>
-      <li><a href="/about" class="text-white hover:text-blue-200 font-semibold transition-colors">À propos</a></li>
-      <li><a href="/resources" class="text-white hover:text-blue-200 font-semibold transition-colors">📚 Ressources</a></li>
-      <li><a href="/gallery" class="text-white hover:text-blue-200 font-semibold transition-colors">🌟 Galerie</a></li>
-      <li><a href="/posts/welcome-to-project-based-writing" class="text-white hover:text-blue-200 font-semibold transition-colors">Blog</a></li>
-    </ul>
+      <!-- Desktop Auth Buttons -->
+      <div id="auth-desktop" class="hidden lg:ml-6 lg:flex lg:items-center space-x-4">
+        <a href="/login" class="px-4 py-2 text-sm font-medium text-white hover:bg-white/20 rounded-md transition-all duration-200">
+          Se connecter
+        </a>
+        <a href="/admin" class="px-4 py-2 text-sm font-medium bg-white text-blue-700 hover:bg-gray-50 rounded-md transition-all duration-200 shadow-md">
+          Espace admin
+        </a>
+      </div>
 
-    <!-- Auth & Admin Buttons -->
-    <div class="flex items-center space-x-3">
-      <li id="auth-link" class="list-none">
-        <a href="/login" class="text-white hover:text-blue-200 font-semibold text-sm transition-colors">🔐 Connexion</a>
-      </li>
-      <a href="/admin" class="bg-white text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50 font-semibold text-sm transition-colors">
-        🎨 Admin
+      <!-- Mobile menu button -->
+      <div class="flex items-center lg:hidden">
+        <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500" aria-controls="mobile-menu" aria-expanded="false">
+          <span class="sr-only">Ouvrir le menu principal</span>
+          <!-- Menu icon -->
+          <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <!-- Close icon -->
+          <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu, show/hide based on menu state -->
+  <div class="lg:hidden hidden bg-gradient-to-r from-green-600 to-blue-600" id="mobile-menu">
+    <div class="pt-1 pb-2">
+      <a href="/" class="block px-6 py-3 text-base font-medium text-white hover:bg-white/20 transition-all duration-200">
+        Accueil
+      </a>
+      <a href="/about" class="block px-6 py-3 text-base font-medium text-white hover:bg-white/20 transition-all duration-200">
+        À propos
+      </a>
+      <a href="/resources" class="block px-6 py-3 text-base font-medium text-white bg-white/30 hover:bg-white/40 transition-all duration-200">
+        Ressources
+      </a>
+      <a href="/gallery" class="block px-6 py-3 text-base font-medium text-white hover:bg-white/20 transition-all duration-200">
+        Galerie
+      </a>
+      <a href="/posts/welcome-to-project-based-writing" class="block px-6 py-3 text-base font-medium text-white hover:bg-white/20 transition-all duration-200">
+        Blog
       </a>
     </div>
-
-    <!-- Mobile menu button -->
-    <button class="lg:hidden text-white text-2xl hover:text-blue-200 transition-colors" aria-label="Menu">
-      ☰
-    </button>
-  </nav>
+    <div class="pt-2 pb-4 px-4 border-t border-white/20">
+      <a href="/login" class="block w-full px-4 py-3 text-base font-medium text-center text-white hover:bg-white/20 rounded-md mb-2 transition-all duration-200">
+        Se connecter
+      </a>
+      <a href="/admin" class="block w-full px-4 py-3 text-base font-medium text-center text-blue-700 bg-white hover:bg-gray-50 rounded-md shadow transition-all duration-200">
+        Espace admin
+      </a>
+    </div>
+  </div>
 </header>
 
 <script>
-  import { auth } from '../lib/firebase.js';
-  import { onAuthStateChanged, signOut } from 'firebase/auth';
-
-  onAuthStateChanged(auth, (user) => {
-    const authLink = document.getElementById('auth-link');
-    if (authLink) {
-      if (user) {
-        // User is logged in - show Logout button
-        authLink.innerHTML = `<button id="logout-header-btn" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🚪 Déconnexion (${user.displayName || user.email})</button>`;
-        
-        const logoutBtn = document.getElementById('logout-header-btn');
-        logoutBtn.addEventListener('click', async () => {
-          try {
-            await signOut(auth);
-            window.location.href = '/';
-          } catch (error) {
-            console.error('Erreur de déconnexion:', error);
-          }
-        });
+  // Gestion de la navigation active
+  document.addEventListener('DOMContentLoaded', () => {
+    // Mise à jour de l'élément actif dans la navigation
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('nav a[href]');
+    
+    navLinks.forEach(link => {
+      const linkPath = new URL(link.href).pathname;
+      // Vérifie si le lien correspond au chemin actuel
+      if (currentPath === linkPath || 
+          (currentPath.startsWith(linkPath) && linkPath !== '/')) {
+        link.setAttribute('data-active', 'true');
       } else {
-        // User is logged out - show Login link
-        authLink.innerHTML = '<a href="/login" class="text-white hover:text-blue-200 font-semibold transition-colors duration-200">🔐 Connexion</a>';
+        link.setAttribute('data-active', 'false');
       }
+    });
+  });
+
+  // Gestion du menu mobile
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  if (mobileMenuButton) {
+    mobileMenuButton.addEventListener('click', () => {
+      const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+      mobileMenuButton.setAttribute('aria-expanded', !expanded);
+      mobileMenu.classList.toggle('hidden');
+      
+      // Basculer entre les icônes de menu et de fermeture
+      const menuIcon = mobileMenuButton.querySelector('svg:first-child');
+      const closeIcon = mobileMenuButton.querySelector('svg:last-child');
+      menuIcon.classList.toggle('hidden');
+      closeIcon.classList.toggle('hidden');
+    });
+  }
+
+  // Gestion de l'état d'authentification
+  const updateAuthUI = (user) => {
+    const authDesktop = document.getElementById('auth-desktop');
+    const authMobile = document.getElementById('auth-mobile');
+    
+    if (user) {
+      // Utilisateur connecté
+      authDesktop.innerHTML = `
+        <button id="logout-desktop-btn" class="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors duration-200">
+          Déconnexion (${user.displayName || user.email})
+        </button>
+      `;
+      
+      authMobile.innerHTML = `
+        <div class="space-y-1 px-4">
+          <div class="px-4 py-2 text-sm text-gray-700">
+            Connecté en tant que <span class="font-medium">${user.displayName || user.email}</span>
+          </div>
+          <button id="logout-mobile-btn" class="w-full text-left px-4 py-2 text-base font-medium text-primary-600 hover:bg-primary-50 rounded-md">
+            Se déconnecter
+          </button>
+        </div>
+      `;
+      
+      // Ajout des écouteurs d'événements pour les boutons de déconnexion
+      const logoutDesktopBtn = document.getElementById('logout-desktop-btn');
+      const logoutMobileBtn = document.getElementById('logout-mobile-btn');
+      
+      const handleLogout = async () => {
+        try {
+          await signOut(auth);
+          window.location.href = '/';
+        } catch (error) {
+          console.error('Erreur de déconnexion:', error);
+        }
+      };
+      
+      if (logoutDesktopBtn) logoutDesktopBtn.addEventListener('click', handleLogout);
+      if (logoutMobileBtn) logoutMobileBtn.addEventListener('click', handleLogout);
+      
+    } else {
+      // Utilisateur non connecté
+      authDesktop.innerHTML = `
+        <a href="/login" class="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors duration-200">
+          Se connecter
+        </a>
+        <a href="/admin" class="px-4 py-2 border border-primary-600 text-sm font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 transition-colors duration-200">
+          Espace admin
+        </a>
+      `;
+      
+      authMobile.innerHTML = `
+        <div class="space-y-1 px-4">
+          <a href="/login" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md">
+            Se connecter
+          </a>
+          <a href="/admin" class="block w-full text-left px-4 py-2 text-base font-medium text-primary-600 hover:bg-primary-50 rounded-md">
+            Espace admin
+          </a>
+        </div>
+      `;
     }
+  };
+
+  // Écouter les changements d'état d'authentification
+  onAuthStateChanged(auth, (user) => {
+    updateAuthUI(user);
   });
 </script>

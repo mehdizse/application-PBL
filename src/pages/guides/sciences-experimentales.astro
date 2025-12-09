@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Guide des Sciences Expérimentales';
+const description = 'Méthodes et expériences pratiques pour enseigner les sciences de manière concrète';
+
+// Données du guide
+const guide = {
+  title: 'Sciences Expérimentales',
+  description: 'Approche pratique et expérimentale pour enseigner les sciences avec des ressources accessibles',
+  author: 'Équipe Écrire & Créer',
+  date: 'Décembre 2025',
+  level: 'Primaire et Collège',
+  duration: 'Variables selon les expériences',
+  image: '/images/sciences-experimentales.jpg',
+  tags: ['sciences', 'expérimentation', 'pédagogie active']
+};
+
+const sections = [
+  {
+    title: 'Introduction',
+    content: `
+      <p>L'enseignement des sciences par l'expérimentation permet aux élèves de développer leur esprit critique et leur curiosité scientifique. Ce guide propose des expériences réalisables avec du matériel simple et accessible.</p>
+    `
+  },
+  {
+    title: 'Objectifs Pédagogiques',
+    content: `
+      <ul class="list-disc pl-6 space-y-2">
+        <li>Développer la démarche scientifique chez les élèves</li>
+        <li>Utiliser du matériel simple et accessible pour les expériences</li>
+        <li>Adapter l'enseignement des sciences à différents contextes</li>
+        <li>Favoriser l'observation, l'hypothèse et la vérification expérimentale</li>
+        <li>Relier les concepts scientifiques au quotidien des élèves</li>
+      </ul>
+    `
+  },
+  {
+    title: 'Expériences Proposées',
+    content: `
+      <h3 class="text-xl font-semibold mt-6 mb-3">1. Énergie Solaire avec des Matériaux de Récupération</h3>
+      <p>Construction d'un four solaire simple avec des matériaux de récupération pour comprendre les principes de l'énergie renouvelable et du développement durable.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">2. Le Cycle de l'Eau</h3>
+      <p>Expérience montrant l'évaporation et la condensation, avec une attention particulière sur l'importance de la préservation de l'eau.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">3. La Biodiversité</h3>
+      <p>Projet d'observation et de classification de la faune et de la flore, en mettant l'accent sur les écosystèmes locaux et leur préservation.</p>
+    `
+  },
+  {
+    title: 'Ressources',
+    content: `
+      <ul class="space-y-3">
+        <li class="flex items-start">
+          <span class="mr-2">🔬</span>
+          <span>Kit d'expériences scientifiques avec du matériel de récupération facile à trouver</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">📚</span>
+          <span>Fiches pratiques d'expériences adaptées aux programmes scolaires</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">🌍</span>
+          <span>Ressources en ligne sur la géologie et la biodiversité</span>
+        </li>
+      </ul>
+    `
+  },
+  {
+    title: 'Évaluation',
+    content: `
+      <p>L'évaluation en sciences expérimentales se veut pratique et formative :</p>
+      <ul class="list-disc pl-6 mt-3 space-y-2">
+        <li>Carnet d'expériences et d'observations</li>
+        <li>Présentation orale des démarches et résultats</li>
+        <li>Évaluation par les pairs lors des présentations de projets</li>
+        <li>Questionnaires pratiques sur la démarche scientifique</li>
+      </ul>
+    `
+  }
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      {/* En-tête du guide */}
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <nav class="mb-4 text-sm text-purple-100">
+              <a href="/guides-pedagogiques" class="hover:underline">Guides Pédagogiques</a> / <span class="text-white font-medium">{guide.title}</span>
+            </nav>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">{guide.title}</h1>
+            <p class="text-purple-100 text-lg">{guide.description}</p>
+          </div>
+          <div class="mt-4 md:mt-0 bg-white/10 p-4 rounded-lg">
+            <div class="text-sm space-y-1">
+              <div class="flex items-center">
+                <span class="w-24 text-purple-100">Niveau :</span>
+                <span class="font-medium">{guide.level}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-purple-100">Durée :</span>
+                <span class="font-medium">{guide.duration}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-purple-100">Auteur :</span>
+                <span class="font-medium">{guide.author}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex flex-wrap gap-2">
+          {guide.tags.map(tag => (
+            <span class="bg-white/20 text-sm px-3 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenu du guide */}
+      <div class="p-8">
+        {sections.map(section => (
+          <div class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
+              {section.title}
+            </h2>
+            <div class="prose max-w-none text-gray-700" set:html={section.content} />
+          </div>
+        ))}
+
+        <div class="mt-12 pt-8 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">À propos de ce guide</h3>
+          <p class="text-gray-600 mb-6">
+            Ce guide a été conçu pour aider les enseignants à mettre en place des activités scientifiques pratiques avec des ressources accessibles. 
+            Il s'inscrit dans une démarche d'éducation au développement durable.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a 
+              href="/guides-pedagogiques" 
+              class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-center transition-colors"
+            >
+              ← Retour aux guides
+            </a>
+            <a 
+              href="/guides-pdf/sciences-experimentales.pdf" 
+              class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg text-center transition-colors"
+              download="Guide_Sciences_Experimentales.pdf"
+            >
+              Télécharger le PDF
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .prose h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    color: #1f2937;
+    font-weight: 600;
+  }
+  .prose ul {
+    margin-top: 0.75em;
+    margin-bottom: 1.25em;
+  }
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.625;
+  }
+</style>

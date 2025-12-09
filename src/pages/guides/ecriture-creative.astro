@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Guide d\'Écriture Créative';
+const description = 'Techniques et activités pour stimuler l\'imagination et l\'expression écrite de vos élèves';
+
+// Données du guide
+const guide = {
+  title: 'L\'Écriture Créative',
+  description: 'Découvrez des méthodes innovantes pour développer la créativité écrite de vos élèves.',
+  author: 'Équipe Écrire & Créer',
+  date: 'Décembre 2025',
+  level: 'Tous niveaux',
+  duration: 'Plusieurs séances',
+  image: '/images/ecriture-creative.jpg',
+  tags: ['français', 'expression écrite', 'créativité']
+};
+
+const sections = [
+  {
+    title: 'Introduction',
+    content: `
+      <p>L'écriture créative est un outil puissant pour développer la pensée critique, l'expression personnelle et la maîtrise de la langue. Ce guide propose des approches variées pour stimuler l'imagination et la créativité des élèves.</p>
+    `
+  },
+  {
+    title: 'Objectifs Pédagogiques',
+    content: `
+      <ul class="list-disc pl-6 space-y-2">
+        <li>Développer la créativité et l'imagination des élèves</li>
+        <li>Améliorer l'expression écrite en français</li>
+        <li>Encourager la confiance en soi dans la production écrite</li>
+        <li>Adapter les exercices d'écriture aux différents contextes culturels</li>
+        <li>Favoriser le travail collaboratif à travers des projets d'écriture</li>
+      </ul>
+    `
+  },
+  {
+    title: 'Activités d\'Écriture',
+    content: `
+      <h3 class="text-xl font-semibold mt-6 mb-3">1. Les Portraits Croisés</h3>
+      <p>Les élèves écrivent le portrait d'un camarade après un court entretien, puis comparent les résultats. Cette activité favorise l'observation et l'empathie.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">2. Le Cadavre Exquis Collectif</h3>
+      <p>Version du jeu surréaliste où chaque élève écrit une phrase en s'inspirant d'éléments culturels variés, créant ainsi une histoire collective.</p>
+      
+      <h3 class="text-xl font-semibold mt-6 mb-3">3. Écrire avec les Cinq Sens</h3>
+      <p>Les élèves décrivent un lieu familier (marché, école, quartier) en utilisant les cinq sens, ce qui enrichit leur vocabulaire descriptif.</p>
+    `
+  },
+  {
+    title: 'Ressources',
+    content: `
+      <ul class="space-y-3">
+        <li class="flex items-start">
+          <span class="mr-2">📚</span>
+          <span>"Écrire pour être lu" - Guide pratique pour l'enseignement de l'écriture</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">🌐</span>
+          <span>Plateforme d'échange de textes d'élèves entre écoles algériennes</span>
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">🎭</span>
+          <span>Jeux de rôle pour développer des personnages et des dialogues</span>
+        </li>
+      </ul>
+    `
+  },
+  {
+    title: 'Évaluation',
+    content: `
+      <p>L'évaluation en écriture créative doit être bienveillante et formative. Privilégiez :</p>
+      <ul class="list-disc pl-6 mt-3 space-y-2">
+        <li>L'auto-évaluation avec des grilles simples</li>
+        <li>L'évaluation par les pairs avec des critères clairs</li>
+        <li>La mise en valeur des progrès plutôt que la notation</li>
+        <li>L'organisation d'un concours d'écriture au sein de la classe ou de l'école</li>
+      </ul>
+    `
+  }
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      {/* En-tête du guide */}
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <nav class="mb-4 text-sm text-blue-100">
+              <a href="/guides-pedagogiques" class="hover:underline">Guides Pédagogiques</a> / <span class="text-white font-medium">{guide.title}</span>
+            </nav>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">{guide.title}</h1>
+            <p class="text-blue-100 text-lg">{guide.description}</p>
+          </div>
+          <div class="mt-4 md:mt-0 bg-white/10 p-4 rounded-lg">
+            <div class="text-sm space-y-1">
+              <div class="flex items-center">
+                <span class="w-24 text-blue-100">Niveau :</span>
+                <span class="font-medium">{guide.level}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-blue-100">Durée :</span>
+                <span class="font-medium">{guide.duration}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-24 text-blue-100">Auteur :</span>
+                <span class="font-medium">{guide.author}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 flex flex-wrap gap-2">
+          {guide.tags.map(tag => (
+            <span class="bg-white/20 text-sm px-3 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenu du guide */}
+      <div class="p-8">
+        {sections.map(section => (
+          <div class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
+              {section.title}
+            </h2>
+            <div class="prose max-w-none text-gray-700" set:html={section.content} />
+          </div>
+        ))}
+
+        <div class="mt-12 pt-8 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">À propos de ce guide</h3>
+          <p class="text-gray-600 mb-6">
+            Ce guide a été élaboré par l'équipe d'Écrire & Créer pour soutenir les enseignants dans leur pratique pédagogique. 
+            Il est conçu pour être adapté à différents contextes éducatifs.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a 
+              href="/guides-pedagogiques" 
+              class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-center transition-colors"
+            >
+              ← Retour aux guides
+            </a>
+            <a 
+              href="/guides-pdf/ecriture-creative.pdf" 
+              class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-center transition-colors"
+              download="Guide_Ecriture_Creative.pdf"
+            >
+              Télécharger le PDF
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .prose h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    color: #1f2937;
+    font-weight: 600;
+  }
+  .prose ul {
+    margin-top: 0.75em;
+    margin-bottom: 1.25em;
+  }
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.625;
+  }
+</style>

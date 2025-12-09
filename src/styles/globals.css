@@ -2,52 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap');
+
 /* Custom styles for the blog */
 @layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  
   body {
-    @apply bg-gradient-to-br from-slate-50 to-blue-50 text-gray-800;
+    @apply bg-white text-secondary-700 font-sans leading-relaxed antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-bold text-secondary-900 tracking-tight;
   }
 
   h1 {
-    @apply text-4xl font-bold text-gray-900 mb-4;
+    @apply text-4xl md:text-5xl mb-6 leading-tight;
   }
 
   h2 {
-    @apply text-3xl font-bold text-gray-900 mb-3;
+    @apply text-3xl md:text-4xl mb-5 mt-10 first:mt-0;
   }
 
   h3 {
-    @apply text-2xl font-semibold text-gray-800 mb-2;
+    @apply text-2xl md:text-3xl mb-4 mt-8;
+  }
+
+  p, ul, ol {
+    @apply mb-6 text-lg leading-relaxed text-secondary-600;
   }
 
   a {
-    @apply text-blue-600 hover:text-purple-600 transition-colors duration-200;
+    @apply text-primary-600 hover:text-primary-800 transition-colors duration-150 font-medium;
+  }
+
+  /* Custom selection color */
+  ::selection {
+    @apply bg-primary-100 text-primary-900;
   }
 }
 
 @layer components {
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500;
+  }
+
   .btn-primary {
-    @apply px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg;
+    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-all duration-200;
+    @apply bg-white text-primary-700 border border-primary-200 hover:bg-primary-50 shadow-sm hover:shadow;
   }
 
+  /* Cards */
   .card {
-    @apply bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden;
+    @apply bg-white rounded-xl shadow-card overflow-hidden transition-shadow duration-300 hover:shadow-card-hover border border-gray-100;
   }
 
   .card-hover {
-    @apply transform hover:-translate-y-1;
+    @apply hover:-translate-y-0.5 transition-transform duration-200;
   }
 
+  /* Layout */
   .section-container {
-    @apply max-w-6xl mx-auto px-4 py-8 md:py-12;
+    @apply max-w-5xl mx-auto px-6 py-12 md:py-16 lg:py-20;
   }
 
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-center mb-12 md:mb-16 relative;
+  }
+
+  .section-title:after {
+    @apply content-[''] block w-16 h-1 bg-primary-500 mx-auto mt-4 rounded-full;
+  }
+
+  /* Post Cards */
   .post-card {
-    @apply card card-hover p-6 border-l-4 border-blue-500;
+    @apply card p-6 md:p-8 hover:shadow-card-hover transition-all duration-300 border-l-4 border-primary-500;
   }
 
   .text-gradient {

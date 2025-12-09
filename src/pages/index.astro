@@ -5,27 +5,23 @@ import PostCard from '../components/PostCard.astro';
 
 <BaseLayout>
   <!-- Hero Section -->
-  <section class="relative overflow-hidden bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 py-6 md:py-8">
-    <div class="absolute inset-0 opacity-20 bg-pattern"></div>
-    <div class="section-container relative z-10">
-      <div class="text-center text-white animate-fade-in-up">
-        <h1 class="text-3xl md:text-4xl font-bold mb-2 leading-tight">
-          🎓 Écrire & Créer
+  <section class="relative overflow-hidden bg-gradient-to-r from-green-600 to-blue-600 py-8 md:py-12">
+    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10"></div>
+    <div class="section-container relative z-10 max-w-3xl mx-auto px-4">
+      <div class="text-center">
+        <h1 class="text-2xl md:text-3xl font-bold mb-3 text-white">
+          Valorisez vos Productions Écrites
         </h1>
-        <p class="text-base md:text-lg font-light mb-4 text-blue-100 max-w-3xl mx-auto">
-          Découvrez comment l'apprentissage par projet transforme l'écriture des élèves en un voyage créatif et motivant.
+        <p class="text-sm md:text-base text-white/90 mb-6 leading-relaxed">
+          Rejoignez notre communauté d'enseignants et d'élèves partageant leurs créations et leurs histoires de réussite.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <a href="/about" class="btn-primary">
-            En savoir plus ✨
+        <div class="flex flex-wrap justify-center gap-3">
+          <a href="/about" class="bg-white text-green-700 hover:bg-green-50 font-medium text-sm py-2 px-5 rounded-lg transition-colors">
+            Explorer les projets
           </a>
-          <a href="/posts/welcome-to-project-based-writing" class="btn-secondary">
-            Lire nos articles 📚
+          <a href="/posts/welcome-to-project-based-writing" class="bg-white/10 hover:bg-white/20 text-white font-medium text-sm py-2 px-5 rounded-lg transition-colors">
+            Voir les témoignages
           </a>
-          <a href="/resources" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg inline-block">
-            Ressources Enseignants 🎓
-          </a>
-        </div>
       </div>
     </div>
   </section>
@@ -82,15 +78,15 @@ import PostCard from '../components/PostCard.astro';
   </section>
 
   <!-- CTA Section -->
-  <section class="bg-gradient-to-r from-blue-600 to-purple-600 py-16 rounded-lg shadow-xl">
-    <div class="section-container text-center text-white">
-      <h2 class="text-4xl font-bold mb-6">Valorisez vos Productions Écrites</h2>
-      <p class="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-        Rejoignez notre communauté d'enseignants et d'élèves partageant leurs créations et leurs histoires de réussite.
+  <section class="bg-gradient-to-r from-green-600 to-blue-600 py-12 rounded-t-lg shadow-xl mt-12">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Prêt à transformer l'écriture en aventure ?</h2>
+      <p class="text-white/90 mb-6 max-w-2xl mx-auto">
+        Rejoignez notre communauté éducative et découvrez comment nos outils peuvent vous aider à motiver vos élèves.
       </p>
-      <button class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg">
-        Créer un Compte 🎨
-      </button>
+      <a href="/register" class="inline-block bg-white text-green-700 hover:bg-green-50 font-medium text-sm py-2.5 px-6 rounded-lg transition-colors shadow-md">
+        Commencer maintenant
+      </a>
     </div>
   </section>
 </BaseLayout>
