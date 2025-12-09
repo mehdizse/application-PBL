@@ -5,8 +5,12 @@ const title = "Écrire et Créer - Blog Éducatif";
 
 <!-- Import des modules Firebase -->
 <script>
-  import { onAuthStateChanged, signOut } from 'firebase/auth';
-  import { auth as firebaseAuth } from '../lib/firebase.js';
+  import { 
+    auth as firebaseAuth,
+    onAuthStateChanged,
+    signOut,
+    updateProfile
+  } from '../lib/firebase.js';
   
   // Fonction pour mettre à jour l'interface utilisateur en fonction de l'état d'authentification
   const updateAuthUI = (user) => {
