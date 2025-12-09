@@ -5,7 +5,10 @@
 <div id="auth-container"></div>
 
 <script>
-  // Load Firebase dynamically to ensure env vars are available
+  // Import the required Firebase modules
+  import { getAuth, onAuthStateChanged } from 'firebase/auth';
+  import { initializeApp } from 'firebase/app';
+
   const loadFirebase = async () => {
     try {
       // Check if env vars exist
@@ -33,18 +36,36 @@
         return false;
       }
 
-      console.log('✅ Firebase credentials loaded successfully');
+      // Initialize Firebase
+      const app = initializeApp(config);
+      const auth = getAuth(app);
+
+      // Set up auth state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log('User is signed in:', user);
+          // User is signed in
+          document.dispatchEvent(new CustomEvent('auth-state-changed', { 
+            detail: { user } 
+          }));
+        } else {
+          console.log('No user is signed in');
+          // User is signed out
+          document.dispatchEvent(new CustomEvent('auth-state-changed', { 
+            detail: { user: null } 
+          }));
+        }
+      });
+
+      console.log('✅ Firebase initialized successfully');
       return true;
     } catch (error) {
-      console.error('❌ Error loading Firebase config:', error);
+      console.error('❌ Error initializing Firebase:', error);
       return false;
     }
   };
 
   // Initialize on page load
-  window.addEventListener('DOMContentLoaded', loadFirebase);
-  
-  // Also try immediately if DOM is already loaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadFirebase);
   } else {
