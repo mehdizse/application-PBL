@@ -322,15 +322,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  import { auth, db } from '../lib/firebase.js';
+  // Import des fonctions Firebase de manière optimisée
   import { onAuthStateChanged, signOut } from 'firebase/auth';
   import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+  import { auth as firebaseAuth, db } from '../lib/firebase.js';
 
   const authCheck = document.getElementById('auth-check');
   const notAuthenticated = document.getElementById('not-authenticated');
   const logoutBtn = document.getElementById('logout-btn');
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(firebaseAuth, (user) => {
     if (user) {
       authCheck.classList.remove('hidden');
       notAuthenticated.classList.add('hidden');
@@ -563,7 +564,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
+      await signOut(firebaseAuth);
       window.location.href = '/login';
     });
   }
