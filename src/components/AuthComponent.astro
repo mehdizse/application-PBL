@@ -5,12 +5,13 @@
 <div id="auth-container"></div>
 
 <script>
-  // Import the required Firebase modules
-  import { getAuth, onAuthStateChanged } from 'firebase/auth';
-  import { initializeApp } from 'firebase/app';
-
+  // Load Firebase dynamically
   const loadFirebase = async () => {
     try {
+      // Dynamically import Firebase modules
+      const { initializeApp } = await import('firebase/app');
+      const { getAuth, onAuthStateChanged } = await import('firebase/auth');
+
       // Check if env vars exist
       const config = {
         apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -33,7 +34,7 @@
       if (!config.apiKey || !config.authDomain || !config.projectId) {
         console.error('❌ Firebase credentials are incomplete!');
         console.error('Config:', config);
-        return false;
+        return () => {}; // Return empty cleanup function
       }
 
       // Initialize Firebase
@@ -41,7 +42,7 @@
       const auth = getAuth(app);
 
       // Set up auth state observer
-      onAuthStateChanged(auth, (user) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           console.log('User is signed in:', user);
           // User is signed in
@@ -58,17 +59,31 @@
       });
 
       console.log('✅ Firebase initialized successfully');
-      return true;
+      
+      // Cleanup function
+      return () => {
+        console.log('🧹 Cleaning up Firebase auth listener');
+        unsubscribe();
+      };
     } catch (error) {
       console.error('❌ Error initializing Firebase:', error);
-      return false;
+      return () => {}; // Return empty cleanup function
     }
   };
 
   // Initialize on page load
+  let cleanup = () => {};
+  
+  const initialize = async () => {
+    cleanup = await loadFirebase() || (() => {});
+  };
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadFirebase);
+    document.addEventListener('DOMContentLoaded', initialize);
   } else {
-    loadFirebase();
+    initialize();
   }
+
+  // Cleanup on component unmount
+  window.addEventListener('beforeunload', cleanup);
 </script>
