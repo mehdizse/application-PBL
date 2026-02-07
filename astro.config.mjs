@@ -1,10 +1,11 @@
 import { defineConfig } from 'astro/config';
+import netlify from '@astrojs/netlify';
 
 export default defineConfig({
   site: 'https://your-blog-url.netlify.app',
   base: '/',
   output: 'server',
-  integrations: [],
+  integrations: [netlify()],
   vite: {
     resolve: {
       alias: [
