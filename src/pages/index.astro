@@ -85,7 +85,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const texte = document.getElementById('defiTexte');
       
       if (defi && defi.texte) {
-        texte.textContent = defi.texte;
+        texte.innerHTML = defi.texte.replace(/\n/g, '<br>');
         section.classList.remove('hidden');
       }
     } catch (error) {
@@ -95,7 +95,34 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   async function loadTextes() {
     try {
-      const textes = await window.getTextesVisibles();
+      // Charger TOUS les textes et les groupes
+      const [allTextes, allGroupes] = await Promise.all([
+        window.getTextes(), // Utiliser getTextes() au lieu de getTextesVisibles()
+        window.getGroupes()
+      ]);
+      
+      console.log('📊 Debug - Tous les textes:', allTextes.length);
+      console.log('👥 Debug - Tous les groupes:', allGroupes.length);
+      
+      // Filtrer les groupes visibles
+      const groupesVisibles = allGroupes.filter(groupe => groupe.visible);
+      const groupesVisiblesNoms = new Set(groupesVisibles.map(groupe => groupe.nom));
+      
+      // Filtrer: textes visibles ET des groupes visibles
+      const textes = allTextes.filter(texte => {
+        const texteVisible = texte.visible;
+        const groupeVisible = groupesVisiblesNoms.has(texte.groupeNom);
+        
+        if (!texteVisible) {
+          console.log(`❌ Texte "${texte.titre}" masqué (texte non visible)`);
+        }
+        if (!groupeVisible) {
+          console.log(`❌ Texte "${texte.titre}" masqué (groupe "${texte.groupeNom}" non visible)`);
+        }
+        
+        return texteVisible && groupeVisible;
+      });
+      
       const container = document.getElementById('textesContainer');
       
       if (textes.length === 0) {
