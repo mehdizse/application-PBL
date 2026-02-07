@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Récupérer l'ID depuis les paramètres de l'URL
+const { id } = Astro.params;
+---
+
+<BaseLayout>
+  <div class="pt-16 min-h-screen bg-gray-50">
+    <div class="max-w-md mx-auto px-4 pb-10">
+      <!-- Bouton retour -->
+      <button onclick="history.back()" class="mb-4 bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-200 hover:text-gray-800 transition-all duration-150">
+        <span class="mr-2">←</span>
+        Retour aux productions
+      </button>
+
+      <!-- Contenu chargé dynamiquement -->
+      <div id="texteContainer" class="space-y-4">
+        <div class="text-center py-12">
+          <div class="text-4xl mb-4 text-gray-400 opacity-70">📚</div>
+          <p class="text-gray-600 font-medium">Chargement du texte...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Charger le texte au chargement de la page
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadTexte();
+  });
+
+  async function loadTexte() {
+    try {
+      const texteId = window.location.pathname.split('/').pop();
+      
+      let texte;
+      
+      // Si on a un ID, on charge depuis Firebase
+      if (texteId && texteId !== 'undefined') {
+        texte = await window.getTexte(texteId);
+      }
+
+      const container = document.getElementById('texteContainer');
+
+      if (texte) {
+        // Badges avec leurs significations
+        const badgesMap = {
+          '⭐': 'Texte de la semaine',
+          '🏆': 'Meilleure introduction',
+          '🔗': 'Bon usage des connecteurs',
+          '✍️': 'Texte bien rédigé',
+          '🤝': 'Bon travail de groupe'
+        };
+
+        container.innerHTML = `
+          <!-- Badge groupe + Titre + Type -->
+          <div>
+            <!-- Badge groupe -->
+            <div class="mb-3">
+              <span class="inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium bg-gray-50">
+                ${texte.groupeNom}
+              </span>
+            </div>
+            
+            <!-- Titre et type -->
+            <h1 class="text-2xl font-bold text-gray-900 mb-2 break-words overflow-wrap-anywhere" style="overflow-wrap: anywhere;">
+              ${texte.titre}
+            </h1>
+            <p class="text-sm text-gray-600">
+              ${texte.type}
+            </p>
+          </div>
+
+          <!-- Ligne badges (si présents) -->
+          ${texte.badges && texte.badges.length > 0 ? `
+            <div class="flex flex-wrap gap-2 items-center">
+              ${texte.badges.map(badge => `
+                <span class="px-2 py-1 rounded-full bg-gray-100 text-sm" title="${badge}">
+                  ${badgesMap[badge] || badge}
+                </span>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Carte Lecture -->
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+            <div class="text-base leading-7 text-gray-800 break-words overflow-wrap-anywhere" style="overflow-wrap: anywhere;">
+              ${texte.contenu.split('\n').map(paragraphe => {
+                // Supprimer les lignes qui répètent le groupe ou les messages de motivation
+                const cleanedParagraphe = paragraphe
+                  .replace(/^Excellent travail.*!$/gm, '')
+                  .replace(/^Très bon travail.*!$/gm, '')
+                  .replace(new RegExp(`^${texte.groupeNom}$`, 'gm'), '')
+                  .trim();
+                return cleanedParagraphe ? `<p class="mb-4 last:mb-0">${cleanedParagraphe}</p>` : '';
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Message motivation (optionnel) -->
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 text-center">
+            <p class="text-sm text-gray-600 font-medium">Excellent travail !</p>
+          </div>
+        `;
+      } else {
+        // Texte par défaut si non trouvé dans Firebase
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <div class="text-4xl mb-4 text-gray-400 opacity-70">📝</div>
+            <p class="text-gray-600 font-medium">Texte non trouvé</p>
+            <p class="text-gray-500 text-sm mt-2">Ce texte n'est pas encore disponible.</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du texte:', error);
+      document.getElementById('texteContainer').innerHTML = `
+        <div class="text-center py-12">
+          <div class="text-4xl mb-4 text-red-400 opacity-70">😅</div>
+          <p class="text-red-500 font-medium">Petit problème technique...</p>
+          <p class="text-gray-500 text-sm mt-2">Réessaie dans quelques instants !</p>
+        </div>
+      `;
+    }
+  }
+</script>

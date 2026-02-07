@@ -1,0 +1,267 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Récupérer les paramètres de l'URL
+const urlParams = Astro.url.searchParams;
+const groupe = urlParams.get('groupe') || 'Inconnu';
+const titre = urlParams.get('titre') || 'Texte sans titre';
+const type = urlParams.get('type') || 'Texte';
+const texteId = urlParams.get('id');
+---
+
+<BaseLayout>
+  <!-- Ajout d'espace pour le header fixe -->
+  <div class="pt-12 min-h-screen bg-background">
+    <div class="max-w-4xl mx-auto px-4 py-6">
+      <!-- Bouton retour épuré -->
+      <button onclick="history.back()" class="mb-6 bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-200 hover:text-gray-800 transition-all duration-150">
+        <span class="mr-2">←</span>
+        Retour aux productions
+      </button>
+
+    <!-- Contenu chargé dynamiquement -->
+    <div id="texteContainer">
+      <div class="text-center py-12">
+        <div class="text-4xl mb-4 text-text-tertiary opacity-70">📚</div>
+        <p class="text-text-secondary font-medium">Chargement du texte...</p>
+      </div>
+    </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { getTexte } from '../lib/firestore.js';
+
+  // Charger le texte au chargement de la page
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadTexte();
+  });
+
+  async function loadTexte() {
+    try {
+      const texteId = new URLSearchParams(window.location.search).get('id');
+      const groupe = new URLSearchParams(window.location.search).get('groupe');
+      const titre = new URLSearchParams(window.location.search).get('titre');
+      const type = new URLSearchParams(window.location.search).get('type');
+
+      let texte;
+      
+      // Si on a un ID, on charge depuis Firebase
+      if (texteId && texteId !== 'undefined') {
+        texte = await getTexte(texteId);
+      }
+
+      const container = document.getElementById('texteContainer');
+
+      if (texte) {
+        // Badges avec leurs significations
+        const badgesMap = {
+          '⭐': 'Texte de la semaine',
+          '🏆': 'Meilleure introduction',
+          '🔗': 'Bon usage des connecteurs',
+          '✍️': 'Texte bien rédigé',
+          '🤝': 'Bon travail de groupe'
+        };
+
+        const badgesHtml = texte.badges && texte.badges.length > 0 
+          ? texte.badges.slice(0, 3).map(badge => `
+              <span class="inline-block text-2xl mx-1" title="${badgesMap[badge] || badge}">${badge}</span>
+            `).join('')
+          : '';
+
+        const messageBadge = texte.badges && texte.badges.length > 0
+          ? texte.badges.map(badge => badgesMap[badge]).filter(Boolean).join(' - ')
+          : 'Très bon travail !';
+
+        container.innerHTML = `
+          <!-- En-tête du texte -->
+          <div class="text-center mb-8">
+            <div class="inline-block bg-indigo-500/10 text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-semibold mb-4 border border-indigo-200/50">
+              ${texte.groupeNom}
+            </div>
+            <h1 class="text-2xl md:text-3xl font-display font-bold text-text-primary mb-2">
+              ${texte.titre}
+            </h1>
+            <p class="text-base text-text-secondary mb-4">
+              ${texte.type}
+            </p>
+            
+            <!-- Message de félicitations -->
+            <div class="bg-surface border border-border/40 rounded-lg p-4 mb-6 shadow-sm">
+              ${badgesHtml ? `
+                <div class="text-2xl mb-2">${badgesHtml}</div>
+                <p class="text-lg font-display font-semibold text-accent mb-1">
+                  Excellent travail ${texte.groupeNom} !
+                </p>
+                <p class="text-text-secondary font-medium">
+                  ${messageBadge}
+                </p>
+              ` : `
+                <div class="text-2xl mb-2 opacity-80">🏆</div>
+                <p class="text-lg font-display font-semibold text-accent mb-1">
+                  Excellent travail ${texte.groupeNom} !
+                </p>
+                <p class="text-text-secondary font-medium">
+                  Votre texte est magnifique, continuez comme ça !
+                </p>
+              `}
+            </div>
+          </div>
+
+          <!-- Contenu du texte -->
+          <div class="bg-surface border border-border/40 rounded-lg p-5 md:p-6 shadow-sm">
+            <div class="prose max-w-none">
+              ${texte.contenu.split('\n').map(paragraphe => `
+                <p class="mb-4 text-text-primary leading-relaxed text-base font-medium">
+                  ${paragraphe}
+                </p>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Message final motivant -->
+          <div class="mt-6 text-center bg-surface border border-border/40 rounded-lg p-5 shadow-sm">
+            <div class="text-3xl mb-2 text-accent opacity-80">🌟</div>
+            <h2 class="text-xl font-display font-semibold text-accent mb-2">
+              Bravo pour cette belle production !
+            </h2>
+            <p class="text-text-secondary">
+              Chaque mot écrit est une victoire. Continuez d'écrire, vous êtes des champions !
+            </p>
+          </div>
+        `;
+      } else {
+        // Texte par défaut si non trouvé dans Firebase
+        const textesParDefaut = {
+          'Groupe A': `Une journée à l'école
+
+Ce matin, je me suis réveillé à 7 heures. Le soleil brillait déjà derrière mes rideaux. J'ai mangé mon petit déjeuner rapidement : des céréales avec du lait et un jus d'orange.
+
+En arrivant à l'école, j'ai vu mes amis dans la cour. Nous avons joué au ballon avant la sonnerie. Notre professeur de français, Madame Dubois, nous a annoncé que nous allions écrire un texte sur nos vacances.
+
+J'étais content car j'avais beaucoup de choses à raconter. Pendant les vacances, je suis allé chez mes grands-parents à la campagne. J'ai aidé mon grand-père dans le jardin et ma grand-mère m'a appris à faire des gâteaux.
+
+À midi, j'ai déjeuné avec Thomas et Léa au self. Nous avons parlé de nos projets pour le week-end. L'après-midi, nous avons fait des mathématiques puis de l'histoire.
+
+La journée s'est terminée par une heure de dessin. J'ai dessiné un paysage avec des montagnes et un lac. Maîtresse a dit que c'était très réussi.
+
+Quand je suis rentré à la maison, j'étais fatigué mais heureux. C'était une bonne journée à l'école !`,
+
+          'Groupe B': `Mon animal préféré
+
+Mon animal préféré, c'est le chat. J'adore les chats parce qu'ils sont doux et intelligents. J'ai un chat qui s'appelle Minou, il est tout noir avec des yeux verts qui brillent dans la nuit.
+
+Minou est très joueur. Tous les jours, quand je rentre de l'école, il vient me frotter contre les jambes pour me dire bonjour. Il aime chasser les papillons dans le jardin et poursuivre les balles que je lui lance.
+
+Ce que je préfère chez les chats, c'est leur indépendance. Contrairement aux chiens qui ont toujours besoin d'attention, les chats savent être seuls sans s'ennuyer. Mais quand ils veulent des câlins, ils viennent nous voir et se frottent contre nous en ronronnant.
+
+Les chats sont aussi très propres. Ils passent beaucoup de temps à faire leur toilette avec leur langue. Leur pelage est toujours doux et parfumé.
+
+Minou dort beaucoup pendant la journée, mais la nuit, il devient plus actif. Parfois, je l'entends marcher sur le toit. C'est un vrai chasseur nocturne !
+
+J'aime regarder Minou quand il est assis sur le mur du jardin, il observe tout autour de lui avec ses yeux perçants. Il semble très sage et intelligent.
+
+Les chats sont des animaux merveilleux. Ils apportent beaucoup de joie et de réconfort. Je suis très content d'avoir Minou comme compagnon.`,
+
+          'Groupe C': `L'histoire d'un héros
+
+Il était une fois un jeune garçon nommé Léo qui vivait dans un petit village au pied d'une montagne mystérieuse. Léo n'était pas comme les autres enfants de son âge. Il possédait un don spécial : il pouvait parler aux animaux.
+
+Un jour, un dragon terrible apparut dans la région. Il faisait peur à tout le monde avec son feu qui détruisait les champs et sa voix qui faisait trembler les maisons. Les villageois étaient terrifiés et ne savaient plus quoi faire.
+
+Léo décida d'affronter le dragon. Mais au lieu de combattre, il voulait comprendre pourquoi le dragon était si en colère. Grâce à son don, il demanda aux oiseaux ce qu'ils savaient sur le dragon.
+
+Les oiseaux lui expliquèrent que le dragon avait perdu son petit et qu'il cherchait désespérément à le retrouver. Sa colère n'était que de la tristesse et de l'inquiétude.
+
+Avec l'aide des écureuils, des lapins et des cerfs, Léo organisa une grande recherche dans toute la forêt. Après trois jours de recherches, ils trouvèrent le petit dragon coincé dans une grotte.
+
+Léo et ses amis animaux libérèrent le bébé dragon. Le père dragon était si heureux et reconnaissant qu'il promit de protéger le village pour toujours.
+
+Depuis ce jour, le dragon et les villageois vivent en paix. Léo est devenu un héros, non pas parce qu'il a combattu, mais parce qu'il a compris et aidé. Il a appris à tout le monde que la gentillesse est plus forte que la violence.
+
+Et c'est ainsi que Léo devint le gardien de la montagne, l'ami des animaux et le héros de son village.`,
+
+          'Groupe D': `Mes vacances d'été
+
+Cet été, j'ai passé les meilleures vacances de ma vie ! Mes parents et moi sommes allés en Tunisie pour visiter ma famille. C'était la première fois que je retournais au pays depuis que je suis né.
+
+Nous sommes partis en avion. J'étais un peu nerveux mais aussi très excité. Quand l'avion a décollé, j'ai senti mon cœur battre très fort. J'ai regardé les nuages passer sous nous, c'était magique !
+
+En arrivant à Tunis, il faisait très chaud. Le soleil brillait et le ciel était bleu. Mes grands-parents m'attendaient à l'aéroport. Ma grand-mère m'a pris dans ses bras et m'a couvert de baisers. Mon grand-père m'a donné un grand câlin et une barre de chocolat.
+
+Chez mes grands-parents, il y avait toujours de bonnes choses à manger. Ma grand-mère faisait le meilleur couscous du monde ! J'adorais aussi ses gâteaux au miel et ses fruits frais du jardin.
+
+L'après-midi, nous allions souvent à la piscine. J'ai appris à nager mieux grâce à mon cousin Karim qui a 14 ans. Nous avons joué pendant des heures dans l'eau, c'était tellement rafraîchissant.
+
+Le week-end, nous sommes allés à la plage. Le sable était doré et chaud sous mes pieds. Les vagues de la mer Méditerranée étaient douces et j'ai pu nager sans avoir peur. J'ai ramassé des coquillages pour en rapporter à mes amis en France.
+
+Un jour, nous avons visité les ruines de Carthage. C'était comme voyager dans le temps. J'imaginais les Romains qui marchaient dans les mêmes rues que moi il y a deux mille ans.
+
+Le soir, je m'asseyais sur la terrasse avec mon grand-père. Il me racontait des histoires de quand il était petit. Je regardais les étoiles qui brillaient plus fort qu'en France.
+
+Quand il a fallu rentrer, j'étais triste de quitter ma famille mais heureux d'avoir passé ces moments merveilleux. J'ai promis de revenir l'année prochaine.
+
+Ces vacances m'ont appris que la famille est le trésor le plus précieux. J'ai hâte de retourner en Tunisie !`
+        };
+
+        const contenu = textesParDefaut[groupe] || "Texte non trouvé. Ce groupe n'a pas encore de texte publié.";
+
+        container.innerHTML = `
+          <!-- En-tête du texte -->
+          <div class="text-center mb-8">
+            <div class="inline-block bg-indigo-500/10 text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-semibold mb-4 border border-indigo-200/50">
+              ${groupe}
+            </div>
+            <h1 class="text-2xl md:text-3xl font-display font-bold text-text-primary mb-2">
+              ${titre}
+            </h1>
+            <p class="text-base text-text-secondary mb-4">
+              ${type}
+            </p>
+            
+            <!-- Message de félicitations -->
+            <div class="bg-surface border border-border/40 rounded-lg p-4 mb-6 shadow-sm">
+              <div class="text-2xl mb-2 opacity-80">🏆</div>
+              <p class="text-lg font-display font-semibold text-accent mb-1">
+                Excellent travail ${groupe} !
+              </p>
+              <p class="text-text-secondary font-medium">
+                Votre texte est magnifique, continuez comme ça !
+              </p>
+            </div>
+          </div>
+
+          <!-- Contenu du texte -->
+          <div class="bg-surface border border-border/40 rounded-lg p-5 md:p-6 shadow-sm">
+            <div class="prose max-w-none">
+              ${contenu.split('\n').map(paragraphe => `
+                <p class="mb-4 text-text-primary leading-relaxed text-base font-medium">
+                  ${paragraphe}
+                </p>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Message final motivant -->
+          <div class="mt-6 text-center bg-surface border border-border/40 rounded-lg p-5 shadow-sm">
+            <div class="text-3xl mb-2 text-accent opacity-80">🌟</div>
+            <h2 class="text-xl font-display font-semibold text-accent mb-2">
+              Bravo pour cette belle production !
+            </h2>
+            <p class="text-text-secondary">
+              Chaque mot écrit est une victoire. Continuez d'écrire, vous êtes des champions !
+            </p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du texte:', error);
+      document.getElementById('texteContainer').innerHTML = `
+        <div class="text-center py-12">
+          <p class="text-red-500 font-medium">Erreur lors du chargement du texte</p>
+        </div>
+      `;
+    }
+  }
+</script>

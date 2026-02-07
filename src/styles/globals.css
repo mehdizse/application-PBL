@@ -4,18 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles for the blog */
+/* Custom styles for Classroom Clean */
 @layer base {
   html {
     @apply scroll-smooth;
   }
   
   body {
-    @apply bg-white text-secondary-700 font-sans leading-relaxed antialiased;
+    @apply bg-background text-text-tertiary font-sans leading-relaxed antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif font-bold text-secondary-900 tracking-tight;
+    @apply font-display font-semibold text-text-primary tracking-tight;
   }
 
   h1 {
@@ -31,11 +31,11 @@
   }
 
   p, ul, ol {
-    @apply mb-6 text-lg leading-relaxed text-secondary-600;
+    @apply mb-6 text-base leading-relaxed text-text-secondary;
   }
 
   a {
-    @apply text-primary-600 hover:text-primary-800 transition-colors duration-150 font-medium;
+    @apply text-primary hover:text-primary-700 transition-colors duration-150 font-medium;
   }
 
   /* Custom selection color */
@@ -51,16 +51,16 @@
   }
 
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md;
+    @apply bg-primary text-surface hover:bg-primary-700 shadow-sm hover:shadow-md;
   }
 
   .btn-secondary {
-    @apply bg-white text-primary-700 border border-primary-200 hover:bg-primary-50 shadow-sm hover:shadow;
+    @apply bg-surface text-text-primary border border-border hover:bg-gray-50 shadow-sm hover:shadow;
   }
 
   /* Cards */
   .card {
-    @apply bg-white rounded-xl shadow-card overflow-hidden transition-shadow duration-300 hover:shadow-card-hover border border-gray-100;
+    @apply bg-surface rounded-lg shadow-card overflow-hidden transition-shadow duration-300 hover:shadow-card-hover border border-border;
   }
 
   .card-hover {
@@ -73,20 +73,20 @@
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-center mb-12 md:mb-16 relative;
+    @apply text-3xl md:text-4xl font-display font-semibold text-center mb-12 md:mb-16 relative;
   }
 
   .section-title:after {
-    @apply content-[''] block w-16 h-1 bg-primary-500 mx-auto mt-4 rounded-full;
+    @apply content-[''] block w-16 h-1 bg-primary mx-auto mt-4 rounded-full;
   }
 
   /* Post Cards */
   .post-card {
-    @apply card p-6 md:p-8 hover:shadow-card-hover transition-all duration-300 border-l-4 border-primary-500;
+    @apply card p-6 md:p-8 hover:shadow-card-hover transition-all duration-300 border-l-4 border-primary;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
 }
 

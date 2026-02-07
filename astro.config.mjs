@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://your-blog-url.netlify.app',
   base: '/',
+  output: 'server',
   integrations: [],
   vite: {
     resolve: {

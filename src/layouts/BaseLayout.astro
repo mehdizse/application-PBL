@@ -63,5 +63,128 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
         <slot />
     </main>
     <Footer />
+    
+    <!-- Scripts Firebase et Firestore -->
+    <script type="module">
+      // Import des modules Firebase ES6
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      
+      // Configuration Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyC_63HQwhIcP_Q0o_qlWYJ0cYk67AUWE4w",
+        authDomain: "learnpbl-1d49f.firebaseapp.com",
+        projectId: "learnpbl-1d49f",
+        storageBucket: "learnpbl-1d49f.firebasestorage.app",
+        messagingSenderId: "548405502023",
+        appId: "1:548405502023:web:ca5e19c0bd56fae6de5162"
+      };
+      
+      // Initialiser Firebase
+      try {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Fonctions Firestore
+        const getGroupes = async () => {
+          const snapshot = await getDocs(collection(db, 'groupes'));
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        };
+        
+        const addGroupe = async (nom) => {
+          const docRef = await addDoc(collection(db, 'groupes'), { 
+            nom, 
+            visible: true, 
+            createdAt: new Date() 
+          });
+          return { id: docRef.id, nom, visible: true };
+        };
+        
+        const updateGroupe = async (id, data) => {
+          await updateDoc(doc(db, 'groupes', id), data);
+        };
+        
+        const deleteGroupe = async (id) => {
+          await deleteDoc(doc(db, 'groupes', id));
+        };
+        
+        const getTextes = async () => {
+          const snapshot = await getDocs(collection(db, 'textes'));
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        };
+        
+        const getTextesVisibles = async () => {
+          const q = query(collection(db, 'textes'), where('visible', '==', true));
+          const snapshot = await getDocs(q);
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        };
+        
+        const addTexte = async (texte) => {
+          const docRef = await addDoc(collection(db, 'textes'), { 
+            ...texte, 
+            visible: true, 
+            createdAt: new Date() 
+          });
+          return { id: docRef.id, ...texte, visible: true };
+        };
+        
+        const updateTexte = async (id, data) => {
+          await updateDoc(doc(db, 'textes', id), data);
+        };
+        
+        const deleteTexte = async (id) => {
+          await deleteDoc(doc(db, 'textes', id));
+        };
+        
+        const getTexte = async (id) => {
+          const docRef = doc(db, 'textes', id);
+          const docSnap = await getDoc(docRef);
+          return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        };
+        
+        const getDefiActuel = async () => {
+          const docRef = doc(db, 'defis', 'actuel');
+          const docSnap = await getDoc(docRef);
+          return docSnap.exists() ? docSnap.data() : null;
+        };
+        
+        const setDefi = async (texte) => {
+          await setDoc(doc(db, 'defis', 'actuel'), { 
+            texte, 
+            updatedAt: new Date() 
+          });
+        };
+        
+        // Rendre les fonctions disponibles globalement
+        window.auth = auth;
+        window.signInWithEmailAndPassword = (auth, email, password) => {
+          return signInWithEmailAndPassword(auth, email, password);
+        };
+        window.signOut = () => {
+          return signOut(auth);
+        };
+        window.onAuthStateChanged = (auth, callback) => {
+          return onAuthStateChanged(auth, callback);
+        };
+        window.getGroupes = getGroupes;
+        window.addGroupe = addGroupe;
+        window.updateGroupe = updateGroupe;
+        window.deleteGroupe = deleteGroupe;
+        window.getTextes = getTextes;
+        window.addTexte = addTexte;
+        window.updateTexte = updateTexte;
+        window.deleteTexte = deleteTexte;
+        window.getTexte = getTexte;
+        window.getDefiActuel = getDefiActuel;
+        window.setDefi = setDefi;
+        window.getTextesVisibles = getTextesVisibles;
+        
+        console.log('✅ Firebase initialisé avec succès');
+      } catch (error) {
+        console.error('❌ Erreur d\'initialisation Firebase:', error);
+      }
+    </script>
 </body>
 </html>

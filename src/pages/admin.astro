@@ -3,619 +3,562 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout>
-  <!-- Auth Check will be done in JavaScript - HIDDEN by default -->
-  <div id="auth-check" class="hidden">
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 py-2">
-      <div class="section-container relative z-10 flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-white mb-0 text-gradient">🎨 Espace Admin</h1>
+  <!-- Ajout d'espace pour le header fixe -->
+  <div class="pt-12 min-h-screen bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 py-6">
+      <!-- Header Admin -->
+      <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-lg font-medium text-gray-900">
+              Espace Enseignant
+            </h1>
+            <p class="text-sm text-gray-500">Gérez les productions de vos élèves</p>
+          </div>
+          <div id="userInfo" class="text-right">
+            <p class="text-xs text-gray-400">Non connecté</p>
+          </div>
         </div>
-        <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
-          🚪 Déconnexion
-        </button>
       </div>
-    </section>
 
-    <!-- Main Content -->
-    <section class="section-container py-16">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Form -->
-        <div class="lg:col-span-2">
-          <!-- Tabs for Format Selection -->
-          <div class="flex space-x-4 mb-8 border-b-2 border-gray-200">
-            <button class="format-tab active pb-4 px-6 border-b-4 border-purple-600 font-bold text-gray-900 transition-all duration-200" data-format="text">
-              📝 Format Écrit
-            </button>
-            <button class="format-tab pb-4 px-6 border-b-4 border-transparent font-bold text-gray-600 hover:text-gray-900 transition-all duration-200" data-format="photo">
-              📸 Format Photo
+      <!-- Section Connexion -->
+      <div id="loginSection" class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+        <h2 class="text-base font-medium text-gray-900 mb-4">Connexion Enseignant</h2>
+        <form id="loginForm" class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" id="email" required 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+            <input type="password" id="password" required 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+          <button type="submit" 
+                  class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">
+            Se connecter
+          </button>
+        </form>
+        <div id="loginError" class="mt-3 p-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md hidden">
+          Erreur de connexion
+        </div>
+      </div>
+
+      <!-- Dashboard Admin -->
+      <div id="dashboardSection" class="hidden">
+        <!-- Défi de la semaine -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+          <h2 class="text-base font-medium text-gray-900 mb-3">
+            Défi de la semaine
+          </h2>
+          <div class="flex gap-2">
+            <input type="text" id="defiInput" placeholder="Ex: Utiliser 3 connecteurs logiques" 
+                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <button onclick="definirDefi()" 
+                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+              Définir le défi
             </button>
           </div>
-
-          <!-- Form Section: Text Format -->
-          <form id="text-form" class="format-content card p-8 mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6">📝 Ajouter un Article Écrit</h2>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Titre de la Production *</label>
-              <input 
-                type="text" 
-                placeholder="Ex: Mon premier poème sur la nature"
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                required
-              >
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label class="block text-sm font-bold text-gray-900 mb-2">Nom de l'Auteur *</label>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Marie Dupont"
-                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                  required
-                >
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-900 mb-2">Classe/Niveau *</label>
-                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200" required>
-                  <option value="">Sélectionnez...</option>
-                  <option value="cp">CP</option>
-                  <option value="ce1">CE1</option>
-                  <option value="ce2">CE2</option>
-                  <option value="cm1">CM1</option>
-                  <option value="cm2">CM2</option>
-                  <option value="6e">6e</option>
-                  <option value="5e">5e</option>
-                  <option value="4e">4e</option>
-                  <option value="3e">3e</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Nom du Projet *</label>
-              <input 
-                type="text" 
-                placeholder="Ex: Découvrir la Poésie"
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                required
-              >
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Description du Projet (Contexte) *</label>
-              <textarea 
-                rows="4"
-                placeholder="Expliquez le contexte du projet et ses objectifs pédagogiques..."
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                required
-              ></textarea>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Contenu de la Production *</label>
-              <textarea 
-                rows="10"
-                placeholder="Collez le texte de l'élève ici..."
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200 font-mono text-sm"
-                required
-              ></textarea>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Tags (séparés par des virgules)</label>
-              <input 
-                type="text" 
-                placeholder="Ex: poésie, nature, créatif"
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              >
-            </div>
-
-            <button 
-              type="submit"
-              class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
-            >
-              <span class="submit-text">📝 Publier l'Article Écrit</span>
-              <span class="submit-spinner hidden">⏳ Publication en cours...</span>
-            </button>
-          </form>
-
-          <!-- Form Section: Photo Format -->
-          <form id="photo-form" class="format-content hidden card p-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6">📸 Ajouter une Photo d'Écrit</h2>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Titre de la Production *</label>
-              <input 
-                type="text" 
-                placeholder="Ex: Mon dessin et mon texte"
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                required
-              >
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label class="block text-sm font-bold text-gray-900 mb-2">Nom de l'Auteur *</label>
-                <input 
-                  type="text" 
-                  placeholder="Ex: Jean Martin"
-                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                  required
-                >
-              </div>
-
-              <div>
-                <label class="block text-sm font-bold text-gray-900 mb-2">Classe/Niveau *</label>
-                <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200" required>
-                  <option value="">Sélectionnez...</option>
-                  <option value="cp">CP</option>
-                  <option value="ce1">CE1</option>
-                  <option value="ce2">CE2</option>
-                  <option value="cm1">CM1</option>
-                  <option value="cm2">CM2</option>
-                  <option value="6e">6e</option>
-                  <option value="5e">5e</option>
-                  <option value="4e">4e</option>
-                  <option value="3e">3e</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Nom du Projet *</label>
-              <input 
-                type="text" 
-                placeholder="Ex: Illustrer une Histoire"
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                required
-              >
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Description du Projet *</label>
-              <textarea 
-                rows="4"
-                placeholder="Contexte et objectifs du projet..."
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-                required
-              ></textarea>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Photo de la Production *</label>
-              <div class="border-2 border-dashed border-purple-300 rounded-lg p-8 text-center hover:bg-purple-50 transition-colors duration-200 cursor-pointer" id="drag-drop-area">
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  class="hidden"
-                  id="photo-input"
-                  required
-                >
-                <label for="photo-input" class="cursor-pointer">
-                  <p class="text-4xl mb-2">📸</p>
-                  <p class="text-gray-900 font-bold mb-1">Cliquez ou glissez votre photo</p>
-                  <p class="text-gray-600 text-sm">Format: JPG, PNG (max 5MB)</p>
-                </label>
-              </div>
-              <!-- Photo Preview -->
-              <div id="photo-preview-container" class="hidden mt-4">
-                <img id="photo-preview" src="" alt="Preview" class="w-full max-h-64 object-cover rounded-lg">
-                <div class="mt-3 flex gap-2">
-                  <button type="button" id="change-photo-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                    🔄 Changer la photo
-                  </button>
-                  <button type="button" id="remove-photo-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                    ❌ Supprimer
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Description de la Photo</label>
-              <textarea 
-                rows="4"
-                placeholder="Expliquez ce qu'on voit sur la photo et le contexte..."
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              ></textarea>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-sm font-bold text-gray-900 mb-2">Tags</label>
-              <input 
-                type="text" 
-                placeholder="Ex: dessin, histoire, créatif"
-                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600 transition-colors duration-200"
-              >
-            </div>
-
-            <button 
-              type="submit"
-              class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-lg transition-all duration-200 shadow-lg"
-            >
-              <span class="submit-text">📸 Publier la Photo</span>
-              <span class="submit-spinner hidden">⏳ Publication en cours...</span>
-            </button>
-          </form>
+          <div id="defiActuel" class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md">
+            <p class="text-sm text-gray-600">Aucun défi défini</p>
+          </div>
         </div>
 
-        <!-- Sidebar -->
-        <aside class="lg:col-span-1">
-          <div class="card p-8 mb-8 bg-gradient-to-br from-purple-50 to-pink-50">
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">📋 Instructions</h3>
-            <div class="space-y-4 text-sm text-gray-700">
-              <div>
-                <p class="font-bold text-purple-600 mb-1">✅ Format Écrit</p>
-                <p>Collez directement le texte ou la production écrite de l'élève</p>
-              </div>
-              <div class="border-t border-gray-200 pt-4">
-                <p class="font-bold text-purple-600 mb-1">✅ Format Photo</p>
-                <p>Uploadez une photo de la production (dessin + texte, travail manuels, etc.)</p>
-              </div>
-              <div class="border-t border-gray-200 pt-4">
-                <p class="font-bold text-purple-600 mb-1">✅ Informations Requises</p>
-                <p>Titre, auteur, classe et contexte du projet</p>
-              </div>
-              <div class="border-t border-gray-200 pt-4">
-                <p class="font-bold text-purple-600 mb-1">✅ Utilité des Tags</p>
-                <p>Catégorisez pour une meilleure organisation</p>
-              </div>
-            </div>
-          </div>
+        <!-- Actions rapides -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+          <button onclick="showAddGroupeModal()" 
+                  class="bg-white border border-gray-300 text-gray-700 p-3 rounded-md hover:bg-gray-50 transition-colors text-center">
+            <div class="text-base mb-1">+</div>
+            <div class="text-sm font-medium">Ajouter un groupe</div>
+          </button>
+          <button onclick="showAddTexteModal()" 
+                  class="bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 transition-colors text-center">
+            <div class="text-base mb-1">📝</div>
+            <div class="text-sm font-medium">Ajouter un texte</div>
+          </button>
+          <button onclick="showBadgesModal()" 
+                  class="bg-white border border-gray-300 text-gray-700 p-3 rounded-md hover:bg-gray-50 transition-colors text-center">
+            <div class="text-base mb-1">🏆</div>
+            <div class="text-sm font-medium">Gérer les badges</div>
+          </button>
+        </div>
 
-          <div class="card p-8 mb-8 border-2 border-purple-500">
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">💡 Conseils Utiles</h3>
-            <ul class="space-y-3 text-sm text-gray-700">
-              <li class="flex items-start space-x-2">
-                <span class="text-purple-600 font-bold">•</span>
-                <span>Obtenez l'accord des parents/tuteurs avant de publier</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="text-purple-600 font-bold">•</span>
-                <span>Variez les types de productions (poèmes, histoires, articles...)</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="text-purple-600 font-bold">•</span>
-                <span>Partagez les photos au moins une fois par mois</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="text-purple-600 font-bold">•</span>
-                <span>Célébrez toutes les productions pour motiver les élèves</span>
-              </li>
-              <li class="flex items-start space-x-2">
-                <span class="text-purple-600 font-bold">•</span>
-                <span>Utilisez les meilleurs travaux pour inspirer d'autres élèves</span>
-              </li>
-            </ul>
+        <!-- Liste des groupes -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+          <h2 class="text-base font-medium text-gray-900 mb-3">
+            Groupes d'élèves
+          </h2>
+          <div id="groupesList" class="space-y-2">
+            <p class="text-gray-400 text-sm">Chargement...</p>
           </div>
+        </div>
 
-          <div class="card p-8 bg-gradient-to-br from-pink-500 to-purple-500 text-white">
-            <h3 class="text-2xl font-bold mb-4">🌟 Galerie Publique</h3>
-            <p class="mb-6">Consultez tous les articles publiés et les meilleures productions</p>
-            <a href="/gallery" class="inline-block bg-white text-purple-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors">
-              👁️ Voir la Galerie
-            </a>
+        <!-- Liste des textes -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h2 class="text-base font-medium text-gray-900 mb-3">
+            Textes des élèves
+          </h2>
+          <div id="textesList" class="space-y-3">
+            <p class="text-gray-400 text-sm">Chargement...</p>
           </div>
-        </aside>
+        </div>
       </div>
-    </section>
+    </div>
   </div>
 
-  <!-- Not Authenticated - ALSO HIDDEN by default until auth check -->
-  <div id="not-authenticated" class="hidden">
-    <section class="section-container py-20">
-      <div class="max-w-md mx-auto text-center">
-        <div class="card p-8">
-          <p class="text-4xl mb-4">🔐</p>
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">Accès Restreint</h2>
-          <p class="text-gray-700 mb-6">Vous devez être connecté pour accéder à cet espace.</p>
-          <a href="/login" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-            🔓 Se Connecter
-          </a>
-        </div>
+  <!-- Modals -->
+  <!-- Modal Ajout Groupe -->
+  <div id="addGroupeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white border border-gray-200 rounded-lg p-6 w-96 shadow-lg">
+      <h3 class="text-base font-medium text-gray-900 mb-4">Ajouter un groupe</h3>
+      <input type="text" id="groupeNomInput" placeholder="Nom du groupe (ex: Groupe A)" 
+             class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+      <div class="flex gap-2">
+        <button onclick="addGroupe()" class="flex-1 bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors">
+          Ajouter
+        </button>
+        <button onclick="closeModal('addGroupeModal')" class="flex-1 bg-white border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50 transition-colors">
+          Annuler
+        </button>
       </div>
-    </section>
+    </div>
+  </div>
+
+  <!-- Modal Ajout Texte -->
+  <div id="addTexteModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-lg">
+      <h3 class="text-base font-medium text-gray-900 mb-4">Ajouter un texte</h3>
+      <form id="texteForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Groupe</label>
+          <select id="texteGroupeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="">Sélectionner un groupe</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
+          <input type="text" id="texteTitreInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select id="texteTypeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="Récit d'aventure">Récit d'aventure</option>
+            <option value="Texte descriptif">Texte descriptif</option>
+            <option value="Nouvelle fantastique">Nouvelle fantastique</option>
+            <option value="Récit de voyage">Récit de voyage</option>
+            <option value="Poème">Poème</option>
+            <option value="Lettre">Lettre</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
+          <textarea id="texteContenuInput" rows="10" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors">
+            Ajouter le texte
+          </button>
+          <button type="button" onclick="closeModal('addTexteModal')" 
+                  class="flex-1 bg-white border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50 transition-colors">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Badges -->
+  <div id="badgesModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-2xl shadow-lg">
+      <h3 class="text-base font-medium text-gray-900 mb-4">Gérer les badges</h3>
+      <div id="badgesList" class="space-y-3">
+        <p class="text-gray-400 text-sm">Chargement...</p>
+      </div>
+      <div class="mt-4">
+        <button onclick="closeModal('badgesModal')" 
+                class="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50 transition-colors">
+          Fermer
+        </button>
+      </div>
+    </div>
   </div>
 </BaseLayout>
 
 <script>
-  // Import des fonctions Firebase
-  import { 
-    collection, 
-    addDoc, 
-    serverTimestamp 
-  } from 'firebase/firestore';
-  
-  import { 
-    auth as firebaseAuth, 
-    db, 
-    onAuthStateChanged, 
-    signOut,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    updateProfile
-  } from '../lib/firebase.js';
+  // Les fonctions Firebase sont chargées globalement via les balises script dans BaseLayout
+  let currentUser = null;
+  let groupes = [];
+  let textes = [];
 
-  // Attendre que le DOM soit complètement chargé
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM chargé, initialisation de l\'administration...');
-    
-    const authCheck = document.getElementById('auth-check');
-    const notAuthenticated = document.getElementById('not-authenticated');
-    const logoutBtn = document.getElementById('logout-btn');
-
-    // Vérifier si les éléments existent
-    if (!authCheck || !notAuthenticated) {
-      console.error('Éléments d\'authentification introuvables dans le DOM');
-      return;
-    }
-
-    // Écouter les changements d'état d'authentification
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      console.log('Changement d\'état d\'authentification détecté', { user: user ? user.email : 'non connecté' });
-      
-      if (user) {
-        console.log('Utilisateur connecté:', user.email);
-        authCheck.classList.remove('hidden');
-        notAuthenticated.classList.add('hidden');
-        
-        // Initialiser les gestionnaires de formulaire
-        try {
-          setupFormHandlers(user);
-          setupTabSwitching();
-          setupPhotoUpload();
-        } catch (error) {
-          console.error('Erreur lors de l\'initialisation des gestionnaires:', error);
-        }
-      } else {
-        console.log('Aucun utilisateur connecté, redirection vers la page de connexion');
-        authCheck.classList.add('hidden');
-        notAuthenticated.classList.remove('hidden');
-        // Rediriger vers la page de connexion après un court délai
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+  // Initialisation
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Attendre que Firebase soit initialisé
+    function waitForFirebase() {
+      if (typeof window.onAuthStateChanged === 'undefined') {
+        setTimeout(waitForFirebase, 100);
+        return;
       }
-    });
+      
+      // Vérifier l'état d'authentification
+      window.onAuthStateChanged(window.auth, (user) => {
+        currentUser = user;
+        if (user) {
+          showDashboard();
+          loadDashboard();
+        } else {
+          showLogin();
+        }
+      });
 
-    // Nettoyer l'écouteur lors du démontage du composant
-    return () => unsubscribe();
+      // Gérer le formulaire de connexion
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      document.getElementById('texteForm').addEventListener('submit', handleAddTexte);
+    }
+    
+    waitForFirebase();
   });
 
-  function setupTabSwitching() {
-    document.querySelectorAll('.format-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const format = tab.dataset.format;
-        
-        document.querySelectorAll('.format-tab').forEach(t => {
-          t.classList.remove('active', 'border-purple-600', 'border-b-4');
-          t.classList.add('border-transparent', 'text-gray-600');
-        });
-        tab.classList.add('active', 'border-purple-600', 'border-b-4', 'text-gray-900');
-        
-        document.querySelectorAll('.format-content').forEach(content => {
-          content.classList.add('hidden');
-        });
-        document.getElementById(`${format}-form`).classList.remove('hidden');
-      });
-    });
+  function showLogin() {
+    document.getElementById('loginSection').classList.remove('hidden');
+    document.getElementById('dashboardSection').classList.add('hidden');
+    document.getElementById('userInfo').innerHTML = '<p class="text-sm text-gray-600">Non connecté</p>';
   }
 
-  function setupPhotoUpload() {
-    const photoInput = document.getElementById('photo-input');
-    const dragDropArea = document.getElementById('drag-drop-area');
-    const photoPreviewContainer = document.getElementById('photo-preview-container');
-    const photoPreview = document.getElementById('photo-preview');
-    const changePhotoBtn = document.getElementById('change-photo-btn');
-    const removePhotoBtn = document.getElementById('remove-photo-btn');
-    
-    // Show preview when photo is selected
-    const showPhotoPreview = (file) => {
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          photoPreview.src = e.target.result;
-          photoPreviewContainer.classList.remove('hidden');
-          dragDropArea.classList.add('hidden');
-        };
-        reader.readAsDataURL(file);
+  function showDashboard() {
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('dashboardSection').classList.remove('hidden');
+    document.getElementById('userInfo').innerHTML = `
+      <p class="text-xs text-gray-500">Connecté en tant que</p>
+      <p class="text-sm font-medium text-gray-900">${currentUser.email}</p>
+      <button onclick="logout()" class="mt-1 text-xs text-gray-500 hover:text-gray-700 underline">Déconnexion</button>
+    `;
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('loginError');
+
+    try {
+      await window.signInWithEmailAndPassword(window.auth, email, password);
+      errorDiv.classList.add('hidden');
+    } catch (error) {
+      // Messages conviviales selon le type d'erreur
+      let friendlyMessage = 'Erreur de connexion';
+      
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        friendlyMessage = 'Email ou mot de passe incorrect';
+      } else if (error.code === 'auth/user-not-found') {
+        friendlyMessage = 'Aucun compte trouvé avec cet email';
+      } else if (error.code === 'auth/too-many-requests') {
+        friendlyMessage = 'Trop de tentatives de connexion. Veuillez réessayer plus tard';
+      } else if (error.code === 'auth/network-request-failed') {
+        friendlyMessage = 'Problème de connexion. Vérifiez votre internet';
+      } else {
+        friendlyMessage = 'Erreur de connexion. Veuillez réessayer';
       }
-    };
+      
+      errorDiv.textContent = friendlyMessage;
+      errorDiv.classList.remove('hidden');
+    }
+  }
 
-    photoInput.addEventListener('change', (e) => {
-      if (e.target.files[0]) {
-        showPhotoPreview(e.target.files[0]);
+  async function logout() {
+    await window.signOut();
+  }
+
+  // Rendre logout disponible globalement
+  window.logout = logout;
+
+  async function loadDashboard() {
+    await Promise.all([
+      window.loadGroupes(),
+      window.loadTextes(),
+      loadDefi()
+    ]);
+  }
+
+  window.loadGroupes = async function() {
+    try {
+      groupes = await window.getGroupes();
+      const container = document.getElementById('groupesList');
+      const select = document.getElementById('texteGroupeSelect');
+      
+      if (groupes.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Aucun groupe pour le moment</p>';
+        select.innerHTML = '<option value="">Aucun groupe disponible</option>';
+        return;
       }
-    });
 
-    changePhotoBtn.addEventListener('click', () => {
-      photoInput.click();
-    });
+      container.innerHTML = groupes.map(groupe => `
+        <div class="flex items-center justify-between p-2 border border-gray-200 rounded-md">
+          <div>
+            <span class="text-sm font-medium text-gray-900">${groupe.nom}</span>
+            <span class="ml-2 text-xs ${groupe.visible ? 'text-green-600' : 'text-red-600'}">
+              ${groupe.visible ? 'Visible' : 'Masqué'}
+            </span>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="toggleGroupeVisibility('${groupe.id}', ${!groupe.visible})" 
+                    class="px-2 py-1 text-xs ${groupe.visible ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} rounded transition-colors">
+              ${groupe.visible ? 'Masquer' : 'Afficher'}
+            </button>
+            <button onclick="deleteGroupeById('${groupe.id}')" 
+                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
+              Supprimer
+            </button>
+          </div>
+        </div>
+      `).join('');
 
-    removePhotoBtn.addEventListener('click', () => {
-      photoInput.value = '';
-      photoPreviewContainer.classList.add('hidden');
-      dragDropArea.classList.remove('hidden');
-    });
+      select.innerHTML = '<option value="">Sélectionner un groupe</option>' + 
+        groupes.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+    } catch (error) {
+      console.error('Erreur lors du chargement des groupes:', error);
+    }
+  }
+
+  window.loadTextes = async function() {
+    try {
+      textes = await window.getTextes();
+      const container = document.getElementById('textesList');
+      
+      if (textes.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Aucun texte pour le moment</p>';
+        return;
+      }
+
+      container.innerHTML = textes.map(texte => `
+        <div class="border border-gray-200 rounded-md p-3">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-medium">
+                  ${texte.groupeNom}
+                </span>
+                <span class="text-sm font-medium text-gray-900">${texte.titre}</span>
+              </div>
+              <span class="text-xs text-gray-500">${texte.type}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              ${texte.badges && texte.badges.length > 0 ? `
+                <div class="flex gap-1 mr-2">
+                  ${texte.badges.map(badge => `<span class="text-xs">${badge}</span>`).join('')}
+                </div>
+              ` : ''}
+              <span class="text-xs ${texte.visible ? 'text-green-600' : 'text-red-600'}">
+                ${texte.visible ? 'Visible' : 'Masqué'}
+              </span>
+            </div>
+          </div>
+          
+          <div class="text-xs text-gray-400 mb-2">
+            Créé le ${new Date(texte.createdAt?.toDate?.() || texte.createdAt).toLocaleDateString('fr-FR')}
+          </div>
+          
+          <div class="flex gap-1">
+            <button onclick="toggleTexteVisibility('${texte.id}', ${!texte.visible})" 
+                    class="px-2 py-1 text-xs ${texte.visible ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} rounded transition-colors">
+              ${texte.visible ? 'Masquer' : 'Afficher'}
+            </button>
+            <button onclick="editTexte('${texte.id}')" 
+                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
+              Modifier
+            </button>
+            <button onclick="deleteTexteById('${texte.id}')" 
+                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
+              Supprimer
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Erreur lors du chargement des textes:', error);
+    }
+  }
+
+  async function loadDefi() {
+    try {
+      const defi = await window.getDefiActuel();
+      const container = document.getElementById('defiActuel');
+      const input = document.getElementById('defiInput');
+      
+      if (defi) {
+        container.innerHTML = `
+          <p class="text-sm font-medium text-gray-900">Défi actuel</p>
+          <p class="text-sm text-gray-700">${defi.texte}</p>
+        `;
+        input.value = defi.texte;
+      } else {
+        container.innerHTML = '<p class="text-sm text-gray-500">Aucun défi défini</p>';
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du défi:', error);
+    }
+  }
+
+  // Fonctions pour les modals
+  window.showAddGroupeModal = function() {
+    document.getElementById('addGroupeModal').classList.remove('hidden');
+  }
+
+  window.showAddTexteModal = function() {
+    document.getElementById('addTexteModal').classList.remove('hidden');
+  }
+
+  window.showBadgesModal = function() {
+    document.getElementById('badgesModal').classList.remove('hidden');
+    window.loadBadges();
+  }
+
+  window.closeModal = function(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+  }
+
+  // Actions
+  window.addGroupe = async function() {
+    const nom = document.getElementById('groupeNomInput').value.trim();
+    if (!nom) return;
+
+    try {
+      await window.addGroupe(nom);
+      document.getElementById('groupeNomInput').value = '';
+      window.closeModal('addGroupeModal');
+      window.loadGroupes();
+    } catch (error) {
+      alert('Erreur lors de l\'ajout du groupe: ' + error.message);
+    }
+  }
+
+  window.handleAddTexte = async function(e) {
+    e.preventDefault();
     
-    if (dragDropArea) {
-      dragDropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dragDropArea.classList.add('bg-purple-50', 'border-purple-600');
+    const groupeId = document.getElementById('texteGroupeSelect').value;
+    const titre = document.getElementById('texteTitreInput').value.trim();
+    const type = document.getElementById('texteTypeSelect').value;
+    const contenu = document.getElementById('texteContenuInput').value.trim();
+    
+    if (!groupeId || !titre || !contenu) return;
+
+    const groupe = groupes.find(g => g.id === groupeId);
+    
+    try {
+      await window.addTexte({
+        groupeId,
+        groupeNom: groupe.nom,
+        titre,
+        type,
+        contenu,
+        badges: []
       });
       
-      dragDropArea.addEventListener('dragleave', () => {
-        dragDropArea.classList.remove('bg-purple-50', 'border-purple-600');
-      });
-      
-      dragDropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dragDropArea.classList.remove('bg-purple-50', 'border-purple-600');
-        if (e.dataTransfer.files.length) {
-          photoInput.files = e.dataTransfer.files;
-          showPhotoPreview(e.dataTransfer.files[0]);
-        }
-      });
+      document.getElementById('texteForm').reset();
+      window.closeModal('addTexteModal');
+      window.loadTextes();
+    } catch (error) {
+      alert('Erreur lors de l\'ajout du texte: ' + error.message);
     }
   }
 
-  function setupFormHandlers(user) {
-    const textForm = document.getElementById('text-form');
-    const photoForm = document.getElementById('photo-form');
-
-    if (textForm) {
-      textForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitBtn = textForm.querySelector('button[type="submit"]');
-        const submitText = submitBtn.querySelector('.submit-text');
-        const submitSpinner = submitBtn.querySelector('.submit-spinner');
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        submitText.classList.add('hidden');
-        submitSpinner.classList.remove('hidden');
-        
-        const inputs = textForm.querySelectorAll('input[type="text"]');
-        const select = textForm.querySelector('select');
-        const textareas = textForm.querySelectorAll('textarea');
-
-        const title = inputs[0].value;
-        const author = inputs[1].value;
-        const level = select.value;
-        const projectName = inputs[2].value;
-        const description = textareas[0].value;
-        const content = textareas[1].value;
-        const tags = inputs[3].value.split(',').map(t => t.trim()).filter(t => t);
-
-        try {
-          await addDoc(collection(db, 'articles'), {
-            title,
-            author,
-            level,
-            projectName,
-            description,
-            content,
-            format: 'écrit',
-            tags,
-            status: 'published',
-            userId: user.uid,
-            createdAt: serverTimestamp()
-          });
-
-          // Show success message
-          alert('✅ Article écrit publié avec succès!');
-          textForm.reset();
-          submitText.classList.remove('hidden');
-          submitSpinner.classList.add('hidden');
-          submitBtn.disabled = false;
-        } catch (error) {
-          alert(`❌ Erreur: ${error.message}`);
-          submitText.classList.remove('hidden');
-          submitSpinner.classList.add('hidden');
-          submitBtn.disabled = false;
-        }
-      });
-    }
-
-    if (photoForm) {
-      photoForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitBtn = photoForm.querySelector('button[type="submit"]');
-        const submitText = submitBtn.querySelector('.submit-text');
-        const submitSpinner = submitBtn.querySelector('.submit-spinner');
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        submitText.classList.add('hidden');
-        submitSpinner.classList.remove('hidden');
-        
-        const inputs = photoForm.querySelectorAll('input[type="text"]');
-        const selects = photoForm.querySelectorAll('select');
-        const textareas = photoForm.querySelectorAll('textarea');
-        const photoInput = document.getElementById('photo-input');
-        const photoFile = photoInput.files[0];
-
-        if (!photoFile) {
-          alert('❌ Veuillez sélectionner une photo');
-          submitText.classList.remove('hidden');
-          submitSpinner.classList.add('hidden');
-          submitBtn.disabled = false;
-          return;
-        }
-
-        const title = inputs[0].value;
-        const author = inputs[1].value;
-        const level = selects[0].value;
-        const projectName = inputs[2].value;
-        const description = textareas[0].value;
-        const photoDescription = textareas[1].value;
-        const tags = inputs[3].value.split(',').map(t => t.trim()).filter(t => t);
-
-        try {
-          // Convert photo to base64
-          const reader = new FileReader();
-          reader.onload = async (event) => {
-            try {
-              const photoBase64 = event.target.result;
-
-              await addDoc(collection(db, 'articles'), {
-                title,
-                author,
-                level,
-                projectName,
-                description,
-                photoDescription,
-                photoBase64, // Store as base64 instead of uploading to Storage
-                format: 'photo',
-                tags,
-                status: 'published',
-                userId: user.uid,
-                createdAt: serverTimestamp()
-              });
-
-              alert('✅ Photo publiée avec succès!');
-              photoForm.reset();
-              document.getElementById('photo-preview-container').classList.add('hidden');
-              document.getElementById('drag-drop-area').classList.remove('hidden');
-              submitText.classList.remove('hidden');
-              submitSpinner.classList.add('hidden');
-              submitBtn.disabled = false;
-            } catch (error) {
-              alert(`❌ Erreur: ${error.message}`);
-              submitText.classList.remove('hidden');
-              submitSpinner.classList.add('hidden');
-              submitBtn.disabled = false;
-            }
-          };
-          reader.readAsDataURL(photoFile);
-        } catch (error) {
-          alert(`❌ Erreur: ${error.message}`);
-          submitText.classList.remove('hidden');
-          submitSpinner.classList.add('hidden');
-          submitBtn.disabled = false;
-        }
-      });
+  window.toggleGroupeVisibility = async function(id, visible) {
+    try {
+      await window.updateGroupe(id, { visible });
+      window.loadGroupes();
+    } catch (error) {
+      alert('Erreur lors de la mise à jour du groupe: ' + error.message);
     }
   }
 
-  // Gestion du bouton de déconnexion
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        console.log('Tentative de déconnexion...');
-        await signOut(firebaseAuth);
-        console.log('Déconnexion réussie, redirection vers la page de connexion');
-        window.location.href = '/login';
-      } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error);
-        // Afficher un message d'erreur à l'utilisateur si nécessaire
-        alert('Une erreur est survenue lors de la déconnexion. Veuillez réessayer.');
-      }
-    });
+  window.toggleTexteVisibility = async function(id, visible) {
+    try {
+      await window.updateTexte(id, { visible });
+      window.loadTextes();
+    } catch (error) {
+      alert('Erreur lors de la mise à jour du texte: ' + error.message);
+    }
+  }
+
+  window.deleteGroupeById = async function(id) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?')) return;
+    
+    try {
+      await window.deleteGroupe(id);
+      window.loadGroupes();
+      window.loadTextes();
+    } catch (error) {
+      alert('Erreur lors de la suppression du groupe: ' + error.message);
+    }
+  }
+
+  window.deleteTexteById = async function(id) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce texte ?')) return;
+    
+    try {
+      await window.deleteTexte(id);
+      window.loadTextes();
+    } catch (error) {
+      alert('Erreur lors de la suppression du texte: ' + error.message);
+    }
+  }
+
+  window.definirDefi = async function() {
+    const defiTexte = document.getElementById('defiInput').value.trim();
+    if (!defiTexte) return;
+
+    try {
+      await window.setDefi(defiTexte);
+      loadDefi();
+    } catch (error) {
+      alert('Erreur lors de la définition du défi: ' + error.message);
+    }
+  }
+
+  window.loadBadges = function() {
+    const badges = ['⭐', '🏆', '🔗', '✍️', '🤝'];
+    const container = document.getElementById('badgesList');
+    
+    container.innerHTML = textes.map(texte => `
+      <div class="border border-gray-200 rounded-md p-3">
+        <div class="text-sm font-medium text-gray-900 mb-2">${texte.titre} (${texte.groupeNom})</div>
+        <div class="flex gap-1 flex-wrap">
+          ${badges.map(badge => `
+            <button onclick="toggleBadge('${texte.id}', '${badge}')" 
+                    class="text-sm p-1.5 rounded ${texte.badges?.includes(badge) ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'} hover:bg-gray-200 transition-colors">
+              ${badge}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.toggleBadge = async function(texteId, badge) {
+    const texte = textes.find(t => t.id === texteId);
+    const badges = texte.badges || [];
+    
+    if (badges.includes(badge)) {
+      badges.splice(badges.indexOf(badge), 1);
+    } else {
+      badges.push(badge);
+    }
+    
+    try {
+      await window.updateTexte(texteId, { badges });
+      window.loadTextes();
+      window.loadBadges();
+    } catch (error) {
+      alert('Erreur lors de la mise à jour des badges: ' + error.message);
+    }
+  }
+
+  window.editTexte = function(id) {
+    // Pour l'instant, on peut juste afficher le contenu
+    const texte = textes.find(t => t.id === id);
+    if (texte) {
+      alert('Contenu du texte:\n\n' + texte.contenu);
+    }
   }
 </script>

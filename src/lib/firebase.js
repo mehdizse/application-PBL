@@ -11,7 +11,7 @@ import {
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getFirebaseConfig } from './firebaseConfigProd.js';
+import { getFirebaseConfig } from './firebaseConfigLocal.js'; // Utilisation de la config locale
 
 // Get Firebase configuration
 const firebaseConfig = getFirebaseConfig();
