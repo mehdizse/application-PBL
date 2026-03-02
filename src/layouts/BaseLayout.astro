@@ -10,7 +10,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content={description} />
     
@@ -69,7 +69,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
       // Import des modules Firebase ES6
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       
       // Configuration Firebase
       const firebaseConfig = {
@@ -110,24 +110,33 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
           await deleteDoc(doc(db, 'groupes', id));
         };
         
+        let textesWeekMigrationPromise = null;
+
         const getTextes = async () => {
+          await ensureTextesWeekIds();
           const snapshot = await getDocs(collection(db, 'textes'));
           return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         };
         
         const getTextesVisibles = async () => {
+          await ensureTextesWeekIds();
           const q = query(collection(db, 'textes'), where('visible', '==', true));
           const snapshot = await getDocs(q);
           return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         };
         
         const addTexte = async (texte) => {
+          const createdAt = new Date();
+          const weeklyData = await getWeeklyExpressionsData();
+          const fallbackWeek = getIsoWeekInfo(createdAt);
+          const currentWeekId = String(weeklyData?.currentWeek?.weekId || fallbackWeek.weekId).trim();
           const docRef = await addDoc(collection(db, 'textes'), { 
             ...texte, 
-            visible: true, 
-            createdAt: new Date() 
+            visible: true,
+            weekId: currentWeekId,
+            createdAt
           });
-          return { id: docRef.id, ...texte, visible: true };
+          return { id: docRef.id, ...texte, visible: true, weekId: currentWeekId, createdAt };
         };
         
         const updateTexte = async (id, data) => {
@@ -144,16 +153,478 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
           return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
         };
         
+        const WEEKLY_COLLECTION = 'weeklyExpressions';
+        const WEEKLY_META_DOC = { collection: 'weeklyExpressionsMeta', id: 'current' };
+        const LEGACY_DEFI_DOC = { collection: 'defis', id: 'actuel' };
+
+        const pad2 = (value) => String(value).padStart(2, '0');
+
+        const getIsoWeekInfo = (date = new Date()) => {
+          const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+          const dayNum = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+          const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+          const year = d.getUTCFullYear();
+
+          const monday = new Date(d);
+          monday.setUTCDate(d.getUTCDate() - ((d.getUTCDay() || 7) - 1));
+          const sunday = new Date(monday);
+          sunday.setUTCDate(monday.getUTCDate() + 6);
+
+          const toDateOnly = (rawDate) => {
+            const y = rawDate.getUTCFullYear();
+            const m = pad2(rawDate.getUTCMonth() + 1);
+            const day = pad2(rawDate.getUTCDate());
+            return `${y}-${m}-${day}`;
+          };
+
+          return {
+            weekId: `${year}-${pad2(weekNo)}`,
+            startDate: toDateOnly(monday),
+            endDate: toDateOnly(sunday)
+          };
+        };
+
+        const getPreviousWeekDate = (date = new Date()) => {
+          const prev = new Date(date);
+          prev.setDate(prev.getDate() - 7);
+          return prev;
+        };
+
+        const normalizeExpressions = (value) => {
+          if (!Array.isArray(value)) return [];
+          return value
+            .map((entry) => String(entry ?? '').trim())
+            .filter((entry) => entry.length > 0);
+        };
+
+        const parseLegacyTextToExpressions = (text) => {
+          const safeText = String(text ?? '').trim();
+          if (!safeText) return [];
+          return safeText
+            .split('\n')
+            .map((line) => line.replace(/^[-*]\s*/, '').trim())
+            .filter((line) => line.length > 0);
+        };
+
+        const toJsDate = (value) => {
+          if (!value) return null;
+          if (typeof value?.toDate === 'function') return value.toDate();
+          if (value instanceof Date) return value;
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? null : parsed;
+        };
+
+        const extractLegacyReferenceDate = (legacyData) => {
+          const fromUpdatedAt = toJsDate(legacyData?.updatedAt);
+          if (fromUpdatedAt) return fromUpdatedAt;
+          const fromCreatedAt = toJsDate(legacyData?.createdAt);
+          if (fromCreatedAt) return fromCreatedAt;
+          return new Date();
+        };
+
+        const WEEK_ID_REGEX = /^\d{4}-\d{2}$/;
+        const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+        const DATE_FR_REGEX = /^\d{2}\/\d{2}\/\d{4}$/;
+
+        const toUtcDate = (year, month, day) => {
+          const date = new Date(Date.UTC(year, month - 1, day));
+          if (
+            date.getUTCFullYear() !== year ||
+            date.getUTCMonth() !== month - 1 ||
+            date.getUTCDate() !== day
+          ) {
+            return null;
+          }
+          return date;
+        };
+
+        const parseFlexibleDate = (value) => {
+          if (!value) return null;
+
+          if (typeof value?.toDate === 'function') {
+            const date = value.toDate();
+            return toUtcDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+          }
+
+          if (value instanceof Date) {
+            return toUtcDate(value.getUTCFullYear(), value.getUTCMonth() + 1, value.getUTCDate());
+          }
+
+          const raw = String(value).trim();
+          if (!raw) return null;
+
+          if (DATE_REGEX.test(raw)) {
+            const [year, month, day] = raw.split('-').map(Number);
+            return toUtcDate(year, month, day);
+          }
+
+          if (DATE_FR_REGEX.test(raw)) {
+            const [day, month, year] = raw.split('/').map(Number);
+            return toUtcDate(year, month, day);
+          }
+
+          return null;
+        };
+
+        const parseIsoDateStrict = (value) => {
+          if (typeof value !== 'string') return null;
+          const raw = value.trim();
+          if (!DATE_REGEX.test(raw)) return null;
+          const [year, month, day] = raw.split('-').map(Number);
+          return toUtcDate(year, month, day);
+        };
+
+        const ensureTextesWeekIds = async () => {
+          if (textesWeekMigrationPromise) return textesWeekMigrationPromise;
+
+          textesWeekMigrationPromise = (async () => {
+            const snapshot = await getDocs(collection(db, 'textes'));
+            const updates = [];
+
+            snapshot.docs.forEach((texteDoc) => {
+              const data = texteDoc.data();
+              const existingWeekId = String(data?.weekId || '').trim();
+              if (WEEK_ID_REGEX.test(existingWeekId)) return;
+
+              const createdAtDate = toJsDate(data?.createdAt) || new Date();
+              const weekInfo = getIsoWeekInfo(createdAtDate);
+              updates.push(
+                setDoc(
+                  doc(db, 'textes', texteDoc.id),
+                  {
+                    weekId: weekInfo.weekId,
+                    updatedAt: new Date()
+                  },
+                  { merge: true }
+                )
+              );
+            });
+
+            if (updates.length > 0) {
+              await Promise.all(updates);
+            }
+          })();
+
+          try {
+            await textesWeekMigrationPromise;
+          } finally {
+            textesWeekMigrationPromise = null;
+          }
+        };
+
+        const toIsoDate = (date) => {
+          const y = date.getUTCFullYear();
+          const m = pad2(date.getUTCMonth() + 1);
+          const d = pad2(date.getUTCDate());
+          return `${y}-${m}-${d}`;
+        };
+
+        const isWithinRangeInclusive = (candidateDate, startDate, endDate) => {
+          const c = candidateDate.getTime();
+          return c >= startDate.getTime() && c <= endDate.getTime();
+        };
+
+        const toWeekRecord = (rawData, fallbackWeekInfo) => {
+          if (!rawData || typeof rawData !== 'object') return null;
+          const weekId = String(rawData.weekId || fallbackWeekInfo.weekId || '').trim();
+          const parsedStartDate = parseFlexibleDate(rawData.startDate || rawData.dateDebut || fallbackWeekInfo.startDate);
+          const parsedEndDate = parseFlexibleDate(rawData.endDate || rawData.dateFin || fallbackWeekInfo.endDate);
+          const expressions = normalizeExpressions(rawData.expressions);
+
+          if (
+            !weekId ||
+            !parsedStartDate ||
+            !parsedEndDate ||
+            expressions.length === 0 ||
+            !WEEK_ID_REGEX.test(weekId)
+          ) {
+            return null;
+          }
+
+          const startTime = parsedStartDate.getTime();
+          const endTime = parsedEndDate.getTime();
+          if (endTime < startTime) return null;
+
+          return {
+            weekId,
+            startDate: toIsoDate(parsedStartDate),
+            endDate: toIsoDate(parsedEndDate),
+            expressions,
+            _startTime: startTime,
+            _endTime: endTime
+          };
+        };
+
+        const sortWeeksDesc = (weeks) => {
+          return [...weeks].sort((a, b) => {
+            if (b._endTime !== a._endTime) return b._endTime - a._endTime;
+            if (b._startTime !== a._startTime) return b._startTime - a._startTime;
+            return b.weekId.localeCompare(a.weekId);
+          });
+        };
+
+        const buildSeedWeeks = () => {
+          const current = getIsoWeekInfo(new Date());
+          const previous = getIsoWeekInfo(getPreviousWeekDate(new Date()));
+          return sortWeeksDesc([
+            {
+              ...current,
+              expressions: [
+                'Utilise au moins 3 connecteurs logiques.',
+                'Ajoute une phrase de conclusion forte.',
+                'Varie la longueur de tes phrases.'
+              ]
+            },
+            {
+              ...previous,
+              expressions: [
+                'Commence ton texte par une accroche.',
+                'Décris une émotion avec au moins 2 adjectifs.',
+                'Relis et corrige les accords.'
+              ]
+            }
+          ]);
+        };
+
+        const saveWeeks = async (weeks) => {
+          await Promise.all(
+            weeks.map((week) =>
+              setDoc(doc(db, WEEKLY_COLLECTION, week.weekId), {
+                weekId: week.weekId,
+                startDate: week.startDate,
+                endDate: week.endDate,
+                expressions: week.expressions,
+                updatedAt: new Date()
+              }, { merge: true })
+            )
+          );
+        };
+
+        const getWeeklyExpressionsData = async () => {
+          const fallbackWeek = getIsoWeekInfo(new Date());
+          let weeklyDocs = await getDocs(collection(db, WEEKLY_COLLECTION));
+          let weeks = sortWeeksDesc(
+            weeklyDocs.docs
+              .map((weekDoc) => toWeekRecord(weekDoc.data(), fallbackWeek))
+              .filter(Boolean)
+          );
+
+          if (weeks.length === 0) {
+            const legacyDocRef = doc(db, LEGACY_DEFI_DOC.collection, LEGACY_DEFI_DOC.id);
+            const legacySnap = await getDoc(legacyDocRef);
+
+            if (legacySnap.exists() && legacySnap.data()?.texte) {
+              const legacyData = legacySnap.data();
+              const legacyReferenceDate = extractLegacyReferenceDate(legacyData);
+              const legacyWeekInfo = getIsoWeekInfo(legacyReferenceDate);
+              const legacyExpressions = parseLegacyTextToExpressions(legacyData.texte);
+              const migratedWeek = {
+                ...legacyWeekInfo,
+                expressions: legacyExpressions.length > 0 ? legacyExpressions : ['Complète cette semaine avec tes premières expressions.']
+              };
+
+              await setDoc(doc(db, WEEKLY_COLLECTION, migratedWeek.weekId), {
+                ...migratedWeek,
+                migratedFromLegacy: true,
+                migratedAt: new Date(),
+                updatedAt: new Date()
+              });
+
+              weeks = [migratedWeek];
+            } else {
+              weeks = buildSeedWeeks();
+              await saveWeeks(weeks);
+            }
+          }
+
+          weeks = sortWeeksDesc(weeks);
+          const metaRef = doc(db, WEEKLY_META_DOC.collection, WEEKLY_META_DOC.id);
+          const metaSnap = await getDoc(metaRef);
+          const metaWeekId = metaSnap.exists()
+            ? String(metaSnap.data()?.currentWeekId || '').trim()
+            : '';
+
+          const today = new Date();
+          const todayUtc = toUtcDate(today.getUTCFullYear(), today.getUTCMonth() + 1, today.getUTCDate());
+
+          const currentWeekByMeta = metaWeekId
+            ? weeks.find((week) => week.weekId === metaWeekId)
+            : null;
+          const currentWeekByDate = weeks.find((week) =>
+            isWithinRangeInclusive(todayUtc, new Date(week._startTime), new Date(week._endTime))
+          );
+
+          let currentWeek = currentWeekByMeta || currentWeekByDate || weeks[0];
+          let selectionMode = (currentWeekByMeta || currentWeekByDate) ? 'current' : 'latest_published';
+
+          if (!currentWeek) {
+            currentWeek = {
+              ...fallbackWeek,
+              expressions: ['Ajoute les expressions de la semaine.'],
+              _startTime: parseFlexibleDate(fallbackWeek.startDate).getTime(),
+              _endTime: parseFlexibleDate(fallbackWeek.endDate).getTime()
+            };
+            weeks = [currentWeek];
+            await saveWeeks(weeks);
+            selectionMode = 'current';
+          }
+
+          if (selectionMode === 'current' && metaWeekId !== currentWeek.weekId) {
+            await setDoc(metaRef, {
+              currentWeekId: currentWeek.weekId,
+              updatedAt: new Date()
+            }, { merge: true });
+          }
+
+          return {
+            currentWeekId: currentWeek.weekId,
+            currentWeek,
+            weeks,
+            archives: weeks.filter((week) => week.weekId !== currentWeek.weekId),
+            selectionMode,
+            isCurrentWeek: selectionMode === 'current'
+          };
+        };
+
+        const setWeeklyExpressionsForWeek = async ({ weekId, startDate, endDate, expressions }) => {
+          const defaultWeek = getIsoWeekInfo(new Date());
+          const cleanWeekId = String(weekId || defaultWeek.weekId).trim();
+          const startDateInput = String(startDate || defaultWeek.startDate).trim();
+          const endDateInput = String(endDate || defaultWeek.endDate).trim();
+          const startDateObj = parseIsoDateStrict(startDateInput);
+          const endDateObj = parseIsoDateStrict(endDateInput);
+          const cleanStartDate = startDateObj ? toIsoDate(startDateObj) : '';
+          const cleanEndDate = endDateObj ? toIsoDate(endDateObj) : '';
+          const cleanExpressions = normalizeExpressions(expressions);
+
+          if (!cleanWeekId) throw new Error('weekId manquant');
+          if (cleanExpressions.length === 0) throw new Error('Aucune expression fournie');
+          if (!WEEK_ID_REGEX.test(cleanWeekId)) throw new Error('Format weekId invalide (attendu YYYY-WW)');
+          if (!startDateObj || !endDateObj) throw new Error('Format de date invalide (attendu YYYY-MM-DD)');
+          if (endDateObj.getTime() < startDateObj.getTime()) throw new Error('La date de fin doit etre apres la date de debut');
+
+          const weekRef = doc(db, WEEKLY_COLLECTION, cleanWeekId);
+          const existingSnap = await getDoc(weekRef);
+          const createdAt = existingSnap.exists() ? existingSnap.data().createdAt || new Date() : new Date();
+
+          await setDoc(weekRef, {
+            weekId: cleanWeekId,
+            startDate: cleanStartDate,
+            endDate: cleanEndDate,
+            dateDebut: cleanStartDate,
+            dateFin: cleanEndDate,
+            expressions: cleanExpressions,
+            createdAt,
+            updatedAt: new Date()
+          }, { merge: true });
+
+          await setDoc(doc(db, WEEKLY_META_DOC.collection, WEEKLY_META_DOC.id), {
+            currentWeekId: cleanWeekId,
+            updatedAt: new Date()
+          }, { merge: true });
+
+          return {
+            weekId: cleanWeekId,
+            startDate: cleanStartDate,
+            endDate: cleanEndDate,
+            expressions: cleanExpressions
+          };
+        };
+
+        const repairLegacyMigrationWeeks = async () => {
+          const legacyDocRef = doc(db, LEGACY_DEFI_DOC.collection, LEGACY_DEFI_DOC.id);
+          const legacySnap = await getDoc(legacyDocRef);
+
+          if (!legacySnap.exists() || !legacySnap.data()?.texte) {
+            return { repaired: false, reason: 'legacy_missing' };
+          }
+
+          const legacyData = legacySnap.data();
+          const legacyReferenceDate = extractLegacyReferenceDate(legacyData);
+          const expectedWeekInfo = getIsoWeekInfo(legacyReferenceDate);
+          const expectedWeekId = expectedWeekInfo.weekId;
+          const expectedExpressions = parseLegacyTextToExpressions(legacyData.texte);
+
+          const migratedQuery = query(collection(db, WEEKLY_COLLECTION), where('migratedFromLegacy', '==', true));
+          const migratedSnapshot = await getDocs(migratedQuery);
+          if (migratedSnapshot.empty) {
+            return { repaired: false, reason: 'no_migrated_docs' };
+          }
+
+          const migratedDocs = migratedSnapshot.docs.map((item) => ({ id: item.id, data: item.data() }));
+          const expectedDoc = migratedDocs.find((item) => item.id === expectedWeekId);
+          const mismatchedDocs = migratedDocs.filter((item) => {
+            return (
+              item.id !== expectedWeekId ||
+              item.data.startDate !== expectedWeekInfo.startDate ||
+              item.data.endDate !== expectedWeekInfo.endDate
+            );
+          });
+
+          if (!expectedDoc || mismatchedDocs.length > 0) {
+            const expressionsFromExisting = expectedDoc?.data?.expressions;
+            const normalizedExpressions = normalizeExpressions(expressionsFromExisting ?? expectedExpressions);
+            await setDoc(doc(db, WEEKLY_COLLECTION, expectedWeekId), {
+              weekId: expectedWeekId,
+              startDate: expectedWeekInfo.startDate,
+              endDate: expectedWeekInfo.endDate,
+              dateDebut: expectedWeekInfo.startDate,
+              dateFin: expectedWeekInfo.endDate,
+              expressions: normalizedExpressions.length > 0 ? normalizedExpressions : ['Ajoute les expressions de la semaine.'],
+              migratedFromLegacy: true,
+              migratedAt: new Date(),
+              legacyReferenceDate: expectedWeekInfo.startDate,
+              updatedAt: new Date()
+            }, { merge: true });
+
+            await Promise.all(
+              mismatchedDocs
+                .filter((item) => item.id !== expectedWeekId)
+                .map((item) => deleteDoc(doc(db, WEEKLY_COLLECTION, item.id)))
+            );
+          }
+
+          const weeklyData = await getWeeklyExpressionsData();
+          const metaRef = doc(db, WEEKLY_META_DOC.collection, WEEKLY_META_DOC.id);
+          if (weeklyData.isCurrentWeek) {
+            await setDoc(metaRef, {
+              currentWeekId: weeklyData.currentWeekId,
+              updatedAt: new Date()
+            }, { merge: true });
+          } else {
+            await setDoc(metaRef, {
+              currentWeekId: deleteField(),
+              updatedAt: new Date()
+            }, { merge: true });
+          }
+
+          return {
+            repaired: true,
+            expectedWeekId,
+            selectionMode: weeklyData.selectionMode
+          };
+        };
+
         const getDefiActuel = async () => {
-          const docRef = doc(db, 'defis', 'actuel');
-          const docSnap = await getDoc(docRef);
-          return docSnap.exists() ? docSnap.data() : null;
+          const data = await getWeeklyExpressionsData();
+          if (!data?.currentWeek) return null;
+          return {
+            weekId: data.currentWeek.weekId,
+            startDate: data.currentWeek.startDate,
+            endDate: data.currentWeek.endDate,
+            expressions: data.currentWeek.expressions,
+            texte: data.currentWeek.expressions.join('\n')
+          };
         };
         
         const setDefi = async (texte) => {
-          await setDoc(doc(db, 'defis', 'actuel'), { 
-            texte, 
-            updatedAt: new Date() 
+          const defaultWeek = getIsoWeekInfo(new Date());
+          const expressions = parseLegacyTextToExpressions(texte);
+          await setWeeklyExpressionsForWeek({
+            ...defaultWeek,
+            expressions
           });
         };
         
@@ -179,6 +650,11 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
         window.getTexte = getTexte;
         window.getDefiActuel = getDefiActuel;
         window.setDefi = setDefi;
+        window.getIsoWeekInfo = getIsoWeekInfo;
+        window.getWeeklyExpressionsData = getWeeklyExpressionsData;
+        window.setWeeklyExpressionsForWeek = setWeeklyExpressionsForWeek;
+        window.repairLegacyMigrationWeeks = repairLegacyMigrationWeeks;
+        window.migrateTextesWeekIds = ensureTextesWeekIds;
         window.getTextesVisibles = getTextesVisibles;
         
         console.log('✅ Firebase initialisé avec succès');
@@ -188,3 +664,4 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
     </script>
 </body>
 </html>
+

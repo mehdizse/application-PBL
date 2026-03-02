@@ -1,23 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Récupérer l'ID depuis les paramètres de l'URL
 const { id } = Astro.params;
 ---
 
 <BaseLayout>
-  <div class="pt-16 min-h-screen bg-gray-50">
-    <div class="max-w-md mx-auto px-4 pb-10">
-      <!-- Bouton retour -->
-      <button onclick="history.back()" class="mb-4 bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-200 hover:text-gray-800 transition-all duration-150">
-        <span class="mr-2">←</span>
+  <div class="min-h-screen bg-gradient-to-b from-indigo-50/50 to-white pt-16">
+    <div class="max-w-3xl mx-auto px-4 py-6">
+      <button
+        onclick="history.back()"
+        class="mb-8 bg-white border border-gray-200 rounded-xl shadow-sm px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        <span class="mr-2">&larr;</span>
         Retour aux productions
       </button>
 
-      <!-- Contenu chargé dynamiquement -->
-      <div id="texteContainer" class="space-y-4">
-        <div class="text-center py-12">
-          <div class="text-4xl mb-4 text-gray-400 opacity-70">📚</div>
+      <div id="texteContainer" class="space-y-6">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
           <p class="text-gray-600 font-medium">Chargement du texte...</p>
         </div>
       </div>
@@ -26,101 +25,122 @@ const { id } = Astro.params;
 </BaseLayout>
 
 <script>
-  // Charger le texte au chargement de la page
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function cleanupContent(content, groupeNom) {
+    return String(content || '')
+      .split('\n')
+      .map((line) =>
+        line
+          .replace(/^Excellent travail.*!$/gm, '')
+          .replace(/^Très bon travail.*!$/gm, '')
+          .replace(new RegExp(`^${groupeNom}$`, 'gm'), '')
+      )
+      .join('\n')
+      .trim();
+  }
+
+  async function waitForFirebase() {
+    if (typeof window.getTexte === 'undefined') {
+      await new Promise((resolve) => setTimeout(resolve, 80));
+      return waitForFirebase();
+    }
+    return null;
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
+    await waitForFirebase();
     await loadTexte();
   });
 
   async function loadTexte() {
+    const container = document.getElementById('texteContainer');
+
     try {
       const texteId = window.location.pathname.split('/').pop();
-      
-      let texte;
-      
-      // Si on a un ID, on charge depuis Firebase
-      if (texteId && texteId !== 'undefined') {
-        texte = await window.getTexte(texteId);
-      }
 
-      const container = document.getElementById('texteContainer');
-
-      if (texte) {
-        // Badges avec leurs significations
-        const badgesMap = {
-          '⭐': 'Texte de la semaine',
-          '🏆': 'Meilleure introduction',
-          '🔗': 'Bon usage des connecteurs',
-          '✍️': 'Texte bien rédigé',
-          '🤝': 'Bon travail de groupe'
-        };
-
+      if (!texteId || texteId === 'undefined') {
         container.innerHTML = `
-          <!-- Badge groupe + Titre + Type -->
-          <div>
-            <!-- Badge groupe -->
-            <div class="mb-3">
-              <span class="inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium bg-gray-50">
-                ${texte.groupeNom}
-              </span>
-            </div>
-            
-            <!-- Titre et type -->
-            <h1 class="text-2xl font-bold text-gray-900 mb-2 break-words overflow-wrap-anywhere" style="overflow-wrap: anywhere;">
-              ${texte.titre}
-            </h1>
-            <p class="text-sm text-gray-600">
-              ${texte.type}
-            </p>
-          </div>
-
-          <!-- Ligne badges (si présents) -->
-          ${texte.badges && texte.badges.length > 0 ? `
-            <div class="flex flex-wrap gap-2 items-center">
-              ${texte.badges.map(badge => `
-                <span class="px-2 py-1 rounded-full bg-gray-100 text-sm" title="${badge}">
-                  ${badgesMap[badge] || badge}
-                </span>
-              `).join('')}
-            </div>
-          ` : ''}
-
-          <!-- Carte Lecture -->
-          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-            <div class="text-base leading-7 text-gray-800 break-words overflow-wrap-anywhere" style="overflow-wrap: anywhere;">
-              ${texte.contenu.split('\n').map(paragraphe => {
-                // Supprimer les lignes qui répètent le groupe ou les messages de motivation
-                const cleanedParagraphe = paragraphe
-                  .replace(/^Excellent travail.*!$/gm, '')
-                  .replace(/^Très bon travail.*!$/gm, '')
-                  .replace(new RegExp(`^${texte.groupeNom}$`, 'gm'), '')
-                  .trim();
-                return cleanedParagraphe ? `<p class="mb-4 last:mb-0">${cleanedParagraphe}</p>` : '';
-              }).join('')}
-            </div>
-          </div>
-
-          <!-- Message motivation (optionnel) -->
-          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 text-center">
-            <p class="text-sm text-gray-600 font-medium">Excellent travail !</p>
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
+            <p class="text-gray-600 font-medium">Texte non trouvé</p>
           </div>
         `;
-      } else {
-        // Texte par défaut si non trouvé dans Firebase
+        return;
+      }
+
+      const texte = await window.getTexte(texteId);
+      if (!texte) {
         container.innerHTML = `
-          <div class="text-center py-12">
-            <div class="text-4xl mb-4 text-gray-400 opacity-70">📝</div>
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
             <p class="text-gray-600 font-medium">Texte non trouvé</p>
             <p class="text-gray-500 text-sm mt-2">Ce texte n'est pas encore disponible.</p>
           </div>
         `;
+        return;
       }
+
+      const badgesMap = {
+        '⭐': 'Texte de la semaine',
+        '🏆': 'Meilleure introduction',
+        '🔗': 'Bon usage des connecteurs',
+        '✍️': 'Texte bien rédigé',
+        '🤝': 'Bon travail de groupe'
+      };
+
+      const cleanedContent = cleanupContent(texte.contenu, texte.groupeNom);
+      const remarque = String(texte.remarqueEnseignant || '').trim();
+
+      container.innerHTML = `
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
+          <div class="flex items-center justify-between gap-2">
+            <span class="inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium bg-gray-50 text-gray-700">
+              ${escapeHtml(texte.groupeNom)}
+            </span>
+            <span class="text-xs text-gray-500">${escapeHtml(texte.type || '')}</span>
+          </div>
+
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 break-words" style="overflow-wrap:anywhere;">
+            ${escapeHtml(texte.titre)}
+          </h1>
+
+          ${Array.isArray(texte.badges) && texte.badges.length > 0 ? `
+            <div class="flex flex-wrap gap-2">
+              ${texte.badges.map((badge) => `
+                <span class="px-2 py-1 rounded-full bg-gray-100 text-sm text-gray-700" title="${escapeHtml(badge)}">
+                  ${escapeHtml(badgesMap[badge] || badge)}
+                </span>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 leading-relaxed whitespace-pre-line text-gray-800" style="overflow-wrap:anywhere;">
+          ${escapeHtml(cleanedContent)}
+        </div>
+
+        ${remarque ? `
+          <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">💬</span>
+              <p class="text-sm font-semibold text-indigo-900">Remarque de l'enseignant</p>
+            </div>
+            <p class="text-sm text-indigo-900 whitespace-pre-line">${escapeHtml(remarque)}</p>
+          </div>
+        ` : ''}
+      `;
     } catch (error) {
       console.error('Erreur lors du chargement du texte:', error);
-      document.getElementById('texteContainer').innerHTML = `
-        <div class="text-center py-12">
-          <div class="text-4xl mb-4 text-red-400 opacity-70">😅</div>
+      container.innerHTML = `
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
           <p class="text-red-500 font-medium">Petit problème technique...</p>
-          <p class="text-gray-500 text-sm mt-2">Réessaie dans quelques instants !</p>
+          <p class="text-gray-500 text-sm mt-2">Réessaie dans quelques instants.</p>
         </div>
       `;
     }

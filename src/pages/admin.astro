@@ -47,22 +47,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <!-- Dashboard Admin -->
       <div id="dashboardSection" class="hidden">
-        <!-- Défi de la semaine -->
+        <!-- Expressions de la semaine -->
         <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
           <h2 class="text-base font-medium text-gray-900 mb-3">
-            Défi de la semaine
+            Expressions de la semaine
           </h2>
-          <div class="space-y-2">
-            <textarea id="defiInput" placeholder="Ex:&#10;- Utiliser 3 connecteurs logiques&#10;- Écrire au moins 8 lignes&#10;- Ajouter une conclusion" 
-                     rows="3" 
-                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
-            <button onclick="definirDefi()" 
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
-              Définir le défi
-            </button>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Week ID</label>
+              <input id="weekIdInput" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" placeholder="YYYY-WW" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Date début</label>
+              <input id="weekStartInput" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Date fin</label>
+              <input id="weekEndInput" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md" />
+            </div>
           </div>
-          <div id="defiActuel" class="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-md">
-            <p class="text-sm text-gray-600">Aucun défi défini</p>
+          <div class="space-y-2">
+            <textarea id="defiInput" placeholder="Une expression par ligne" 
+                     rows="4" 
+                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="definirDefi()" 
+                      class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+                Enregistrer la semaine
+              </button>
+              <button onclick="reparerMigrationLegacy()" 
+                      class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors">
+                Reparer migration legacy
+              </button>
+            </div>
+          </div>
+          <div id="legacyRepairStatus" class="mt-2 text-xs text-gray-500"></div>
+          <div id="defiActuel" class="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-md">
+            <p class="text-sm text-gray-600">Aucune semaine chargée</p>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs font-medium text-gray-700 mb-2">Archives</p>
+            <div id="defiArchives" class="flex flex-wrap gap-2"></div>
           </div>
         </div>
 
@@ -157,6 +182,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <textarea id="texteContenuInput" rows="10" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Remarque de l'enseignant (optionnel)</label>
+          <textarea id="texteRemarqueInput" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Ex: Bonne progression sur l'introduction et les connecteurs."></textarea>
+        </div>
         <div class="flex gap-2">
           <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors">
             Ajouter le texte
@@ -221,6 +252,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let currentUser = null;
   let groupes = [];
   let textes = [];
+  let weeklyExpressionsData = null;
 
   // Initialisation
   document.addEventListener('DOMContentLoaded', async () => {
@@ -307,7 +339,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     await Promise.all([
       window.loadGroupes(),
       window.loadTextes(),
-      loadDefi()
+      loadWeeklyExpressions()
     ]);
   }
 
@@ -414,24 +446,124 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 
-  async function loadDefi() {
-    try {
-      const defi = await window.getDefiActuel();
-      const container = document.getElementById('defiActuel');
-      const input = document.getElementById('defiInput');
-      
-      if (defi) {
-        container.innerHTML = `
-          <p class="text-sm font-medium text-gray-900">Défi actuel</p>
-          <div class="text-sm text-gray-700 whitespace-pre-line">${defi.texte}</div>
-        `;
-        input.value = defi.texte;
-      } else {
-        container.innerHTML = '<p class="text-sm text-gray-500">Aucun défi défini</p>';
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement du défi:', error);
+  function parseExpressionsInput(rawValue) {
+    return String(rawValue ?? '')
+      .split('\n')
+      .map((line) => line.replace(/^[-*]\s*/, '').trim())
+      .filter((line) => line.length > 0);
+  }
+
+  const WEEK_ID_REGEX = /^\d{4}-\d{2}$/;
+  const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+  function parseIsoDateStrict(raw) {
+    if (!ISO_DATE_REGEX.test(raw)) return null;
+    const [year, month, day] = raw.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      date.getUTCFullYear() !== year ||
+      date.getUTCMonth() !== month - 1 ||
+      date.getUTCDate() !== day
+    ) {
+      return null;
     }
+    return date;
+  }
+
+  function validateWeeklyForm({ weekId, startDate, endDate, expressions }) {
+    if (!WEEK_ID_REGEX.test(weekId)) {
+      throw new Error('weekId invalide (attendu YYYY-WW)');
+    }
+
+    if (!ISO_DATE_REGEX.test(startDate) || !ISO_DATE_REGEX.test(endDate)) {
+      throw new Error('Les dates doivent etre en format YYYY-MM-DD');
+    }
+
+    const start = parseIsoDateStrict(startDate);
+    const end = parseIsoDateStrict(endDate);
+    if (!start || !end) {
+      throw new Error('Dates invalides (jour/mois impossible)');
+    }
+
+    if (end.getTime() < start.getTime()) {
+      throw new Error('La date de fin doit etre apres la date de debut');
+    }
+
+    if (!Array.isArray(expressions) || expressions.length === 0) {
+      throw new Error('Ajoute au moins une expression');
+    }
+  }
+
+  function getCurrentWeekFallback() {
+    if (typeof window.getIsoWeekInfo === 'function') {
+      return window.getIsoWeekInfo(new Date());
+    }
+    return { weekId: '1970-01', startDate: '1970-01-01', endDate: '1970-01-07' };
+  }
+
+  function fillWeeklyForm(week) {
+    if (!week) return;
+    document.getElementById('weekIdInput').value = week.weekId || '';
+    document.getElementById('weekStartInput').value = week.startDate || '';
+    document.getElementById('weekEndInput').value = week.endDate || '';
+    document.getElementById('defiInput').value = Array.isArray(week.expressions) ? week.expressions.join('\n') : '';
+  }
+
+  function renderWeeklyArchives() {
+    const container = document.getElementById('defiArchives');
+    const archives = weeklyExpressionsData?.archives || [];
+    if (archives.length === 0) {
+      container.innerHTML = '<p class="text-xs text-gray-500">Aucune archive pour le moment</p>';
+      return;
+    }
+
+    container.innerHTML = archives.map((week) => `
+      <button
+        type="button"
+        data-week-id="${week.weekId}"
+        class="px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+      >
+        ${week.weekId}
+      </button>
+    `).join('');
+
+    container.querySelectorAll('button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const selected = weeklyExpressionsData.weeks.find((week) => week.weekId === button.dataset.weekId);
+        fillWeeklyForm(selected);
+      });
+    });
+  }
+
+  async function loadWeeklyExpressions() {
+    try {
+      weeklyExpressionsData = await window.getWeeklyExpressionsData();
+      const container = document.getElementById('defiActuel');
+      const currentWeek = weeklyExpressionsData?.currentWeek;
+
+      if (currentWeek) {
+        fillWeeklyForm(currentWeek);
+        container.innerHTML = `
+          <p class="text-sm font-medium text-gray-900 mb-1">Semaine courante: ${currentWeek.weekId}</p>
+          <p class="text-xs text-gray-500 mb-2">${currentWeek.startDate} au ${currentWeek.endDate}</p>
+          <ul class="space-y-1">
+            ${currentWeek.expressions.map((expression) => `<li class="text-sm text-gray-700">• ${expression}</li>`).join('')}
+          </ul>
+        `;
+      } else {
+        const fallback = getCurrentWeekFallback();
+        fillWeeklyForm({ ...fallback, expressions: [] });
+        container.innerHTML = '<p class="text-sm text-gray-500">Aucune semaine chargee</p>';
+      }
+
+      renderWeeklyArchives();
+    } catch (error) {
+      console.error('Erreur lors du chargement des expressions:', error);
+    }
+  }
+
+  async function reloadWeeklyExpressions() {
+    await loadWeeklyExpressions();
   }
 
   // Fonctions pour les modals
@@ -495,20 +627,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const titre = document.getElementById('texteTitreInput').value.trim();
     const type = document.getElementById('texteTypeSelect').value;
     const contenu = document.getElementById('texteContenuInput').value.trim();
+    const remarqueEnseignant = document.getElementById('texteRemarqueInput').value.trim();
     
     if (!groupeId || !titre || !contenu) return;
 
     const groupe = groupes.find(g => g.id === groupeId);
     
     try {
-      await window.addTexte({
+      const payload = {
         groupeId,
         groupeNom: groupe.nom,
         titre,
         type,
         contenu,
         badges: []
-      });
+      };
+
+      if (remarqueEnseignant) {
+        payload.remarqueEnseignant = remarqueEnseignant;
+      }
+
+      await window.addTexte(payload);
       
       document.getElementById('texteForm').reset();
       window.closeModal('addTexteModal');
@@ -589,14 +728,53 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   window.definirDefi = async function() {
-    const defiTexte = document.getElementById('defiInput').value.trim();
-    if (!defiTexte) return;
+    const weekId = document.getElementById('weekIdInput').value.trim();
+    const startDate = document.getElementById('weekStartInput').value;
+    const endDate = document.getElementById('weekEndInput').value;
+    const expressions = parseExpressionsInput(document.getElementById('defiInput').value);
+
+    const fallback = getCurrentWeekFallback();
 
     try {
-      await window.setDefi(defiTexte);
-      loadDefi();
+      validateWeeklyForm({
+        weekId: weekId || fallback.weekId,
+        startDate: startDate || fallback.startDate,
+        endDate: endDate || fallback.endDate,
+        expressions
+      });
+
+      await window.setWeeklyExpressionsForWeek({
+        weekId: weekId || fallback.weekId,
+        startDate: startDate || fallback.startDate,
+        endDate: endDate || fallback.endDate,
+        expressions
+      });
+      await reloadWeeklyExpressions();
     } catch (error) {
-      alert('Erreur lors de la définition du défi: ' + error.message);
+      alert('Erreur lors de la sauvegarde des expressions: ' + error.message);
+    }
+  }
+
+  window.reparerMigrationLegacy = async function() {
+    const status = document.getElementById('legacyRepairStatus');
+    if (status) status.textContent = 'Reparation en cours...';
+
+    try {
+      if (typeof window.repairLegacyMigrationWeeks !== 'function') {
+        throw new Error('Fonction de reparation indisponible');
+      }
+
+      const result = await window.repairLegacyMigrationWeeks();
+      await reloadWeeklyExpressions();
+
+      if (!status) return;
+      if (result?.repaired) {
+        status.textContent = `Migration legacy reparee (semaine: ${result.expectedWeekId}, mode: ${result.selectionMode}).`;
+      } else {
+        status.textContent = `Aucune correction appliquee (${result?.reason || 'inconnu'}).`;
+      }
+    } catch (error) {
+      if (status) status.textContent = `Echec de reparation: ${error.message}`;
     }
   }
 
@@ -658,6 +836,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <textarea id="editContent-${id}" rows="8" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">${texte.contenu}</textarea>
         </div>
+
+        <div class="mb-3">
+          <label class="block text-xs font-medium text-gray-700 mb-1">Remarque de l'enseignant (optionnel)</label>
+          <textarea id="editRemarque-${id}" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">${texte.remarqueEnseignant || ''}</textarea>
+        </div>
         
         <div class="flex gap-2">
           <button onclick="saveTexte('${id}')" 
@@ -683,6 +867,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   window.saveTexte = async function(id) {
     const titre = document.getElementById(`editTitle-${id}`).value.trim();
     const contenu = document.getElementById(`editContent-${id}`).value.trim();
+    const remarqueEnseignant = document.getElementById(`editRemarque-${id}`).value.trim();
     
     if (!titre || !contenu) {
       alert('Le titre et le contenu ne peuvent pas être vides');
@@ -690,7 +875,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     try {
-      await window.updateTexte(id, { titre, contenu });
+      await window.updateTexte(id, { titre, contenu, remarqueEnseignant });
       window.loadTextes();
     } catch (error) {
       alert('Erreur lors de la sauvegarde: ' + error.message);
@@ -784,3 +969,4 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (groupeCard) groupeCard.style.display = '';
   }
 </script>
+

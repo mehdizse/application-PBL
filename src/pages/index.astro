@@ -13,18 +13,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Le Mur des Textes</h1>
         <p class="text-sm text-gray-600">Découvrez les créations de la classe ✨</p>
       </div>
-      <!-- Défi de la semaine -->
-      <div id="defiSection" class="hidden mb-6">
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4">
-          <div class="flex items-center mb-2">
-            <span class="text-lg mr-2">🎯</span>
-            <span class="text-sm font-medium text-gray-900">Défi de la semaine</span>
-          </div>
-          <p id="defiTexte" class="text-sm text-gray-700 leading-relaxed break-words overflow-hidden"></p>
-        </div>
-      </div>
-
-      
       <!-- Cartes de textes -->
       <div id="textesContainer" class="space-y-4 mb-8">
         <div class="text-center py-8">
@@ -64,13 +52,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   document.addEventListener('DOMContentLoaded', async () => {
     // Attendre que Firebase soit initialisé
     function waitForFirebase() {
-      if (typeof window.getDefiActuel === 'undefined') {
+      if (typeof window.getWeeklyExpressionsData === 'undefined') {
         setTimeout(waitForFirebase, 100);
         return;
       }
       
       Promise.all([
-        loadDefi(),
         loadTextes()
       ]);
     }
@@ -78,179 +65,197 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     waitForFirebase();
   });
 
-  async function loadDefi() {
-    try {
-      const defi = await window.getDefiActuel();
-      const section = document.getElementById('defiSection');
-      const texte = document.getElementById('defiTexte');
-      
-      if (defi && defi.texte) {
-        texte.innerHTML = defi.texte.replace(/\n/g, '<br>');
-        section.classList.remove('hidden');
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement du défi:', error);
-    }
+    let weeklyCache = null;
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function renderExpressionsAsList(expressions) {
+    return expressions
+      .map((expression) => `
+        <li class="text-sm text-gray-700 leading-relaxed break-words overflow-hidden flex items-start">
+          <span class="text-indigo-500 mr-2 mt-0.5">•</span>
+          <span>${escapeHtml(expression)}</span>
+        </li>
+      `)
+      .join('');
+  }
+
+  function formatIsoDateFr(isoDate) {
+    const raw = String(isoDate || '').trim();
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+    if (!match) return raw;
+    const [, year, month, day] = match;
+    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(date);
   }
 
   async function loadTextes() {
     try {
-      // Charger TOUS les textes et les groupes
+      const container = document.getElementById('textesContainer');
+      if (!weeklyCache?.weeks?.length) {
+        weeklyCache = await window.getWeeklyExpressionsData();
+      }
+
       const [allTextes, allGroupes] = await Promise.all([
-        window.getTextes(), // Utiliser getTextes() au lieu de getTextesVisibles()
+        window.getTextes(),
         window.getGroupes()
       ]);
-      
-      console.log('📊 Debug - Tous les textes:', allTextes.length);
-      console.log('👥 Debug - Tous les groupes:', allGroupes.length);
-      
-      // Filtrer les groupes visibles
-      const groupesVisibles = allGroupes.filter(groupe => groupe.visible);
-      const groupesVisiblesNoms = new Set(groupesVisibles.map(groupe => groupe.nom));
-      
-      // Filtrer: textes visibles ET des groupes visibles
-      const textes = allTextes.filter(texte => {
+
+      const groupesVisibles = allGroupes.filter((groupe) => groupe.visible);
+      const groupesVisiblesNoms = new Set(groupesVisibles.map((groupe) => groupe.nom));
+      const textesVisibles = allTextes.filter((texte) => {
         const texteVisible = texte.visible;
         const groupeVisible = groupesVisiblesNoms.has(texte.groupeNom);
-        
-        if (!texteVisible) {
-          console.log(`❌ Texte "${texte.titre}" masqué (texte non visible)`);
-        }
-        if (!groupeVisible) {
-          console.log(`❌ Texte "${texte.titre}" masqué (groupe "${texte.groupeNom}" non visible)`);
-        }
-        
         return texteVisible && groupeVisible;
       });
-      
-      const container = document.getElementById('textesContainer');
-      
-      if (textes.length === 0) {
+
+      const fallbackWeekId = (typeof window.getIsoWeekInfo === 'function')
+        ? window.getIsoWeekInfo(new Date()).weekId
+        : '1970-01';
+
+      const textesParSemaine = textesVisibles.reduce((acc, texte) => {
+        const cleanWeekId = String(texte.weekId || '').trim();
+        const weekId = cleanWeekId || fallbackWeekId;
+        if (!acc[weekId]) acc[weekId] = [];
+        acc[weekId].push(texte);
+        return acc;
+      }, {});
+
+      const weeks = Array.isArray(weeklyCache?.weeks) ? weeklyCache.weeks : [];
+      if (weeks.length === 0) {
         container.innerHTML = `
           <div class="text-center py-8">
-            <div class="text-2xl mb-2">📝</div>
-            <p class="text-sm text-gray-600">Aucun texte publié pour le moment</p>
-            <p class="text-xs text-gray-500 mt-1">Reviens bientôt pour découvrir les productions de la classe !</p>
+            <p class="text-sm text-gray-600">Aucune semaine disponible</p>
           </div>
         `;
         return;
       }
 
-      // Regrouper par groupe
-      const groupes = {};
-      textes.forEach(texte => {
-        if (!groupes[texte.groupeNom]) {
-          groupes[texte.groupeNom] = [];
-        }
-        groupes[texte.groupeNom].push(texte);
-      });
+      const badgesMap = {
+        '⭐': 'Texte de la semaine',
+        '🏆': 'Meilleure introduction',
+        '🔗': 'Connecteurs bien utilises',
+        '✍️': 'Texte bien redige',
+        '🤝': 'Bon travail de groupe'
+      };
 
-      // Générer le HTML pour chaque groupe
-      let html = '';
-      let isFirstGroup = true;
-      Object.keys(groupes).forEach(groupeNom => {
-        // Couleur d'accent selon le groupe
-        const accentColors = ['indigo', 'emerald', 'amber', 'rose', 'purple'];
-        const accentColor = accentColors[Object.keys(groupes).indexOf(groupeNom) % accentColors.length];
-        
-        // Séparateur pour les groupes (sauf le premier)
-        if (!isFirstGroup) {
-          html += `
-            <div class="flex items-center my-6">
-              <div class="flex-1 border-t border-gray-200"></div>
-              <div class="px-3 py-1 bg-gray-50 border border-gray-200 rounded-full">
-                <span class="text-xs font-medium text-gray-500">${groupeNom}</span>
-              </div>
-              <div class="flex-1 border-t border-gray-200"></div>
-            </div>
-          `;
-        }
-        isFirstGroup = false;
-        
-        html += `
-          <div class="mb-6">
-            <div class="space-y-3">
-        `;
-        
-        groupes[groupeNom].forEach(texte => {
-          // Badges avec texte explicatif
-          const badgesMap = {
-            '⭐': 'Texte de la semaine',
-            '🏆': 'Meilleure introduction',
-            '🔗': 'Connecteurs bien utilisés',
-            '✍️': 'Texte bien rédigé',
-            '🤝': 'Bon travail de groupe'
+      const accentColors = ['indigo', 'emerald', 'amber', 'rose', 'purple'];
+      const currentWeekId = String(weeklyCache?.currentWeek?.weekId || '').trim();
+      let html = `
+        <div class="relative pl-8">
+          <div class="absolute left-3 top-0 bottom-0 w-px bg-indigo-200" aria-hidden="true"></div>
+      `;
+
+      weeks.forEach((week, weekIndex) => {
+        const isCurrentWeek = week.weekId === currentWeekId;
+        const dotClass = isCurrentWeek
+          ? 'bg-indigo-600 border-4 border-white shadow-md'
+          : 'bg-indigo-400 shadow-sm';
+        const weekContainerClass = isCurrentWeek
+          ? 'bg-indigo-50 border border-indigo-200 rounded-2xl shadow-sm p-4'
+          : 'bg-white border border-gray-200 rounded-2xl shadow-sm p-4';
+        const weekTextes = (textesParSemaine[week.weekId] || []).sort((a, b) => {
+          const getTime = (value) => {
+            if (value && typeof value.toDate === 'function') return value.toDate().getTime();
+            const parsed = new Date(value || 0);
+            return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
           };
-          
-          let badgesHtml = '';
-          if (texte.badges && texte.badges.length > 0) {
-            badgesHtml = texte.badges.map(badge => 
-              `<span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700" title="${badge}">
-                ${badgesMap[badge] || badge}
-              </span>`
-            ).join('');
-          } else {
-            badgesHtml = '<span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700">🌟</span>';
-          }
-
-          // Extraire les 2 premières lignes du contenu
-          let extrait = texte.contenu || '';
-          let lignes = extrait.split('\n').filter(line => line.trim());
-          if (lignes.length > 2) {
-            extrait = lignes.slice(0, 2).join(' ') + '...';
-          } else {
-            extrait = lignes.join(' ');
-          }
-          
-          // Limiter la longueur
-          if (extrait.length > 120) {
-            extrait = extrait.substring(0, 120) + '...';
-          }
-
-          html += `
-            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 hover:shadow-md transition-shadow border-l-4 border-l-${accentColor}-400">
-              <!-- En-tête avec groupe et badges -->
-              <div class="flex items-start justify-between mb-3">
-                <span class="inline-flex items-center rounded-full border border-gray-200 px-2 py-1 text-xs font-medium bg-${accentColor}-50 text-${accentColor}-700">
-                  ${groupeNom}
-                </span>
-                <div class="flex flex-wrap gap-1 max-w-[200px]">
-                  ${badgesHtml}
+          return getTime(b.createdAt) - getTime(a.createdAt);
+        });
+        const weekTitle = `Semaine ${week.weekId}`;
+        const formattedStartDate = formatIsoDateFr(week.startDate);
+        const formattedEndDate = formatIsoDateFr(week.endDate);
+        html += `
+          <section class="relative mb-12">
+            <span class="absolute left-[8px] top-2 h-4 w-4 rounded-full ${dotClass}" aria-hidden="true"></span>
+            <div class="${weekContainerClass}">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <h2 class="text-2xl font-bold text-indigo-800">${weekTitle}</h2>
+                <div class="flex items-center gap-2">
+                  ${isCurrentWeek ? '<span class="bg-green-50 text-green-700 rounded-full px-2 py-1 text-xs">Semaine courante</span>' : ''}
+                  <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2 py-1 text-xs">${week.weekId}</span>
                 </div>
               </div>
-              
-              <!-- Titre -->
-              <h3 class="text-base font-semibold text-gray-900 mb-1 break-words overflow-hidden">
-                ${texte.titre}
-              </h3>
-              
-              <!-- Type -->
-              <p class="text-xs text-gray-500 mb-2">
-                ${texte.type}
-              </p>
-              
-              <!-- Extrait du contenu -->
-              <p class="text-sm text-gray-700 mb-3 leading-relaxed break-words overflow-hidden line-clamp-2">
-                ${extrait}
-              </p>
-              
-              <!-- Bouton CTA -->
-              <button 
-                onclick="window.location.href='/texte/${texte.id}'"
-                class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium py-3 px-4 rounded-xl text-sm hover:from-indigo-600 hover:to-indigo-700 transition-all min-h-[44px] shadow-sm"
-              >
-                Lire le texte
-              </button>
+              <p class="text-sm text-gray-600 font-medium mb-3">${formattedStartDate} &ndash; ${formattedEndDate}</p>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
+              <p class="text-sm font-semibold text-gray-900 mb-2">Expressions de la semaine</p>
+              <ul class="space-y-2 leading-relaxed">
+                ${renderExpressionsAsList(week.expressions)}
+              </ul>
             </div>
+        `;
+
+        if (weekTextes.length === 0) {
+          html += `
+            <p class="text-sm text-gray-500">Aucune production cette semaine</p>
           `;
-        });
-        
+        } else {
+          html += `<div class="space-y-3">`;
+          weekTextes.forEach((texte, textIndex) => {
+            const accentColor = accentColors[(weekIndex + textIndex) % accentColors.length];
+            const badges = Array.isArray(texte.badges) ? texte.badges : [];
+            const badgesHtml = badges.length > 0
+              ? badges.map((badge) => `
+                  <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700" title="${escapeHtml(badge)}">
+                    ${escapeHtml(badgesMap[badge] || badge)}
+                  </span>
+                `).join('')
+              : '<span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700">Aucun badge</span>';
+
+            let extrait = String(texte.contenu || '');
+            const lignes = extrait.split('\n').map((line) => line.trim()).filter(Boolean);
+            extrait = lignes.slice(0, 2).join(' ');
+            if (lignes.length > 2) extrait += '...';
+            if (extrait.length > 120) extrait = `${extrait.slice(0, 120)}...`;
+
+            html += `
+              <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 hover:shadow-md transition-shadow border-l-4 border-l-${accentColor}-400">
+                <div class="flex items-start justify-between mb-3">
+                  <span class="inline-flex items-center rounded-full border border-gray-200 px-2 py-1 text-xs font-medium bg-${accentColor}-50 text-${accentColor}-700">
+                    ${escapeHtml(texte.groupeNom || 'Groupe')}
+                  </span>
+                  <div class="flex flex-wrap gap-1 max-w-[200px]">
+                    ${badgesHtml}
+                  </div>
+                </div>
+                <h3 class="text-base font-semibold text-gray-900 mb-1 break-words overflow-hidden">
+                  ${escapeHtml(texte.titre || 'Sans titre')}
+                </h3>
+                <p class="text-xs text-gray-500 mb-2">${escapeHtml(texte.type || '')}</p>
+                <p class="text-sm text-gray-700 mb-3 leading-relaxed break-words overflow-hidden line-clamp-2">
+                  ${escapeHtml(extrait)}
+                </p>
+                <button 
+                  onclick="window.location.href='/texte/${texte.id}'"
+                  class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium py-3 px-4 rounded-xl text-sm hover:from-indigo-600 hover:to-indigo-700 transition-all min-h-[44px] shadow-sm"
+                >
+                  Lire le texte
+                </button>
+              </div>
+            `;
+          });
+          html += `</div>`;
+        }
+
         html += `
             </div>
-          </div>
+          </section>
         `;
       });
 
+      html += `</div>`;
       container.innerHTML = html;
     } catch (error) {
       console.error('Erreur lors du chargement des textes:', error);
@@ -265,3 +270,5 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 </script>
+
+
