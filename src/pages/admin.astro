@@ -644,6 +644,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             const file = photoInput.files?.[0];
             if (!file) return;
 
+            console.log('[Upload] File selected:', file.name, file.size, 'bytes');
+
             const groupId = winningTeamData.teams[teamKey].groupeId;
             if (!groupId) {
               alert('Sélectionnez d\'abord un groupe');
@@ -651,9 +653,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               return;
             }
 
+            console.log('[Upload] Group ID:', groupId, 'Slot:', i);
+
             setWinningTeamStatus('Upload en cours...');
             const existingStoragePath = String(winningTeamData.teams[teamKey].members[i].storagePath || '');
+
+            console.log('[Upload] Calling window.uploadWinningTeamPhoto...');
+            console.log('[Upload] Function exists?', typeof window.uploadWinningTeamPhoto === 'function');
+
             const { storagePath, downloadUrl } = await window.uploadWinningTeamPhoto({ groupId, slot: i, file });
+
+            console.log('[Upload] Upload complete. Storage path:', storagePath, 'Download URL:', downloadUrl);
+
             winningTeamData.teams[teamKey].members[i].storagePath = storagePath;
             winningTeamData.teams[teamKey].members[i].photoUrl = downloadUrl;
             renderWinningTeamForm();
@@ -667,8 +678,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             }
 
             await saveWinningTeam();
+            setWinningTeamStatus('Upload terminé');
           } catch (error) {
             console.error('Erreur upload photo:', error);
+            console.error('Error stack:', error.stack);
             const details = error.code ? `Code: ${error.code}` : '';
             alert(`Erreur upload: ${error.message}\n${details}`);
             setWinningTeamStatus('Erreur upload');

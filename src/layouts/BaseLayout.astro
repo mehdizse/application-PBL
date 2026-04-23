@@ -185,6 +185,8 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
         };
 
         const uploadWinningTeamPhoto = async ({ groupId, slot, file }) => {
+          console.log('[Firebase Upload] Start:', { groupId, slot, fileName: file?.name, fileSize: file?.size });
+
           if (!groupId) throw new Error('groupId manquant');
           if (!Number.isInteger(slot) || slot < 0) throw new Error('slot invalide');
           if (!file) throw new Error('file manquant');
@@ -192,9 +194,21 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
           const safeName = String(file.name || 'photo').replace(/[^a-zA-Z0-9._-]/g, '_');
           const stamp = Date.now();
           const path = `winningTeam/${groupId}/${slot}/${stamp}_${safeName}`;
+
+          console.log('[Firebase Upload] Storage path:', path);
+          console.log('[Firebase Upload] Storage initialized?', !!storage);
+
           const fileRef = storageRef(storage, path);
+          console.log('[Firebase Upload] File ref created');
+
+          console.log('[Firebase Upload] Starting uploadBytes...');
           await uploadBytes(fileRef, file);
+          console.log('[Firebase Upload] uploadBytes complete');
+
+          console.log('[Firebase Upload] Getting download URL...');
           const downloadUrl = await getDownloadURL(fileRef);
+          console.log('[Firebase Upload] Download URL obtained:', downloadUrl);
+
           return { storagePath: path, downloadUrl };
         };
 
