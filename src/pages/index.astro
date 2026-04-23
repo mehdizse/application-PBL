@@ -13,6 +13,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Le Mur des Textes</h1>
         <p class="text-sm text-gray-600">Découvrez les créations de la classe ✨</p>
       </div>
+
+      <div id="winningTeamPublic" class="hidden mb-8"></div>
       <!-- Cartes de textes -->
       <div id="textesContainer" class="space-y-4 mb-8">
         <div class="text-center py-8">
@@ -58,6 +60,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
       
       Promise.all([
+        loadWinningTeamPublic(),
         loadTextes()
       ]);
     }
@@ -269,6 +272,84 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       `;
     }
   }
+
+  async function loadWinningTeamPublic() {
+    const container = document.getElementById('winningTeamPublic');
+    if (!container) return;
+
+    const waitForWinningFns = async () => {
+      if (typeof window.subscribeWinningTeam !== 'function' || typeof window.getTexte !== 'function') {
+        await new Promise((r) => setTimeout(r, 80));
+        return waitForWinningFns();
+      }
+      return null;
+    };
+
+    await waitForWinningFns();
+
+    let lastRenderedKey = '';
+
+    window.subscribeWinningTeam(async (winningData) => {
+      try {
+        if (!winningData || !winningData.winner) {
+          container.classList.add('hidden');
+          container.innerHTML = '';
+          return;
+        }
+
+        const winnerKey = String(winningData.winner);
+        const team = winningData?.teams?.[winnerKey];
+        const members = Array.isArray(team?.members) ? team.members : [];
+        const texteId = String(team?.texteId || '');
+
+        const renderKey = `${winnerKey}:${texteId}:${members.map((m) => `${m?.prenom || ''}|${m?.photoUrl || ''}`).join(',')}`;
+        if (renderKey === lastRenderedKey) return;
+        lastRenderedKey = renderKey;
+
+        const texte = texteId ? await window.getTexte(texteId) : null;
+        const title = 'Équipe Gagnante !';
+
+        const photosHtml = members.slice(0, 3).map((m) => {
+          const url = String(m?.photoUrl || '');
+          const prenom = String(m?.prenom || '');
+          return `
+            <div class="flex flex-col items-center">
+              <div class="w-20 h-20 rounded-full bg-white border border-amber-200 shadow-sm overflow-hidden flex items-center justify-center">
+                ${url ? `<img src="${url}" alt="${escapeHtml(prenom)}" class="w-full h-full object-cover" />` : `<span class="text-2xl">👤</span>`}
+              </div>
+              <div class="mt-2 text-sm font-medium text-gray-800">${escapeHtml(prenom)}</div>
+            </div>
+          `;
+        }).join('');
+
+        const texteHtml = texte ? `
+          <div class="mt-5 bg-white border border-gray-200 rounded-2xl p-4">
+            <div class="text-xs font-semibold text-indigo-700 mb-1">${escapeHtml(texte.groupeNom || '')}</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">${escapeHtml(texte.titre || '')}</h3>
+            <p class="text-sm text-gray-600 mb-3">${escapeHtml(texte.type || '')}</p>
+            <div class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">${escapeHtml(texte.contenu || '')}</div>
+          </div>
+        ` : '';
+
+        container.classList.remove('hidden');
+        container.innerHTML = `
+          <div class="bg-gradient-to-r from-amber-50 to-white border border-amber-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div class="flex items-center gap-2">
+                <div class="text-2xl">🏆</div>
+                <h2 class="text-xl font-bold text-amber-900">${title}</h2>
+              </div>
+              <div class="text-xs font-medium text-amber-800 bg-amber-100 border border-amber-200 rounded-full px-3 py-1">Félicitations</div>
+            </div>
+            <div class="flex flex-wrap items-start justify-center gap-6">
+              ${photosHtml}
+            </div>
+            ${texteHtml}
+          </div>
+        `;
+      } catch (error) {
+        console.error('Erreur affichage winningTeam:', error);
+      }
+    });
+  }
 </script>
-
-

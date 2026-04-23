@@ -91,6 +91,97 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </div>
 
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+          <h2 class="text-base font-medium text-gray-900 mb-3">Équipe Gagnante</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-semibold text-gray-900">Groupe 1</p>
+                <button type="button" id="winnerBtnA" class="px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                  Définir gagnant
+                </button>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Sélectionner le groupe</label>
+                  <select id="winningGroupASelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Choisir un groupe</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Production écrite</label>
+                  <select id="winningTexteASelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Choisir un texte</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div class="space-y-1">
+                    <input id="winningPrenomA0" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                    <input id="winningPhotoA0" type="file" accept="image/*" class="w-full text-xs" />
+                    <div id="winningPreviewA0" class="hidden mt-1"></div>
+                  </div>
+                  <div class="space-y-1">
+                    <input id="winningPrenomA1" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                    <input id="winningPhotoA1" type="file" accept="image/*" class="w-full text-xs" />
+                    <div id="winningPreviewA1" class="hidden mt-1"></div>
+                  </div>
+                  <div class="space-y-1">
+                    <input id="winningPrenomA2" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                    <input id="winningPhotoA2" type="file" accept="image/*" class="w-full text-xs" />
+                    <div id="winningPreviewA2" class="hidden mt-1"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-semibold text-gray-900">Groupe 2</p>
+                <button type="button" id="winnerBtnB" class="px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                  Définir gagnant
+                </button>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Sélectionner le groupe</label>
+                  <select id="winningGroupBSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Choisir un groupe</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Production écrite</label>
+                  <select id="winningTexteBSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Choisir un texte</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div class="space-y-1">
+                    <input id="winningPrenomB0" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                    <input id="winningPhotoB0" type="file" accept="image/*" class="w-full text-xs" />
+                    <div id="winningPreviewB0" class="hidden mt-1"></div>
+                  </div>
+                  <div class="space-y-1">
+                    <input id="winningPrenomB1" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                    <input id="winningPhotoB1" type="file" accept="image/*" class="w-full text-xs" />
+                    <div id="winningPreviewB1" class="hidden mt-1"></div>
+                  </div>
+                  <div class="space-y-1">
+                    <input id="winningPrenomB2" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                    <input id="winningPhotoB2" type="file" accept="image/*" class="w-full text-xs" />
+                    <div id="winningPreviewB2" class="hidden mt-1"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <div id="winningTeamStatus" class="text-xs text-gray-500">Chargement...</div>
+            <button type="button" id="winningTeamSaveBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium">
+              Enregistrer l'équipe gagnante
+            </button>
+          </div>
+        </div>
+
         <!-- Actions rapides -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
           <button onclick="showAddGroupeModal()" 
@@ -253,6 +344,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let groupes = [];
   let textes = [];
   let weeklyExpressionsData = null;
+  let winningTeamData = null;
 
   // Initialisation
   document.addEventListener('DOMContentLoaded', async () => {
@@ -276,7 +368,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       // Gérer le formulaire de connexion
       document.getElementById('loginForm').addEventListener('submit', handleLogin);
-      document.getElementById('texteForm').addEventListener('submit', handleAddTexte);
+      document.getElementById('texteForm').addEventListener('submit', window.handleAddTexte);
     }
     
     waitForFirebase();
@@ -339,7 +431,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     await Promise.all([
       window.loadGroupes(),
       window.loadTextes(),
-      loadWeeklyExpressions()
+      loadWeeklyExpressions(),
+      loadWinningTeam()
     ]);
   }
 
@@ -441,9 +534,235 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </div>
       `).join('');
+
+      if (winningTeamData) {
+        renderWinningTeamForm();
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des textes:', error);
     }
+  }
+
+  async function loadWinningTeam() {
+    try {
+      winningTeamData = await window.getWinningTeam();
+      if (!winningTeamData) {
+        winningTeamData = {
+          teams: {
+            a: { groupeId: '', texteId: '', members: [{ prenom: '', photoUrl: '', storagePath: '' }, { prenom: '', photoUrl: '', storagePath: '' }, { prenom: '', photoUrl: '', storagePath: '' }] },
+            b: { groupeId: '', texteId: '', members: [{ prenom: '', photoUrl: '', storagePath: '' }, { prenom: '', photoUrl: '', storagePath: '' }, { prenom: '', photoUrl: '', storagePath: '' }] }
+          },
+          winner: ''
+        };
+      }
+
+      winningTeamData.teams = winningTeamData.teams || {};
+      winningTeamData.teams.a = winningTeamData.teams.a || { groupeId: '', texteId: '', members: [] };
+      winningTeamData.teams.b = winningTeamData.teams.b || { groupeId: '', texteId: '', members: [] };
+
+      const ensureMembers = (teamKey) => {
+        const members = Array.isArray(winningTeamData.teams[teamKey].members) ? winningTeamData.teams[teamKey].members : [];
+        while (members.length < 3) members.push({ prenom: '', photoUrl: '', storagePath: '' });
+        winningTeamData.teams[teamKey].members = members.slice(0, 3).map((m) => ({
+          prenom: String(m?.prenom || ''),
+          photoUrl: String(m?.photoUrl || ''),
+          storagePath: String(m?.storagePath || '')
+        }));
+      };
+
+      ensureMembers('a');
+      ensureMembers('b');
+      winningTeamData.winner = String(winningTeamData.winner || '');
+
+      setupWinningTeamListenersOnce();
+      renderWinningTeamForm();
+      setWinningTeamStatus('Prêt');
+    } catch (error) {
+      console.error('Erreur loadWinningTeam:', error);
+      setWinningTeamStatus('Erreur de chargement');
+    }
+  }
+
+  let winningTeamListenersReady = false;
+
+  function setupWinningTeamListenersOnce() {
+    if (winningTeamListenersReady) return;
+    winningTeamListenersReady = true;
+
+    const groupASelect = document.getElementById('winningGroupASelect');
+    const groupBSelect = document.getElementById('winningGroupBSelect');
+    const texteASelect = document.getElementById('winningTexteASelect');
+    const texteBSelect = document.getElementById('winningTexteBSelect');
+    const saveBtn = document.getElementById('winningTeamSaveBtn');
+    const winnerBtnA = document.getElementById('winnerBtnA');
+    const winnerBtnB = document.getElementById('winnerBtnB');
+
+    groupASelect.addEventListener('change', () => {
+      winningTeamData.teams.a.groupeId = groupASelect.value;
+      winningTeamData.teams.a.texteId = '';
+      renderWinningTeamForm();
+    });
+
+    groupBSelect.addEventListener('change', () => {
+      winningTeamData.teams.b.groupeId = groupBSelect.value;
+      winningTeamData.teams.b.texteId = '';
+      renderWinningTeamForm();
+    });
+
+    texteASelect.addEventListener('change', () => {
+      winningTeamData.teams.a.texteId = texteASelect.value;
+    });
+
+    texteBSelect.addEventListener('change', () => {
+      winningTeamData.teams.b.texteId = texteBSelect.value;
+    });
+
+    winnerBtnA.addEventListener('click', async () => {
+      winningTeamData.winner = 'a';
+      renderWinningTeamForm();
+      await saveWinningTeam();
+    });
+
+    winnerBtnB.addEventListener('click', async () => {
+      winningTeamData.winner = 'b';
+      renderWinningTeamForm();
+      await saveWinningTeam();
+    });
+
+    saveBtn.addEventListener('click', saveWinningTeam);
+
+    const attachMemberListeners = (teamKey) => {
+      for (let i = 0; i < 3; i += 1) {
+        const prenomInput = document.getElementById(`winningPrenom${teamKey.toUpperCase()}${i}`);
+        const photoInput = document.getElementById(`winningPhoto${teamKey.toUpperCase()}${i}`);
+        prenomInput.addEventListener('input', () => {
+          winningTeamData.teams[teamKey].members[i].prenom = prenomInput.value;
+        });
+
+        photoInput.addEventListener('change', async () => {
+          try {
+            const file = photoInput.files?.[0];
+            if (!file) return;
+
+            const groupId = winningTeamData.teams[teamKey].groupeId;
+            if (!groupId) {
+              alert('Sélectionnez d\'abord un groupe');
+              photoInput.value = '';
+              return;
+            }
+
+            setWinningTeamStatus('Upload en cours...');
+            const existingStoragePath = String(winningTeamData.teams[teamKey].members[i].storagePath || '');
+            const { storagePath, downloadUrl } = await window.uploadWinningTeamPhoto({ groupId, slot: i, file });
+            winningTeamData.teams[teamKey].members[i].storagePath = storagePath;
+            winningTeamData.teams[teamKey].members[i].photoUrl = downloadUrl;
+            renderWinningTeamForm();
+
+            if (existingStoragePath && existingStoragePath !== storagePath) {
+              try {
+                await window.deleteWinningTeamPhoto({ storagePath: existingStoragePath });
+              } catch (error) {
+                console.error('Erreur suppression ancienne photo:', error);
+              }
+            }
+
+            await saveWinningTeam();
+          } catch (error) {
+            console.error('Erreur upload photo:', error);
+            alert('Erreur upload: ' + error.message);
+            setWinningTeamStatus('Erreur upload');
+          }
+        });
+      }
+    };
+
+    attachMemberListeners('a');
+    attachMemberListeners('b');
+  }
+
+  function renderWinningTeamForm() {
+    const groupASelect = document.getElementById('winningGroupASelect');
+    const groupBSelect = document.getElementById('winningGroupBSelect');
+    const texteASelect = document.getElementById('winningTexteASelect');
+    const texteBSelect = document.getElementById('winningTexteBSelect');
+    const winnerBtnA = document.getElementById('winnerBtnA');
+    const winnerBtnB = document.getElementById('winnerBtnB');
+
+    const selectedA = String(winningTeamData?.teams?.a?.groupeId || '');
+    const selectedB = String(winningTeamData?.teams?.b?.groupeId || '');
+
+    const buildGroupeOptions = ({ selectedValue, disabledValue }) => {
+      return '<option value="">Choisir un groupe</option>' +
+        groupes.map((g) => {
+          const disabled = disabledValue && g.id === disabledValue && g.id !== selectedValue;
+          return `<option value="${g.id}" ${disabled ? 'disabled' : ''}>${g.nom}</option>`;
+        }).join('');
+    };
+
+    groupASelect.innerHTML = buildGroupeOptions({ selectedValue: selectedA, disabledValue: selectedB });
+    groupBSelect.innerHTML = buildGroupeOptions({ selectedValue: selectedB, disabledValue: selectedA });
+    groupASelect.value = selectedA;
+    groupBSelect.value = selectedB;
+
+    const buildTexteOptions = (items) => {
+      return '<option value="">Choisir un texte</option>' +
+        items.map((t) => `<option value="${t.id}">${t.titre}</option>`).join('');
+    };
+
+    const textesA = selectedA ? textes.filter((t) => t.groupeId === selectedA) : [];
+    const textesB = selectedB ? textes.filter((t) => t.groupeId === selectedB) : [];
+    texteASelect.innerHTML = buildTexteOptions(textesA);
+    texteBSelect.innerHTML = buildTexteOptions(textesB);
+    texteASelect.value = String(winningTeamData?.teams?.a?.texteId || '');
+    texteBSelect.value = String(winningTeamData?.teams?.b?.texteId || '');
+
+    const winner = String(winningTeamData?.winner || '');
+    const winnerActiveClass = 'bg-amber-50 border-amber-300 text-amber-800';
+    const normalClass = 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50';
+    winnerBtnA.className = `px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${winner === 'a' ? winnerActiveClass : normalClass}`;
+    winnerBtnB.className = `px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${winner === 'b' ? winnerActiveClass : normalClass}`;
+
+    const renderPreview = (teamKey, index) => {
+      const member = winningTeamData?.teams?.[teamKey]?.members?.[index];
+      const container = document.getElementById(`winningPreview${teamKey.toUpperCase()}${index}`);
+      const url = String(member?.photoUrl || '');
+      if (!url) {
+        container.innerHTML = '';
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+      container.innerHTML = `<img src="${url}" alt="photo" class="w-14 h-14 rounded-full object-cover border border-gray-200" />`;
+    };
+
+    for (let i = 0; i < 3; i += 1) {
+      const prenomA = document.getElementById(`winningPrenomA${i}`);
+      const prenomB = document.getElementById(`winningPrenomB${i}`);
+      prenomA.value = String(winningTeamData?.teams?.a?.members?.[i]?.prenom || '');
+      prenomB.value = String(winningTeamData?.teams?.b?.members?.[i]?.prenom || '');
+      renderPreview('a', i);
+      renderPreview('b', i);
+    }
+  }
+
+  async function saveWinningTeam() {
+    try {
+      setWinningTeamStatus('Enregistrement...');
+      await window.setWinningTeam(winningTeamData, { merge: false });
+      setWinningTeamStatus('Enregistré');
+      return true;
+    } catch (error) {
+      console.error('Erreur saveWinningTeam:', error);
+      setWinningTeamStatus('Erreur enregistrement');
+      alert('Erreur: ' + error.message);
+      return false;
+    }
+  }
+
+  function setWinningTeamStatus(message) {
+    const el = document.getElementById('winningTeamStatus');
+    if (!el) return;
+    el.textContent = message;
   }
 
   function parseExpressionsInput(rawValue) {

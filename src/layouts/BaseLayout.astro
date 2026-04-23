@@ -69,7 +69,8 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
       // Import des modules Firebase ES6
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, setDoc, getDoc, deleteField, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
       
       // Configuration Firebase
       const firebaseConfig = {
@@ -86,6 +87,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         
         // Fonctions Firestore
         const getGroupes = async () => {
@@ -151,6 +153,57 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
           const docRef = doc(db, 'textes', id);
           const docSnap = await getDoc(docRef);
           return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        };
+
+        const WINNING_TEAM_DOC = { collection: 'winningTeam', id: 'current' };
+
+        const getWinningTeam = async () => {
+          const docRef = doc(db, WINNING_TEAM_DOC.collection, WINNING_TEAM_DOC.id);
+          const snap = await getDoc(docRef);
+          return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+        };
+
+        const setWinningTeam = async (payload, { merge = true } = {}) => {
+          const docRef = doc(db, WINNING_TEAM_DOC.collection, WINNING_TEAM_DOC.id);
+          await setDoc(docRef, { ...payload, updatedAt: new Date() }, { merge });
+          return true;
+        };
+
+        const subscribeWinningTeam = (callback) => {
+          const docRef = doc(db, WINNING_TEAM_DOC.collection, WINNING_TEAM_DOC.id);
+          return onSnapshot(
+            docRef,
+            (snap) => {
+              const data = snap.exists() ? { id: snap.id, ...snap.data() } : null;
+              callback?.(data);
+            },
+            (error) => {
+              console.error('Erreur onSnapshot winningTeam:', error);
+              callback?.(null);
+            }
+          );
+        };
+
+        const uploadWinningTeamPhoto = async ({ groupId, slot, file }) => {
+          if (!groupId) throw new Error('groupId manquant');
+          if (!Number.isInteger(slot) || slot < 0) throw new Error('slot invalide');
+          if (!file) throw new Error('file manquant');
+
+          const safeName = String(file.name || 'photo').replace(/[^a-zA-Z0-9._-]/g, '_');
+          const stamp = Date.now();
+          const path = `winningTeam/${groupId}/${slot}/${stamp}_${safeName}`;
+          const fileRef = storageRef(storage, path);
+          await uploadBytes(fileRef, file);
+          const downloadUrl = await getDownloadURL(fileRef);
+          return { storagePath: path, downloadUrl };
+        };
+
+        const deleteWinningTeamPhoto = async ({ storagePath }) => {
+          const path = String(storagePath || '').trim();
+          if (!path) return false;
+          const fileRef = storageRef(storage, path);
+          await deleteObject(fileRef);
+          return true;
         };
         
         const WEEKLY_COLLECTION = 'weeklyExpressions';
@@ -630,6 +683,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
         
         // Rendre les fonctions disponibles globalement
         window.auth = auth;
+        window.storage = storage;
         window.signInWithEmailAndPassword = (auth, email, password) => {
           return signInWithEmailAndPassword(auth, email, password);
         };
@@ -648,6 +702,11 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
         window.updateTexte = updateTexte;
         window.deleteTexte = deleteTexte;
         window.getTexte = getTexte;
+        window.getWinningTeam = getWinningTeam;
+        window.setWinningTeam = setWinningTeam;
+        window.subscribeWinningTeam = subscribeWinningTeam;
+        window.uploadWinningTeamPhoto = uploadWinningTeamPhoto;
+        window.deleteWinningTeamPhoto = deleteWinningTeamPhoto;
         window.getDefiActuel = getDefiActuel;
         window.setDefi = setDefi;
         window.getIsoWeekInfo = getIsoWeekInfo;
