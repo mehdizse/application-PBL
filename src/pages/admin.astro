@@ -669,8 +669,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             await saveWinningTeam();
           } catch (error) {
             console.error('Erreur upload photo:', error);
-            alert('Erreur upload: ' + error.message);
+            const details = error.code ? `Code: ${error.code}` : '';
+            alert(`Erreur upload: ${error.message}\n${details}`);
             setWinningTeamStatus('Erreur upload');
+            photoInput.value = '';
           }
         });
       }
