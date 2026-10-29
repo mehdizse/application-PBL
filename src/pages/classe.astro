@@ -172,6 +172,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .team.win .face { border-color: var(--gold); }
   .team.lose { opacity: .35; filter: grayscale(1); transform: scale(.9); }
   .crown { font-size: 54px; height: 60px; }
+  .solo-zone { margin-top: 16px; min-height: clamp(200px, 32vh, 360px); display: grid; place-items: center; }
+  .mystery {
+    width: clamp(160px, 22vw, 280px); height: clamp(160px, 22vw, 280px); border-radius: 50%;
+    display: grid; place-items: center; font-size: clamp(90px, 14vw, 180px); font-weight: 800; color: var(--gold);
+    background: var(--card); border: 4px dashed rgba(255, 201, 60, .6); animation: pulse 1.6s ease-in-out infinite;
+  }
+  .mystery .countdown { font-size: inherit; }
+  .solo-faces { display: flex; justify-content: center; gap: clamp(14px, 3vw, 40px); flex-wrap: wrap; }
+  .solo-person { animation: pop .7s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: calc(var(--i) * .25s); }
+  .face.big {
+    width: clamp(100px, 14vw, 190px); height: clamp(100px, 14vw, 190px); border-color: var(--gold);
+    box-shadow: 0 0 40px rgba(255, 201, 60, .45); font-size: 56px;
+  }
+  .solo-name { margin-top: 10px; font-size: clamp(22px, 3vw, 40px); font-weight: 800; }
   .countdown { font-size: clamp(120px, 22vw, 300px); font-weight: 800; color: var(--gold); line-height: 1; animation: beat .9s ease-out both; }
 
   /* Texte gagnant */
@@ -374,7 +388,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // Duel de la semaine
     let duel = null;
-    if (winning?.teams && winning.winner) {
+    if (winning?.teams && (winning.winner || winning.solo === true)) {
       const groupeNom = (id) => groupes.find((g) => g.id === id)?.nom || '';
       const team = (key) => {
         const t = winning.teams[key] || {};
@@ -382,9 +396,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return { key, nom: groupeNom(t.groupeId) || (key === 'a' ? 'Équipe A' : 'Équipe B'), members, texteId: t.texteId || '' };
       };
       const a = team('a'); const b = team('b');
-      const winner = winning.winner === 'b' ? b : a;
+      const solo = winning.solo === true;
+      const winner = solo ? a : (winning.winner === 'b' ? b : a);
       const texte = winner.texteId ? textes.find((t) => t.id === winner.texteId) || null : null;
-      duel = { a, b, winnerKey: winner.key, texte };
+      duel = { a, b, solo, winnerKey: winner.key, texte };
     }
 
     const current = weekly?.currentWeek || null;
@@ -467,6 +482,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   function renderDuel() {
     duelState = 'versus';
+    if (data.duel.solo) return renderSolo();
     const { a, b } = data.duel;
     return `
       <div class="kicker pop">⚔️ Le duel de la semaine</div>
@@ -478,6 +494,48 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
       <button class="cta" data-action="reveal" id="revealBtn">🥁 Révéler le gagnant</button>
     `;
+  }
+
+  function renderSolo() {
+    const t = data.duel.a;
+    const faces = (t.members.length ? t.members : [{}]).map((m, i) => `
+      <div class="solo-person" style="--i:${i}">
+        <div class="face big">${m.photoUrl ? `<img src="${esc(m.photoUrl)}" alt="${esc(m.prenom)}">` : '👤'}</div>
+        <div class="solo-name">${esc(m.prenom || '')}</div>
+      </div>`).join('');
+    return `
+      <div class="kicker pop">🏆 Le groupe gagnant de la semaine</div>
+      <h2 class="big-title" style="font-size:clamp(34px,5vw,72px)" id="duelTitle">Qui a gagné cette semaine ?</h2>
+      <div id="soloZone" class="solo-zone">
+        <div class="mystery" id="mystery">?</div>
+        <div class="solo-reveal" id="soloReveal" hidden>
+          <div class="crown">👑</div>
+          <div class="solo-faces">${faces}</div>
+        </div>
+      </div>
+      <button class="cta" data-action="reveal" id="revealBtn">🥁 Révéler le gagnant</button>
+    `;
+  }
+
+  async function revealSolo() {
+    duelState = 'counting';
+    document.getElementById('revealBtn')?.remove();
+    const mystery = document.getElementById('mystery');
+    playDrumroll(3);
+    for (const n of [3, 2, 1]) {
+      mystery.innerHTML = `<div class="countdown">${n}</div>`;
+      playTick();
+      await wait(1000);
+    }
+    mystery.remove();
+    document.getElementById('soloReveal').hidden = false;
+    const title = document.getElementById('duelTitle');
+    title.innerHTML = `Bravo <span style="color:var(--gold)">${esc(data.duel.a.nom)}</span> !`;
+    title.classList.add('pop');
+    playFanfare();
+    confetti(260);
+    setTimeout(() => confetti(160), 900);
+    duelState = 'revealed';
   }
 
   function highlightExpressions(html) {
@@ -554,6 +612,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   async function reveal() {
     if (duelState !== 'versus') return;
+    if (data.duel.solo) return revealSolo();
     duelState = 'counting';
     document.getElementById('revealBtn')?.remove();
     const title = document.getElementById('duelTitle');
