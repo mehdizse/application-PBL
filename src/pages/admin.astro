@@ -778,7 +778,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return;
       }
       container.classList.remove('hidden');
-      container.innerHTML = `<img src="${url}" alt="photo" class="w-14 h-14 rounded-full object-cover border border-gray-200" />`;
+      container.innerHTML = `
+        <div class="relative inline-block">
+          <img src="${url}" alt="photo" class="w-14 h-14 rounded-full object-cover border border-gray-200" />
+          <button type="button" onclick="removeWinningPhoto('${teamKey}', ${index})" title="Supprimer la photo"
+            class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold leading-none shadow hover:bg-red-700">✕</button>
+        </div>`;
     };
 
     for (let i = 0; i < 4; i += 1) {
@@ -790,6 +795,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       renderPreview('b', i);
     }
   }
+
+  // Retire la photo d'un élève (fichier supprimé du stockage + fiche vidée)
+  window.removeWinningPhoto = async function(teamKey, index) {
+    const member = winningTeamData?.teams?.[teamKey]?.members?.[index];
+    if (!member) return;
+    const storagePath = String(member.storagePath || '');
+    member.photoUrl = '';
+    member.storagePath = '';
+    const photoInput = document.getElementById(`winningPhoto${teamKey.toUpperCase()}${index}`);
+    if (photoInput) photoInput.value = '';
+    renderWinningTeamForm();
+    await saveWinningTeam();
+    if (storagePath) {
+      try {
+        await window.deleteWinningTeamPhoto({ storagePath });
+      } catch (error) {
+        console.error('Erreur suppression photo:', error);
+      }
+    }
+  };
 
   async function saveWinningTeam() {
     try {
