@@ -1,359 +1,499 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const memberSlots = [0, 1, 2, 3];
 ---
 
-<BaseLayout>
-  <!-- Ajout d'espace pour le header fixe -->
-  <div class="pt-12 min-h-screen bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4 py-6">
-      <!-- Header Admin -->
-      <div class="bg-white border border-gray-200 rounded-lg p-3 mb-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-lg font-medium text-gray-900">
-              Espace Enseignant
-            </h1>
-            <p class="text-sm text-gray-500">Gérez les productions de vos élèves</p>
-          </div>
-          <div id="userInfo" class="text-right">
-            <p class="text-xs text-gray-400">Non connecté</p>
-          </div>
-        </div>
-        <a href="/classe" class="mt-3 flex items-center justify-center gap-2 w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-semibold py-2.5 rounded-lg text-sm transition-colors">
-          📽️ Lancer le Mode Classe (vidéoprojecteur)
-        </a>
-      </div>
-
-      <!-- Section Connexion -->
-      <div id="loginSection" class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-        <h2 class="text-base font-medium text-gray-900 mb-4">Connexion Enseignant</h2>
-        <form id="loginForm" class="space-y-3">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" id="email" required 
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-            <input type="password" id="password" required 
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <button type="submit" 
-                  class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">
-            Se connecter
-          </button>
-        </form>
-        <div id="loginError" class="mt-3 p-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md hidden">
-          Erreur de connexion
-        </div>
-      </div>
-
-      <!-- Dashboard Admin -->
-      <div id="dashboardSection" class="hidden">
-        <!-- Expressions de la semaine -->
-        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-          <h2 class="text-base font-medium text-gray-900 mb-3">
-            Expressions de la semaine
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">Week ID</label>
-              <input id="weekIdInput" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" placeholder="YYYY-WW" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">Date début</label>
-              <input id="weekStartInput" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">Date fin</label>
-              <input id="weekEndInput" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md" />
-            </div>
-          </div>
-          <div class="space-y-2">
-            <textarea id="defiInput" placeholder="Une expression par ligne" 
-                     rows="4" 
-                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
-            <div class="flex flex-wrap gap-2">
-              <button onclick="definirDefi()" 
-                      class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
-                Enregistrer la semaine
-              </button>
-              <button onclick="reparerMigrationLegacy()" 
-                      class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors">
-                Reparer migration legacy
-              </button>
-            </div>
-          </div>
-          <div id="legacyRepairStatus" class="mt-2 text-xs text-gray-500"></div>
-          <div id="defiActuel" class="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-md">
-            <p class="text-sm text-gray-600">Aucune semaine chargée</p>
-          </div>
-          <div class="mt-3">
-            <p class="text-xs font-medium text-gray-700 mb-2">Archives</p>
-            <div id="defiArchives" class="flex flex-wrap gap-2"></div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-          <h2 class="text-base font-medium text-gray-900 mb-3">Équipe Gagnante</h2>
-          <label class="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-900 cursor-pointer">
-            <input id="winningSoloCheckbox" type="checkbox" class="w-4 h-4" />
-            <span><b>Présenter un seul groupe</b> (pas de duel) : seul le Groupe 1 est utilisé, il est automatiquement le gagnant.</span>
+<BaseLayout bare pageTitle="Espace enseignant · Le Mur des Textes">
+  <div class="adm">
+    <!-- ===== Connexion ===== -->
+    <section id="loginSection" class="adm-login">
+      <div class="login-card">
+        <div class="login-logo"><span class="mark">✍️</span>Le Mur des Textes</div>
+        <h1>Espace enseignant</h1>
+        <p class="muted">Connectez-vous pour gérer les textes, les groupes et la cérémonie de la semaine.</p>
+        <form id="loginForm" class="stack">
+          <label class="field"><span>Email</span>
+            <input type="email" id="email" required autocomplete="username" />
           </label>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="border border-gray-200 rounded-lg p-3">
-              <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-semibold text-gray-900">Groupe 1</p>
-                <button type="button" id="winnerBtnA" class="px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                  Définir gagnant
-                </button>
-              </div>
-              <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Sélectionner le groupe</label>
-                  <select id="winningGroupASelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Choisir un groupe</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Production écrite</label>
-                  <select id="winningTexteASelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Choisir un texte</option>
-                  </select>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                  <div class="space-y-1">
-                    <input id="winningPrenomA0" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoA0" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewA0" class="hidden mt-1"></div>
-                  </div>
-                  <div class="space-y-1">
-                    <input id="winningPrenomA1" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoA1" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewA1" class="hidden mt-1"></div>
-                  </div>
-                  <div class="space-y-1">
-                    <input id="winningPrenomA2" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoA2" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewA2" class="hidden mt-1"></div>
-                  </div>
-                  <div class="space-y-1">
-                    <input id="winningPrenomA3" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoA3" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewA3" class="hidden mt-1"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <label class="field"><span>Mot de passe</span>
+            <input type="password" id="password" required autocomplete="current-password" />
+          </label>
+          <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+        </form>
+        <div id="loginError" class="alert-error hidden">Erreur de connexion</div>
+        <a href="/" class="login-back">← Retour au site</a>
+      </div>
+    </section>
 
-            <div id="winningTeamBCard" class="border border-gray-200 rounded-lg p-3">
-              <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-semibold text-gray-900">Groupe 2</p>
-                <button type="button" id="winnerBtnB" class="px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                  Définir gagnant
-                </button>
-              </div>
-              <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Sélectionner le groupe</label>
-                  <select id="winningGroupBSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Choisir un groupe</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 mb-1">Production écrite</label>
-                  <select id="winningTexteBSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">Choisir un texte</option>
-                  </select>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                  <div class="space-y-1">
-                    <input id="winningPrenomB0" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoB0" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewB0" class="hidden mt-1"></div>
-                  </div>
-                  <div class="space-y-1">
-                    <input id="winningPrenomB1" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoB1" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewB1" class="hidden mt-1"></div>
-                  </div>
-                  <div class="space-y-1">
-                    <input id="winningPrenomB2" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoB2" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewB2" class="hidden mt-1"></div>
-                  </div>
-                  <div class="space-y-1">
-                    <input id="winningPrenomB3" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                    <input id="winningPhotoB3" type="file" accept="image/*" class="w-full text-xs" />
-                    <div id="winningPreviewB3" class="hidden mt-1"></div>
-                  </div>
-                </div>
+    <!-- ===== Tableau de bord ===== -->
+    <div id="dashboardSection" class="adm-app hidden">
+      <aside class="adm-side">
+        <a href="/" class="side-logo"><span class="mark">✍️</span><span>Le Mur des Textes</span></a>
+        <nav class="side-nav" id="sideNav">
+          <button data-panel="overview" class="active"><span class="ico">🏠</span><span>Tableau de bord</span></button>
+          <button data-panel="week"><span class="ico">📅</span><span>Semaine & consignes</span></button>
+          <button data-panel="winner"><span class="ico">🏆</span><span>Groupe gagnant</span></button>
+          <button data-panel="textes"><span class="ico">📝</span><span>Textes</span><em id="navCountTextes"></em></button>
+          <button data-panel="groupes"><span class="ico">👥</span><span>Groupes</span><em id="navCountGroupes"></em></button>
+          <button data-panel="badges"><span class="ico">⭐</span><span>Badges</span></button>
+        </nav>
+        <div class="side-bottom">
+          <a href="/classe" class="btn btn-gold btn-block">📽️ Mode Classe</a>
+          <a href="/" class="side-link">Voir le site public ↗</a>
+          <div id="userInfo" class="side-user"></div>
+        </div>
+      </aside>
+
+      <main class="adm-main">
+        <header class="adm-top">
+          <div>
+            <h1 id="panelTitle">Tableau de bord</h1>
+            <p id="panelSub" class="muted">Vue d'ensemble de la semaine</p>
+          </div>
+          <div class="top-actions">
+            <button class="btn btn-ghost" onclick="showAddGroupeModal()">+ Groupe</button>
+            <button class="btn btn-primary" onclick="showAddTexteModal()">+ Nouveau texte</button>
+          </div>
+        </header>
+
+        <!-- Vue d'ensemble -->
+        <section class="panel-view" data-view="overview">
+          <div class="stat-grid">
+            <div class="stat-card"><span class="lbl">Textes publiés</span><b id="ovTextes">–</b><span class="sub" id="ovTextesSub"></span></div>
+            <div class="stat-card"><span class="lbl">Groupes</span><b id="ovGroupes">–</b><span class="sub" id="ovGroupesSub"></span></div>
+            <div class="stat-card"><span class="lbl">Badges attribués</span><b id="ovBadges">–</b><span class="sub">tous textes confondus</span></div>
+            <div class="stat-card"><span class="lbl">Semaine en cours</span><b id="ovWeek">–</b><span class="sub" id="ovWeekSub"></span></div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-h"><h2>Préparer la cérémonie</h2><span class="muted">À faire chaque semaine</span></div>
+              <ul class="checklist" id="ovChecklist"></ul>
+            </div>
+            <div class="card">
+              <div class="card-h"><h2>Actions rapides</h2></div>
+              <div class="quick">
+                <button onclick="showAddTexteModal()"><span>📝</span>Ajouter un texte</button>
+                <button data-goto="badges"><span>⭐</span>Donner des badges</button>
+                <button data-goto="winner"><span>🏆</span>Choisir le gagnant</button>
+                <button data-goto="week"><span>📅</span>Consignes de la semaine</button>
+                <a href="/classe"><span>📽️</span>Lancer le Mode Classe</a>
+                <button onclick="showAddGroupeModal()"><span>👥</span>Ajouter un groupe</button>
               </div>
             </div>
           </div>
-          <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <div id="winningTeamStatus" class="text-xs text-gray-500">Chargement...</div>
-            <button type="button" id="winningTeamSaveBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium">
-              Enregistrer l'équipe gagnante
-            </button>
+        </section>
+
+        <!-- Semaine & consignes -->
+        <section class="panel-view hidden" data-view="week">
+          <div class="two-col wide-left">
+            <div class="card">
+              <div class="card-h"><h2>Modifier la semaine</h2></div>
+              <div class="grid-3">
+                <label class="field"><span>Semaine (année-numéro)</span>
+                  <input id="weekIdInput" type="text" class="is-readonly" placeholder="AAAA-SS" />
+                </label>
+                <label class="field"><span>Date de début</span>
+                  <input id="weekStartInput" type="date" />
+                </label>
+                <label class="field"><span>Date de fin</span>
+                  <input id="weekEndInput" type="date" />
+                </label>
+              </div>
+              <label class="field"><span>Consignes / expressions — une par ligne</span>
+                <textarea id="defiInput" rows="9" placeholder="Une consigne par ligne"></textarea>
+              </label>
+              <div class="row-actions">
+                <button onclick="definirDefi()" class="btn btn-primary">Enregistrer la semaine</button>
+                <button onclick="reparerMigrationLegacy()" class="btn btn-ghost btn-sm" title="Outil technique : à n'utiliser qu'en cas de problème avec les anciennes semaines">Réparer les anciennes semaines</button>
+              </div>
+              <div id="legacyRepairStatus" class="muted small"></div>
+            </div>
+            <div class="stack">
+              <div class="card">
+                <div class="card-h"><h2>Ce que voient les élèves</h2></div>
+                <div id="defiActuel"><p class="muted">Aucune semaine chargée</p></div>
+              </div>
+              <div class="card">
+                <div class="card-h"><h2>Semaines précédentes</h2><span class="muted small">Cliquer pour recharger</span></div>
+                <div id="defiArchives" class="chips"></div>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Actions rapides -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-          <button onclick="showAddGroupeModal()" 
-                  class="bg-white border border-gray-300 text-gray-700 p-3 rounded-md hover:bg-gray-50 transition-colors text-center">
-            <div class="text-base mb-1">+</div>
-            <div class="text-sm font-medium">Ajouter un groupe</div>
-          </button>
-          <button onclick="showAddTexteModal()" 
-                  class="bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 transition-colors text-center">
-            <div class="text-base mb-1">📝</div>
-            <div class="text-sm font-medium">Ajouter un texte</div>
-          </button>
-          <button onclick="showBadgesModal()" 
-                  class="bg-white border border-gray-300 text-gray-700 p-3 rounded-md hover:bg-gray-50 transition-colors text-center">
-            <div class="text-base mb-1">🏆</div>
-            <div class="text-sm font-medium">Gérer les badges</div>
-          </button>
-        </div>
-
-        <!-- Liste des groupes -->
-        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-          <h2 class="text-base font-medium text-gray-900 mb-3">
-            Groupes d'élèves
-          </h2>
-          <div id="groupesList" class="space-y-2">
-            <p class="text-gray-400 text-sm">Chargement...</p>
+        <!-- Groupe gagnant -->
+        <section class="panel-view hidden" data-view="winner">
+          <div class="card">
+            <label class="solo-toggle">
+              <input id="winningSoloCheckbox" type="checkbox" />
+              <span class="sw"></span>
+              <span><b>Présenter un seul groupe</b><br /><span class="muted small">Pas de duel : seul le Groupe 1 est utilisé et il est automatiquement le gagnant.</span></span>
+            </label>
           </div>
-        </div>
 
-        <!-- Liste des textes -->
-        <div class="bg-white border border-gray-200 rounded-lg p-4">
-          <h2 class="text-base font-medium text-gray-900 mb-3">
-            Textes des élèves
-          </h2>
-          <div id="textesList" class="space-y-3">
-            <p class="text-gray-400 text-sm">Chargement...</p>
+          <div class="two-col">
+            {['A', 'B'].map((k) => (
+              <div class="card" id={k === 'B' ? 'winningTeamBCard' : undefined}>
+                <div class="card-h">
+                  <h2>{k === 'A' ? 'Groupe 1' : 'Groupe 2'}</h2>
+                  <button type="button" id={`winnerBtn${k}`} class="btn btn-ghost btn-sm">Définir gagnant</button>
+                </div>
+                <div class="grid-2">
+                  <label class="field"><span>Groupe</span>
+                    <select id={`winningGroup${k}Select`}><option value="">Choisir un groupe</option></select>
+                  </label>
+                  <label class="field"><span>Production écrite</span>
+                    <select id={`winningTexte${k}Select`}><option value="">Choisir un texte</option></select>
+                  </label>
+                </div>
+                <p class="field-title">Élèves du groupe</p>
+                <div class="members">
+                  {memberSlots.map((i) => (
+                    <div class="member">
+                      <div id={`winningPreview${k}${i}`} class="hidden member-photo"></div>
+                      <label class="upload">
+                        <input id={`winningPhoto${k}${i}`} type="file" accept="image/*" />
+                        <span>📷 Photo</span>
+                      </label>
+                      <input id={`winningPrenom${k}${i}`} type="text" placeholder="Prénom" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
+
+          <div class="save-bar">
+            <span id="winningTeamStatus" class="muted small">Chargement…</span>
+            <button type="button" id="winningTeamSaveBtn" class="btn btn-primary">Enregistrer le groupe gagnant</button>
+          </div>
+        </section>
+
+        <!-- Textes -->
+        <section class="panel-view hidden" data-view="textes">
+          <div class="toolbar">
+            <input id="texteSearch" type="search" placeholder="Rechercher un titre ou un groupe…" />
+            <button class="btn btn-primary" onclick="showAddTexteModal()">+ Nouveau texte</button>
+          </div>
+          <div id="textesList" class="list"><p class="muted">Chargement…</p></div>
+        </section>
+
+        <!-- Groupes -->
+        <section class="panel-view hidden" data-view="groupes">
+          <div class="toolbar">
+            <p class="muted">Un groupe masqué n'apparaît plus sur le site public, ni ses textes.</p>
+            <button class="btn btn-primary" onclick="showAddGroupeModal()">+ Nouveau groupe</button>
+          </div>
+          <div id="groupesList" class="list"><p class="muted">Chargement…</p></div>
+        </section>
+
+        <!-- Badges -->
+        <section class="panel-view hidden" data-view="badges">
+          <div class="card legend-card">
+            <span>⭐ Texte de la semaine <em>30 pts</em></span>
+            <span>🏆 Meilleure introduction <em>15 pts</em></span>
+            <span>🔗 Connecteurs <em>15 pts</em></span>
+            <span>✍️ Bien rédigé <em>15 pts</em></span>
+            <span>🤝 Travail de groupe <em>15 pts</em></span>
+          </div>
+          <div id="badgesList" class="list"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===== Fenêtres ===== -->
+    <div id="addGroupeModal" class="modal hidden">
+      <div class="modal-card">
+        <h3>Nouveau groupe</h3>
+        <label class="field"><span>Nom du groupe</span>
+          <input type="text" id="groupeNomInput" placeholder="Ex : Groupe A – 3AM" />
+        </label>
+        <div class="row-actions end">
+          <button onclick="closeModal('addGroupeModal')" class="btn btn-ghost">Annuler</button>
+          <button onclick="ajouterGroupe()" class="btn btn-primary">Ajouter</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modals -->
-  <!-- Modal Ajout Groupe -->
-  <div id="addGroupeModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white border border-gray-200 rounded-lg p-6 w-96 shadow-lg">
-      <h3 class="text-base font-medium text-gray-900 mb-4">Ajouter un groupe</h3>
-      <input type="text" id="groupeNomInput" placeholder="Nom du groupe (ex: Groupe A)" 
-             class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-      <div class="flex gap-2">
-        <button onclick="ajouterGroupe()" class="flex-1 bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors">
-          Ajouter
-        </button>
-        <button onclick="closeModal('addGroupeModal')" class="flex-1 bg-white border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50 transition-colors">
-          Annuler
-        </button>
+    <div id="addTexteModal" class="modal hidden">
+      <div class="modal-card lg">
+        <h3>Nouveau texte</h3>
+        <form id="texteForm" class="stack">
+          <div class="grid-2">
+            <label class="field"><span>Groupe</span>
+              <select id="texteGroupeSelect"><option value="">Sélectionner un groupe</option></select>
+            </label>
+            <label class="field"><span>Type de texte</span>
+              <select id="texteTypeSelect">
+                <option value="Récit – fait divers">Récit – fait divers</option>
+                <option value="Récit d'aventure">Récit d'aventure</option>
+                <option value="Texte descriptif">Texte descriptif</option>
+                <option value="Texte explicatif">Texte explicatif</option>
+                <option value="Texte argumentatif">Texte argumentatif</option>
+                <option value="Nouvelle fantastique">Nouvelle fantastique</option>
+                <option value="Récit de voyage">Récit de voyage</option>
+                <option value="Poème">Poème</option>
+                <option value="Lettre">Lettre</option>
+              </select>
+            </label>
+          </div>
+          <label class="field"><span>Titre</span>
+            <input type="text" id="texteTitreInput" />
+          </label>
+          <label class="field"><span>Texte de l'élève (tel qu'il est écrit)</span>
+            <textarea id="texteContenuInput" rows="10"></textarea>
+          </label>
+          <label class="field"><span>Remarque de l'enseignant (optionnel)</span>
+            <textarea id="texteRemarqueInput" rows="3" placeholder="Ex : Bonne progression sur l'introduction et les connecteurs."></textarea>
+          </label>
+          <div class="row-actions end">
+            <button type="button" onclick="closeModal('addTexteModal')" class="btn btn-ghost">Annuler</button>
+            <button type="submit" class="btn btn-primary">Publier le texte</button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
 
-  <!-- Modal Ajout Texte -->
-  <div id="addTexteModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-lg">
-      <h3 class="text-base font-medium text-gray-900 mb-4">Ajouter un texte</h3>
-      <form id="texteForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Groupe</label>
-          <select id="texteGroupeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Sélectionner un groupe</option>
-          </select>
+    <div id="confirmModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="confirm-head">
+          <div class="danger-ico">!</div>
+          <div><h3>Confirmer la suppression</h3><p class="muted small">Cette action est irréversible.</p></div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-          <input type="text" id="texteTitreInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        <div id="confirmMessage" class="confirm-msg"></div>
+        <div class="row-actions end">
+          <button onclick="closeConfirmModal()" class="btn btn-ghost">Annuler</button>
+          <button onclick="confirmAction()" class="btn btn-danger">Supprimer</button>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-          <select id="texteTypeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="Récit d'aventure">Récit d'aventure</option>
-            <option value="Texte descriptif">Texte descriptif</option>
-            <option value="Nouvelle fantastique">Nouvelle fantastique</option>
-            <option value="Récit de voyage">Récit de voyage</option>
-            <option value="Poème">Poème</option>
-            <option value="Lettre">Lettre</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
-          <textarea id="texteContenuInput" rows="10" 
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Remarque de l'enseignant (optionnel)</label>
-          <textarea id="texteRemarqueInput" rows="3"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Ex: Bonne progression sur l'introduction et les connecteurs."></textarea>
-        </div>
-        <div class="flex gap-2">
-          <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors">
-            Ajouter le texte
-          </button>
-          <button type="button" onclick="closeModal('addTexteModal')" 
-                  class="flex-1 bg-white border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50 transition-colors">
-            Annuler
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Badges -->
-  <div id="badgesModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-2xl shadow-lg max-h-[80vh] overflow-y-auto">
-      <h3 class="text-base font-medium text-gray-900 mb-4">Gérer les badges</h3>
-      <div id="badgesList" class="space-y-3">
-        <!-- Badges will be loaded here -->
-      </div>
-      <div class="mt-4 flex justify-end">
-        <button onclick="closeModal('badgesModal')" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors">
-          Fermer
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Confirmation -->
-  <div id="confirmModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white border border-gray-200 rounded-lg p-6 w-96 shadow-lg">
-      <div class="flex items-center mb-4">
-        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-3">
-          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-          </svg>
-        </div>
-        <div>
-          <h3 class="text-base font-medium text-gray-900">Confirmer la suppression</h3>
-          <p class="text-sm text-gray-500">Cette action est irréversible</p>
-        </div>
-      </div>
-      
-      <div id="confirmMessage" class="text-sm text-gray-700 mb-6 bg-gray-50 p-3 rounded-md">
-        <!-- Message will be inserted here -->
-      </div>
-      
-      <div class="flex gap-3">
-        <button onclick="confirmAction()" class="flex-1 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-colors font-medium">
-          Supprimer
-        </button>
-        <button onclick="closeConfirmModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition-colors font-medium">
-          Annuler
-        </button>
       </div>
     </div>
   </div>
 </BaseLayout>
+
+<style is:global>
+  .adm {
+    --a-bg: #f5f4fa; --a-card: #fff; --a-line: #e6e3f0; --a-ink: #1d1838; --a-ink2: #4b4568; --a-muted: #8a84a3;
+    --a-primary: #5b3fd6; --a-primary-h: #4a2fc0; --a-soft: #efebfd; --a-night: #1b1446; --a-night2: #261a5e;
+    --a-gold: #ffc93c; --a-green: #12a37a; --a-red: #dc3d4b;
+    min-height: 100vh; background: var(--a-bg); color: var(--a-ink); font-family: 'Inter', system-ui, sans-serif; font-size: 14px;
+  }
+  .adm .hidden { display: none !important; }
+  .adm h1, .adm h2, .adm h3 { color: var(--a-ink); font-family: 'Inter', system-ui, sans-serif; margin: 0; letter-spacing: -0.01em; }
+  .adm .muted { color: var(--a-muted); margin: 0; }
+  .adm .small { font-size: 12.5px; }
+  .adm .stack { display: flex; flex-direction: column; gap: 16px; }
+
+  /* Champs */
+  .adm .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--a-ink2); }
+  .adm .field-title { font-size: 13px; font-weight: 600; color: var(--a-ink2); margin: 16px 0 10px; }
+  .adm input:not([type=checkbox]):not([type=file]), .adm select, .adm textarea {
+    width: 100%; font: inherit; font-weight: 400; font-size: 14px; color: var(--a-ink); background: #fff;
+    border: 1px solid var(--a-line); border-radius: 10px; padding: 10px 12px; transition: border-color .15s, box-shadow .15s; outline: none;
+  }
+  .adm textarea { resize: vertical; line-height: 1.55; }
+  .adm input:focus, .adm select:focus, .adm textarea:focus { border-color: var(--a-primary); box-shadow: 0 0 0 3px rgba(91, 63, 214, .15); }
+  .adm .is-readonly { background: #f7f6fb !important; color: var(--a-muted) !important; }
+
+  /* Boutons */
+  .adm .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 600; font-size: 14px;
+    padding: 9px 16px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; text-decoration: none; white-space: nowrap;
+    transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+  }
+  .adm .btn-primary { background: var(--a-primary); color: #fff; box-shadow: 0 1px 2px rgba(29, 24, 56, .15); }
+  .adm .btn-primary:hover { background: var(--a-primary-h); }
+  .adm .btn-gold { background: var(--a-gold); color: var(--a-night); }
+  .adm .btn-gold:hover { background: #ffd666; }
+  .adm .btn-ghost { background: #fff; color: var(--a-ink2); border-color: var(--a-line); }
+  .adm .btn-ghost:hover { background: #f6f4fc; border-color: #d8d2ea; }
+  .adm .btn-danger { background: var(--a-red); color: #fff; }
+  .adm .btn-danger:hover { background: #c22f3c; }
+  .adm .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 8px; }
+  .adm .btn-block { width: 100%; }
+  .adm .btn.is-winner { background: #fff4d6; border-color: #ffd36b; color: #8a5f00; }
+  .adm .icon-btn {
+    width: 32px; height: 32px; display: inline-grid; place-items: center; border-radius: 8px; border: 1px solid var(--a-line);
+    background: #fff; color: var(--a-ink2); cursor: pointer; font-size: 14px; transition: background .15s, color .15s, border-color .15s;
+  }
+  .adm .icon-btn:hover { background: #f6f4fc; }
+  .adm .icon-btn.danger:hover { background: #fdecee; color: var(--a-red); border-color: #f5c2c8; }
+  .adm .row-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+  .adm .row-actions.end { justify-content: flex-end; }
+
+  /* Connexion */
+  .adm-login {
+    min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+    background: radial-gradient(800px 400px at 0% 0%, rgba(255, 107, 154, .25), transparent 60%),
+                radial-gradient(800px 500px at 100% 100%, rgba(76, 195, 255, .2), transparent 60%),
+                linear-gradient(160deg, var(--a-night), #2b1d6b);
+  }
+  .login-card { width: min(420px, 100%); background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .45); }
+  .login-card h1 { font-size: 24px; margin: 22px 0 6px; }
+  .login-card .muted { margin-bottom: 22px; line-height: 1.5; }
+  .login-logo, .side-logo { display: flex; align-items: center; gap: 10px; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 18px; color: var(--a-ink); text-decoration: none; }
+  .mark { width: 32px; height: 32px; border-radius: 9px; background: var(--a-gold); display: grid; place-items: center; font-size: 16px; flex: none; }
+  .alert-error { margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: #fdecee; color: #b42532; font-size: 13px; }
+  .login-back { display: inline-block; margin-top: 18px; color: var(--a-muted); font-size: 13px; text-decoration: none; }
+  .login-back:hover { color: var(--a-ink); }
+
+  /* Structure */
+  .adm-app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
+  .adm-side {
+    position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 22px; padding: 20px 14px;
+    background: linear-gradient(180deg, var(--a-night), var(--a-night2)); color: #fff;
+  }
+  .side-logo { color: #fff; padding: 4px 8px; }
+  .side-nav { display: flex; flex-direction: column; gap: 2px; }
+  .side-nav button {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 10px; border: 0; background: none;
+    color: rgba(255, 255, 255, .72); font: inherit; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; transition: background .15s, color .15s;
+  }
+  .side-nav button:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+  .side-nav button.active { background: rgba(255, 255, 255, .12); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 var(--a-gold); }
+  .side-nav .ico { width: 20px; text-align: center; }
+  .side-nav em { margin-left: auto; font-style: normal; font-size: 12px; background: rgba(255, 255, 255, .12); padding: 1px 8px; border-radius: 999px; }
+  .side-nav em:empty { display: none; }
+  .side-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .side-link { color: rgba(255, 255, 255, .65); text-decoration: none; font-size: 13px; text-align: center; padding: 4px; }
+  .side-link:hover { color: #fff; }
+  .side-user { border-top: 1px solid rgba(255, 255, 255, .12); padding: 12px 6px 0; font-size: 12.5px; color: rgba(255, 255, 255, .6); overflow-wrap: anywhere; }
+  .side-user b { display: block; color: #fff; font-weight: 600; font-size: 13px; margin: 2px 0 6px; }
+  .side-user button { background: none; border: 0; color: rgba(255, 255, 255, .7); font: inherit; font-size: 12.5px; cursor: pointer; padding: 0; text-decoration: underline; }
+  .side-user button:hover { color: #fff; }
+
+  .adm-main { padding: 28px 32px 48px; max-width: 1200px; width: 100%; }
+  .adm-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .adm-top h1 { font-size: 26px; font-weight: 700; }
+  .adm-top .muted { margin-top: 4px; }
+  .top-actions { display: flex; gap: 10px; }
+
+  /* Cartes */
+  .adm .card { background: var(--a-card); border: 1px solid var(--a-line); border-radius: 16px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(29, 24, 56, .04); }
+  .adm .card-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .adm .card-h h2 { font-size: 16px; font-weight: 700; }
+  .adm .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+  .adm .two-col.wide-left { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); margin-top: 0; }
+  .adm .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .adm .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+
+  /* Vue d'ensemble */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .stat-card { background: #fff; border: 1px solid var(--a-line); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 4px; }
+  .stat-card .lbl { font-size: 12.5px; font-weight: 600; color: var(--a-muted); text-transform: uppercase; letter-spacing: .04em; }
+  .stat-card b { font-size: 30px; font-weight: 800; color: var(--a-ink); line-height: 1.15; }
+  .stat-card .sub { font-size: 12.5px; color: var(--a-muted); }
+  .checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .checklist li { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 10px; }
+  .checklist li:hover { background: #faf9fd; }
+  .checklist .dot { width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .checklist .ok .dot { background: #e3f7ef; color: var(--a-green); }
+  .checklist .todo .dot { background: #f1eff7; color: var(--a-muted); }
+  .checklist .txt { flex: 1; }
+  .checklist .txt b { display: block; font-weight: 600; }
+  .checklist .txt span { color: var(--a-muted); font-size: 12.5px; }
+  .checklist li button { flex: none; }
+  .quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .quick button, .quick a {
+    display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: 12px; border: 1px solid var(--a-line); background: #fff;
+    font: inherit; font-weight: 600; color: var(--a-ink); text-align: left; cursor: pointer; text-decoration: none; transition: border-color .15s, background .15s;
+  }
+  .quick button:hover, .quick a:hover { border-color: #cfc6f2; background: #faf9fe; }
+  .quick span { width: 34px; height: 34px; border-radius: 10px; background: var(--a-soft); display: grid; place-items: center; font-size: 16px; flex: none; }
+
+  /* Listes (textes, groupes, badges) */
+  .adm .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .adm .toolbar input { max-width: 380px; }
+  .adm .list { display: flex; flex-direction: column; gap: 10px; }
+  .adm .item { background: #fff; border: 1px solid var(--a-line); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+  .adm .item:hover { border-color: #d9d3ec; }
+  .adm .item .main { flex: 1; min-width: 0; }
+  .adm .item .title { font-weight: 600; font-size: 15px; color: var(--a-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm .item .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; font-size: 12.5px; color: var(--a-muted); }
+  .adm .item .acts { display: flex; gap: 6px; flex: none; }
+  .adm .chip-g { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--a-soft); color: #4a35b5; }
+  .adm .status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; }
+  .adm .status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .adm .status.on { color: var(--a-green); }
+  .adm .status.off { color: var(--a-muted); }
+  .adm .edit-box { background: #fff; border: 1px solid #cfc6f2; box-shadow: 0 0 0 3px rgba(91, 63, 214, .08); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .adm .edit-box h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--a-ink); }
+  .adm .empty-state { text-align: center; padding: 40px 16px; color: var(--a-muted); background: #fff; border: 1px dashed var(--a-line); border-radius: 14px; }
+
+  .adm .badge-row { background: #fff; border: 1px solid var(--a-line); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .adm .badge-row .main { flex: 1; min-width: 200px; }
+  .adm .badge-toggles { display: flex; gap: 6px; flex-wrap: wrap; }
+  .adm .badge-toggles button {
+    width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--a-line); background: #fff; font-size: 18px; cursor: pointer;
+    filter: grayscale(1); opacity: .45; transition: all .15s;
+  }
+  .adm .badge-toggles button:hover { opacity: .8; }
+  .adm .badge-toggles button.on { filter: none; opacity: 1; background: #fff6dc; border-color: #ffd36b; }
+  .legend-card { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 16px; font-size: 13px; color: var(--a-ink2); }
+  .legend-card em { font-style: normal; color: var(--a-muted); margin-left: 4px; }
+
+  /* Semaine */
+  .adm .week-now h3 { font-size: 15px; }
+  .adm .week-now ol { margin: 12px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--a-ink2); line-height: 1.5; }
+  .adm .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .adm .chips button { font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--a-line); background: #fff; color: var(--a-ink2); cursor: pointer; }
+  .adm .chips button:hover { border-color: var(--a-primary); color: var(--a-primary); }
+
+  /* Groupe gagnant */
+  .solo-toggle { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+  .solo-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .solo-toggle .sw { width: 44px; height: 26px; border-radius: 999px; background: #dcd8e8; position: relative; flex: none; transition: background .2s; }
+  .solo-toggle .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .2); transition: transform .2s; }
+  .solo-toggle input:checked + .sw { background: var(--a-primary); }
+  .solo-toggle input:checked + .sw::after { transform: translateX(18px); }
+  .solo-toggle input:focus-visible + .sw { box-shadow: 0 0 0 3px rgba(91, 63, 214, .25); }
+  .members { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .member { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 10px; border: 1px dashed var(--a-line); border-radius: 12px; background: #fcfbfe; }
+  .member-photo img { width: 64px !important; height: 64px !important; }
+  .member input[type=text] { text-align: center; padding: 8px !important; }
+  .upload { cursor: pointer; }
+  .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .upload span { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: var(--a-soft); color: #4a35b5; }
+  .upload:hover span { background: #e2dbfb; }
+  .upload input:focus-visible + span { box-shadow: 0 0 0 3px rgba(91, 63, 214, .25); }
+  .save-bar {
+    position: sticky; bottom: 16px; margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: #fff; border: 1px solid var(--a-line); border-radius: 14px; padding: 12px 16px; box-shadow: 0 10px 30px -12px rgba(29, 24, 56, .25);
+  }
+
+  /* Fenêtres */
+  .adm .modal { position: fixed; inset: 0; z-index: 60; background: rgba(20, 15, 50, .55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .adm .modal-card { width: min(440px, 100%); max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .4); display: flex; flex-direction: column; gap: 16px; }
+  .adm .modal-card.lg { width: min(720px, 100%); }
+  .adm .modal-card h3 { font-size: 18px; font-weight: 700; }
+  .confirm-head { display: flex; align-items: center; gap: 14px; }
+  .danger-ico { width: 40px; height: 40px; border-radius: 50%; background: #fdecee; color: var(--a-red); display: grid; place-items: center; font-weight: 800; font-size: 18px; flex: none; }
+  .confirm-msg { background: #f8f7fc; border-radius: 12px; padding: 14px; font-size: 14px; color: var(--a-ink2); }
+  .confirm-msg p { margin: 0 0 4px; }
+
+  /* Responsive */
+  @media (max-width: 1100px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .members { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 900px) {
+    .adm-app { grid-template-columns: 1fr; }
+    .adm-side { position: sticky; top: 0; z-index: 40; height: auto; flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; overflow-x: auto; }
+    .side-logo span:last-child, .side-bottom .side-link, .side-user { display: none; }
+    .side-nav { flex-direction: row; gap: 4px; }
+    .side-nav button { white-space: nowrap; padding: 8px 10px; }
+    .side-nav button.active { box-shadow: inset 0 -3px 0 var(--a-gold); }
+    .side-bottom { margin: 0 0 0 auto; flex-direction: row; }
+    .side-bottom .btn { width: auto; }
+    .adm-main { padding: 20px 16px 40px; }
+    .adm .two-col, .adm .two-col.wide-left, .adm .grid-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .adm .grid-2, .stat-grid, .quick { grid-template-columns: 1fr; }
+    .top-actions .btn-ghost { display: none; }
+    .adm .item { flex-wrap: wrap; }
+    .adm .toolbar { flex-direction: column; align-items: stretch; }
+    .adm .toolbar input { max-width: none; }
+  }
+</style>
 
 <script>
   // Les fonctions Firebase sont chargées globalement via les balises script dans BaseLayout
@@ -362,6 +502,104 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let textes = [];
   let weeklyExpressionsData = null;
   let winningTeamData = null;
+
+  const esc = (v) => String(v ?? '')
+    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+
+  const BADGE_LABELS = {
+    '⭐': 'Texte de la semaine', '🏆': 'Meilleure introduction', '🔗': 'Connecteurs bien utilisés',
+    '✍️': 'Texte bien rédigé', '🤝': 'Bon travail de groupe'
+  };
+
+  // ===== Navigation entre les onglets =====
+  const PANELS = {
+    overview: ['Tableau de bord', "Vue d'ensemble de la semaine"],
+    week: ['Semaine & consignes', 'Les consignes affichées sur le site et dans le Mode Classe'],
+    winner: ['Groupe gagnant', 'Le groupe révélé pendant la cérémonie'],
+    textes: ['Textes', 'Toutes les productions des élèves'],
+    groupes: ['Groupes', "Les groupes d'auteurs"],
+    badges: ['Badges', 'Cliquez sur un badge pour le donner ou le retirer']
+  };
+
+  function showPanel(name) {
+    if (!PANELS[name]) name = 'overview';
+    document.querySelectorAll('.panel-view').forEach((el) => el.classList.toggle('hidden', el.dataset.view !== name));
+    document.querySelectorAll('#sideNav button').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
+    document.getElementById('panelTitle').textContent = PANELS[name][0];
+    document.getElementById('panelSub').textContent = PANELS[name][1];
+    if (name === 'badges') window.loadBadges();
+    try { localStorage.setItem('adminPanel', name); } catch (e) {}
+    window.scrollTo({ top: 0 });
+  }
+  window.showPanel = showPanel;
+
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-panel], [data-goto]');
+    if (el) showPanel(el.dataset.panel || el.dataset.goto);
+  });
+
+  // Fermer une fenêtre avec Échap ou en cliquant à côté
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    ['addGroupeModal', 'addTexteModal'].forEach((id) => document.getElementById(id)?.classList.add('hidden'));
+    window.closeConfirmModal?.();
+  });
+  document.querySelectorAll('.modal').forEach((m) => m.addEventListener('click', (e) => {
+    if (e.target !== m) return;
+    if (m.id === 'confirmModal') window.closeConfirmModal?.();
+    else m.classList.add('hidden');
+  }));
+
+  document.getElementById('texteSearch')?.addEventListener('input', () => renderTextesList());
+
+  function frDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!m) return String(iso || '');
+    return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+      .format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])));
+  }
+
+  // ===== Vue d'ensemble =====
+  function updateOverview() {
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const visibles = textes.filter((t) => t.visible);
+    const badgesCount = textes.reduce((n, t) => n + (Array.isArray(t.badges) ? t.badges.length : 0), 0);
+    const week = weeklyExpressionsData?.currentWeek;
+    const weekTextes = week ? textes.filter((t) => String(t.weekId || '') === week.weekId) : [];
+    const weekBadges = weekTextes.some((t) => Array.isArray(t.badges) && t.badges.length);
+
+    set('ovTextes', textes.length);
+    set('ovTextesSub', `${visibles.length} visible${visibles.length > 1 ? 's' : ''} sur le site`);
+    set('ovGroupes', groupes.length);
+    set('ovGroupesSub', `${groupes.filter((g) => g.visible).length} visibles`);
+    set('ovBadges', badgesCount);
+    set('ovWeek', week ? `S${String(week.weekId).split('-')[1] || ''}` : '–');
+    set('ovWeekSub', week ? `${frDate(week.startDate)} → ${frDate(week.endDate)}` : 'Aucune semaine');
+    set('navCountTextes', textes.length || '');
+    set('navCountGroupes', groupes.length || '');
+
+    const today = new Date().toISOString().slice(0, 10);
+    const weekIsCurrent = !!week && week.startDate <= today && today <= week.endDate;
+    const w = winningTeamData;
+    const winnerKey = w?.solo ? 'a' : w?.winner;
+    const winnerTeam = winnerKey ? w?.teams?.[winnerKey] : null;
+    const winnerReady = !!(winnerTeam?.groupeId && winnerTeam?.texteId);
+
+    const steps = [
+      [weekIsCurrent, 'Consignes de la semaine', weekIsCurrent ? `${week.expressions.length} consignes enregistrées` : 'Les dates ne correspondent pas à cette semaine', 'week'],
+      [weekTextes.length > 0, 'Textes publiés', weekTextes.length ? `${weekTextes.length} texte(s) cette semaine` : 'Aucun texte pour cette semaine', 'textes'],
+      [weekBadges, 'Badges attribués', weekBadges ? 'Au moins un texte récompensé' : 'Aucun badge cette semaine', 'badges'],
+      [winnerReady, 'Groupe gagnant choisi', winnerReady ? 'Prêt pour la cérémonie' : 'Groupe ou texte manquant', 'winner']
+    ];
+    const list = document.getElementById('ovChecklist');
+    if (list) list.innerHTML = steps.map(([ok, title, sub, panel], i) => `
+      <li class="${ok ? 'ok' : 'todo'}">
+        <span class="dot">${ok ? '✓' : i + 1}</span>
+        <span class="txt"><b>${title}</b><span>${esc(sub)}</span></span>
+        <button class="btn btn-ghost btn-sm" data-goto="${panel}">${ok ? 'Voir' : 'Compléter'}</button>
+      </li>`).join('');
+  }
 
   // Initialisation
   document.addEventListener('DOMContentLoaded', async () => {
@@ -394,17 +632,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function showLogin() {
     document.getElementById('loginSection').classList.remove('hidden');
     document.getElementById('dashboardSection').classList.add('hidden');
-    document.getElementById('userInfo').innerHTML = '<p class="text-sm text-gray-600">Non connecté</p>';
+    document.getElementById('userInfo').innerHTML = '';
   }
 
   function showDashboard() {
     document.getElementById('loginSection').classList.add('hidden');
     document.getElementById('dashboardSection').classList.remove('hidden');
     document.getElementById('userInfo').innerHTML = `
-      <p class="text-xs text-gray-500">Connecté en tant que</p>
-      <p class="text-sm font-medium text-gray-900">${currentUser.email}</p>
-      <button onclick="logout()" class="mt-1 text-xs text-gray-500 hover:text-gray-700 underline">Déconnexion</button>
+      Connecté en tant que
+      <b>${esc(currentUser.email)}</b>
+      <button onclick="logout()">Se déconnecter</button>
     `;
+    let saved = 'overview';
+    try { saved = localStorage.getItem('adminPanel') || 'overview'; } catch (e) {}
+    showPanel(saved);
   }
 
   async function handleLogin(e) {
@@ -451,6 +692,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       loadWeeklyExpressions(),
       loadWinningTeam()
     ]);
+    // Recharger les groupes une fois les textes connus (nombre de textes par groupe)
+    await window.loadGroupes();
+    updateOverview();
   }
 
   window.loadGroupes = async function() {
@@ -460,41 +704,71 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const select = document.getElementById('texteGroupeSelect');
       
       if (groupes.length === 0) {
-        container.innerHTML = '<p class="text-gray-500">Aucun groupe pour le moment</p>';
+        container.innerHTML = '<div class="empty-state">Aucun groupe pour le moment. Créez le premier avec « + Nouveau groupe ».</div>';
         select.innerHTML = '<option value="">Aucun groupe disponible</option>';
         return;
       }
 
-      container.innerHTML = groupes.map(groupe => `
-        <div class="flex items-center justify-between p-2 border border-gray-200 rounded-md" data-groupe-id="${groupe.id}">
-          <div>
-            <span class="text-sm font-medium text-gray-900">${groupe.nom}</span>
-            <span class="ml-2 text-xs ${groupe.visible ? 'text-green-600' : 'text-red-600'}">
-              ${groupe.visible ? 'Visible' : 'Masqué'}
-            </span>
+      container.innerHTML = groupes.map(groupe => {
+        const nb = textes.filter((t) => t.groupeNom === groupe.nom).length;
+        return `
+        <div class="item" data-groupe-id="${groupe.id}">
+          <div class="main">
+            <div class="title">${esc(groupe.nom)}</div>
+            <div class="meta">
+              <span class="status ${groupe.visible ? 'on' : 'off'}">${groupe.visible ? 'Visible' : 'Masqué'}</span>
+              <span>· ${nb} texte${nb > 1 ? 's' : ''}</span>
+            </div>
           </div>
-          <div class="flex gap-1">
-            <button onclick="toggleGroupeVisibility('${groupe.id}', ${!groupe.visible})" 
-                    class="px-2 py-1 text-xs ${groupe.visible ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} rounded transition-colors">
-              ${groupe.visible ? 'Masquer' : 'Afficher'}
-            </button>
-            <button onclick="editGroupe('${groupe.id}')" 
-                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
-              Modifier
-            </button>
-            <button onclick="deleteGroupeById('${groupe.id}')" 
-                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
-              Supprimer
-            </button>
+          <div class="acts">
+            <button onclick="toggleGroupeVisibility('${groupe.id}', ${!groupe.visible})" class="btn btn-ghost btn-sm">${groupe.visible ? 'Masquer' : 'Afficher'}</button>
+            <button onclick="editGroupe('${groupe.id}')" class="icon-btn" title="Renommer">✏️</button>
+            <button onclick="deleteGroupeById('${groupe.id}')" class="icon-btn danger" title="Supprimer">🗑</button>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
 
       select.innerHTML = '<option value="">Sélectionner un groupe</option>' + 
-        groupes.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+        groupes.map(g => `<option value="${g.id}">${esc(g.nom)}</option>`).join('');
+      updateOverview();
     } catch (error) {
       console.error('Erreur lors du chargement des groupes:', error);
     }
+  }
+
+  function renderTextesList() {
+    const container = document.getElementById('textesList');
+    if (!container || !textes.length) return;
+    const q = String(document.getElementById('texteSearch')?.value || '').trim().toLowerCase();
+    const timeOf = (v) => (v?.toDate?.() || new Date(v || 0)).getTime() || 0;
+    const list = textes
+      .filter((t) => !q || `${t.titre} ${t.groupeNom} ${t.type}`.toLowerCase().includes(q))
+      .sort((a, b) => timeOf(b.createdAt) - timeOf(a.createdAt));
+    if (!list.length) { container.innerHTML = '<div class="empty-state">Aucun texte ne correspond à la recherche.</div>'; return; }
+    container.innerHTML = list.map((texte) => {
+      const t = timeOf(texte.createdAt);
+      const date = t ? new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      const badges = (Array.isArray(texte.badges) ? texte.badges : []).map((b) => `<span title="${esc(BADGE_LABELS[b] || b)}">${esc(b)}</span>`).join('');
+      return `
+        <div class="item" data-texte-id="${texte.id}">
+          <div class="main">
+            <div class="title">${esc(texte.titre || 'Sans titre')}</div>
+            <div class="meta">
+              <span class="chip-g">${esc(texte.groupeNom || '')}</span>
+              ${texte.type ? `<span>${esc(texte.type)}</span>` : ''}
+              ${date ? `<span>· ${date}</span>` : ''}
+              <span class="status ${texte.visible ? 'on' : 'off'}">${texte.visible ? 'Visible' : 'Masqué'}</span>
+              ${badges ? `<span>${badges}</span>` : ''}
+            </div>
+          </div>
+          <div class="acts">
+            <a href="/texte/${encodeURIComponent(texte.id)}" target="_blank" class="icon-btn" title="Voir sur le site">↗</a>
+            <button onclick="toggleTexteVisibility('${texte.id}', ${!texte.visible})" class="btn btn-ghost btn-sm">${texte.visible ? 'Masquer' : 'Afficher'}</button>
+            <button onclick="editTexte('${texte.id}')" class="icon-btn" title="Modifier">✏️</button>
+            <button onclick="deleteTexteById('${texte.id}')" class="icon-btn danger" title="Supprimer">🗑</button>
+          </div>
+        </div>`;
+    }).join('');
   }
 
   window.loadTextes = async function() {
@@ -503,58 +777,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const container = document.getElementById('textesList');
       
       if (textes.length === 0) {
-        container.innerHTML = '<p class="text-gray-500">Aucun texte pour le moment</p>';
+        container.innerHTML = '<div class="empty-state">Aucun texte pour le moment. Ajoutez le premier avec « + Nouveau texte ».</div>';
+        updateOverview();
         return;
       }
 
-      container.innerHTML = textes.map(texte => `
-        <div class="border border-gray-200 rounded-md p-3" data-texte-id="${texte.id}">
-          <div class="flex items-start justify-between mb-2">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-medium">
-                  ${texte.groupeNom}
-                </span>
-                <span class="text-sm font-medium text-gray-900">${texte.titre}</span>
-              </div>
-              <span class="text-xs text-gray-500">${texte.type}</span>
-            </div>
-            <div class="flex items-center gap-1">
-              ${texte.badges && texte.badges.length > 0 ? `
-                <div class="flex gap-1 mr-2">
-                  ${texte.badges.map(badge => `<span class="text-xs">${badge}</span>`).join('')}
-                </div>
-              ` : ''}
-              <span class="text-xs ${texte.visible ? 'text-green-600' : 'text-red-600'}">
-                ${texte.visible ? 'Visible' : 'Masqué'}
-              </span>
-            </div>
-          </div>
-          
-          <div class="text-xs text-gray-400 mb-2">
-            Créé le ${new Date(texte.createdAt?.toDate?.() || texte.createdAt).toLocaleDateString('fr-FR')}
-          </div>
-          
-          <div class="flex gap-1">
-            <button onclick="toggleTexteVisibility('${texte.id}', ${!texte.visible})" 
-                    class="px-2 py-1 text-xs ${texte.visible ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} rounded transition-colors">
-              ${texte.visible ? 'Masquer' : 'Afficher'}
-            </button>
-            <button onclick="editTexte('${texte.id}')" 
-                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
-              Modifier
-            </button>
-            <button onclick="deleteTexteById('${texte.id}')" 
-                    class="px-2 py-1 text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded transition-colors">
-              Supprimer
-            </button>
-          </div>
-        </div>
-      `).join('');
+      renderTextesList();
 
       if (winningTeamData) {
         renderWinningTeamForm();
       }
+      if (!document.querySelector('[data-view="badges"]')?.classList.contains('hidden')) window.loadBadges();
+      updateOverview();
     } catch (error) {
       console.error('Erreur lors du chargement des textes:', error);
     }
@@ -762,10 +996,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     document.getElementById('winningTeamBCard').classList.toggle('hidden', solo);
 
     const winner = String(winningTeamData?.winner || '');
-    const winnerActiveClass = 'bg-amber-50 border-amber-300 text-amber-800';
-    const normalClass = 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50';
-    winnerBtnA.className = `px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${winner === 'a' ? winnerActiveClass : normalClass}`;
-    winnerBtnB.className = `px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${winner === 'b' ? winnerActiveClass : normalClass}`;
+    winnerBtnA.className = `btn btn-ghost btn-sm ${winner === 'a' ? 'is-winner' : ''}`;
+    winnerBtnB.className = `btn btn-ghost btn-sm ${winner === 'b' ? 'is-winner' : ''}`;
+    winnerBtnA.textContent = winner === 'a' ? '🏆 Gagnant' : 'Définir gagnant';
+    winnerBtnB.textContent = winner === 'b' ? '🏆 Gagnant' : 'Définir gagnant';
     winnerBtnA.classList.toggle('invisible', solo);
 
     const renderPreview = (teamKey, index) => {
@@ -820,7 +1054,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     try {
       setWinningTeamStatus('Enregistrement...');
       await window.setWinningTeam(winningTeamData, { merge: false });
-      setWinningTeamStatus('Enregistré');
+      setWinningTeamStatus('✓ Enregistré');
+      updateOverview();
       return true;
     } catch (error) {
       console.error('Erreur saveWinningTeam:', error);
@@ -903,7 +1138,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const container = document.getElementById('defiArchives');
     const archives = weeklyExpressionsData?.archives || [];
     if (archives.length === 0) {
-      container.innerHTML = '<p class="text-xs text-gray-500">Aucune archive pour le moment</p>';
+      container.innerHTML = '<p class="muted small">Aucune semaine précédente</p>';
       return;
     }
 
@@ -911,9 +1146,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <button
         type="button"
         data-week-id="${week.weekId}"
-        class="px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+        title="Semaine ${esc(week.weekId)}"
       >
-        ${week.weekId}
+        ${frDate(week.startDate) || esc(week.weekId)}
       </button>
     `).join('');
 
@@ -934,19 +1169,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (currentWeek) {
         fillWeeklyForm(currentWeek);
         container.innerHTML = `
-          <p class="text-sm font-medium text-gray-900 mb-1">Semaine courante: ${currentWeek.weekId}</p>
-          <p class="text-xs text-gray-500 mb-2">${currentWeek.startDate} au ${currentWeek.endDate}</p>
-          <ul class="space-y-1">
-            ${currentWeek.expressions.map((expression) => `<li class="text-sm text-gray-700">• ${expression}</li>`).join('')}
-          </ul>
+          <div class="week-now">
+            <h3>Semaine ${esc(currentWeek.weekId)}</h3>
+            <p class="muted small">Du ${frDate(currentWeek.startDate)} au ${frDate(currentWeek.endDate)}</p>
+            <ol>${currentWeek.expressions.map((expression) => `<li>${esc(expression)}</li>`).join('')}</ol>
+          </div>
         `;
       } else {
         const fallback = getCurrentWeekFallback();
         fillWeeklyForm({ ...fallback, expressions: [] });
-        container.innerHTML = '<p class="text-sm text-gray-500">Aucune semaine chargee</p>';
+        container.innerHTML = '<p class="muted">Aucune semaine enregistrée</p>';
       }
 
       renderWeeklyArchives();
+      updateOverview();
     } catch (error) {
       console.error('Erreur lors du chargement des expressions:', error);
     }
@@ -966,8 +1202,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   window.showBadgesModal = function() {
-    document.getElementById('badgesModal').classList.remove('hidden');
-    window.loadBadges();
+    showPanel('badges');
   }
 
   window.closeModal = function(modalId) {
@@ -1172,15 +1407,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const badges = ['⭐', '🏆', '🔗', '✍️', '🤝'];
     const container = document.getElementById('badgesList');
     
-    container.innerHTML = textes.map(texte => `
-      <div class="border border-gray-200 rounded-md p-3">
-        <div class="text-sm font-medium text-gray-900 mb-2">${texte.titre} (${texte.groupeNom})</div>
-        <div class="flex gap-1 flex-wrap">
+    if (!textes.length) { container.innerHTML = '<div class="empty-state">Aucun texte à récompenser pour le moment.</div>'; return; }
+    const timeOf = (v) => (v?.toDate?.() || new Date(v || 0)).getTime() || 0;
+    container.innerHTML = [...textes].sort((a, b) => timeOf(b.createdAt) - timeOf(a.createdAt)).map(texte => `
+      <div class="badge-row">
+        <div class="main">
+          <div style="font-weight:600">${esc(texte.titre || 'Sans titre')}</div>
+          <div style="margin-top:4px"><span class="chip-g">${esc(texte.groupeNom || '')}</span></div>
+        </div>
+        <div class="badge-toggles">
           ${badges.map(badge => `
-            <button onclick="toggleBadge('${texte.id}', '${badge}')" 
-                    class="text-sm p-1.5 rounded ${texte.badges?.includes(badge) ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'} hover:bg-gray-200 transition-colors">
-              ${badge}
-            </button>
+            <button onclick="toggleBadge('${texte.id}', '${badge}')" title="${esc(BADGE_LABELS[badge])}" class="${texte.badges?.includes(badge) ? 'on' : ''}">${badge}</button>
           `).join('')}
         </div>
       </div>
@@ -1212,36 +1449,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // Créer le formulaire d'édition
     const editForm = `
-      <div id="editForm-${id}" class="bg-white border border-indigo-200 rounded-lg p-4 mb-4">
-        <h4 class="text-sm font-medium text-gray-900 mb-3">Modifier le texte</h4>
-        
-        <div class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-1">Titre</label>
-          <input type="text" id="editTitle-${id}" value="${texte.titre}" 
-                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-        </div>
-        
-        <div class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-1">Contenu</label>
-          <textarea id="editContent-${id}" rows="8" 
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">${texte.contenu}</textarea>
-        </div>
-
-        <div class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-1">Remarque de l'enseignant (optionnel)</label>
-          <textarea id="editRemarque-${id}" rows="3"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">${texte.remarqueEnseignant || ''}</textarea>
-        </div>
-        
-        <div class="flex gap-2">
-          <button onclick="saveTexte('${id}')" 
-                  class="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-indigo-700 transition-colors">
-            Sauvegarder
-          </button>
-          <button onclick="cancelEdit('${id}')" 
-                  class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md text-xs hover:bg-gray-300 transition-colors">
-            Annuler
-          </button>
+      <div id="editForm-${id}" class="edit-box">
+        <h4>Modifier le texte</h4>
+        <label class="field"><span>Titre</span>
+          <input type="text" id="editTitle-${id}" value="${esc(texte.titre)}">
+        </label>
+        <label class="field"><span>Contenu</span>
+          <textarea id="editContent-${id}" rows="8">${esc(texte.contenu)}</textarea>
+        </label>
+        <label class="field"><span>Remarque de l'enseignant (optionnel)</span>
+          <textarea id="editRemarque-${id}" rows="3">${esc(texte.remarqueEnseignant || '')}</textarea>
+        </label>
+        <div class="row-actions end" style="margin-top:0">
+          <button onclick="cancelEdit('${id}')" class="btn btn-ghost btn-sm">Annuler</button>
+          <button onclick="saveTexte('${id}')" class="btn btn-primary btn-sm">Enregistrer</button>
         </div>
       </div>
     `;
@@ -1286,24 +1507,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // Créer le formulaire d'édition
     const editForm = `
-      <div id="editGroupeForm-${id}" class="bg-white border border-indigo-200 rounded-lg p-4 mb-4">
-        <h4 class="text-sm font-medium text-gray-900 mb-3">Modifier le groupe</h4>
-        
-        <div class="mb-3">
-          <label class="block text-xs font-medium text-gray-700 mb-1">Nom du groupe</label>
-          <input type="text" id="editGroupeName-${id}" value="${groupe.nom}" 
-                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-        </div>
-        
-        <div class="flex gap-2">
-          <button onclick="saveGroupe('${id}')" 
-                  class="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-indigo-700 transition-colors">
-            Sauvegarder
-          </button>
-          <button onclick="cancelGroupeEdit('${id}')" 
-                  class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md text-xs hover:bg-gray-300 transition-colors">
-            Annuler
-          </button>
+      <div id="editGroupeForm-${id}" class="edit-box">
+        <h4>Renommer le groupe</h4>
+        <label class="field"><span>Nom du groupe</span>
+          <input type="text" id="editGroupeName-${id}" value="${esc(groupe.nom)}">
+        </label>
+        <div class="row-actions end" style="margin-top:0">
+          <button onclick="cancelGroupeEdit('${id}')" class="btn btn-ghost btn-sm">Annuler</button>
+          <button onclick="saveGroupe('${id}')" class="btn btn-primary btn-sm">Enregistrer</button>
         </div>
       </div>
     `;
