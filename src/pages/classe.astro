@@ -14,7 +14,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <!-- Barre du haut -->
     <div class="topbar">
-      <div class="brand">📝 Le Mur des Textes</div>
+      <div class="brand">📝 Le Mur des Textes <span class="school">· CEM Abed Mohamed – Ben Daoud – Relizane</span></div>
       <div class="tools">
         <button id="soundBtn" class="tool" title="Son">🔊</button>
         <button id="fullBtn" class="tool" title="Plein écran (F)">⛶</button>
@@ -75,6 +75,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 10; }
   .brand { font-weight: 700; font-size: 18px; opacity: 0.85; }
+  .brand .school { font-weight: 500; opacity: .75; }
+  @media (max-width: 700px) { .brand .school { display: none; } }
   .tools { display: flex; gap: 8px; }
   .tool {
     width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--card-border);
@@ -437,6 +439,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="kicker pop">${esc(weekLabel())}</div>
       <h1 class="big-title rise">Le Mur des Textes</h1>
       <p class="sub rise" style="animation-delay:.15s">Qui a écrit le meilleur texte cette semaine ?</p>
+      <p class="sub rise" style="animation-delay:.25s;font-size:clamp(14px,1.6vw,20px);margin-top:10px;opacity:.8">🏫 CEM Abed Mohamed – Ben Daoud – Relizane</p>
       <button class="cta" data-action="next">C'est parti ! ▶</button>
     `;
   }
