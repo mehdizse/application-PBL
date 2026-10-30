@@ -1,24 +1,17 @@
 ---
-// Header moderne mobile-first
+const isAdmin = Astro.url.pathname.startsWith('/admin');
 ---
 
-<header class="bg-white/95 backdrop-blur border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-14">
-  <div class="flex items-center justify-between h-full px-4 max-w-md mx-auto md:max-w-3xl">
-    <!-- Logo et titre à gauche -->
-    <div class="flex items-center space-x-2">
-      <span class="text-lg">📝</span>
-      <span class="text-sm font-medium text-gray-900">Mur des Textes</span>
-    </div>
-    
-    <!-- Bouton discret à droite -->
-    {Astro.url.pathname === '/admin' ? (
-      <a href="/" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 border border-gray-200 rounded-md transition-colors">
-        Page principale
-      </a>
-    ) : (
-      <a href="/admin" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 border border-gray-200 rounded-md transition-colors">
-        Espace enseignant
-      </a>
-    )}
+<header class="site-header">
+  <div class="inner">
+    <a href="/" class="site-logo"><span class="mark">✍️</span>Le Mur des Textes</a>
+    <nav class="site-nav">
+      {isAdmin ? (
+        <a href="/">Voir le site</a>
+      ) : (
+        <a href="/admin" class="hide-sm">Espace enseignant</a>
+      )}
+      <a href="/classe" class="accent">Mode Classe</a>
+    </nav>
   </div>
 </header>

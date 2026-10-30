@@ -2,356 +2,227 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout>
-  <!-- Contenu principal mobile-first -->
-  <div class="min-h-screen bg-gradient-to-b from-indigo-50/50 to-white pt-16">
-    <div class="max-w-md mx-auto px-4 py-6 md:max-w-3xl">
-      
-      <!-- Hero / Titre -->
-      <div class="text-center mb-8 px-4 py-6 bg-gradient-to-r from-indigo-50 to-white rounded-2xl">
-        <div class="text-2xl mb-2">📝</div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Le Mur des Textes</h1>
-        <p class="text-sm text-gray-600">Découvrez les créations de la classe ✨</p>
-        <a href="/classe" class="inline-flex items-center gap-2 mt-4 bg-amber-400 hover:bg-amber-500 text-amber-950 font-semibold px-5 py-2.5 rounded-full text-sm shadow-sm transition-colors">
-          🏆 Voir le classement et le gagnant
-        </a>
+<BaseLayout pageTitle="Le Mur des Textes">
+  <!-- Bandeau d'accueil -->
+  <section class="hero">
+    <div class="inner">
+      <span class="hero-kicker" id="heroWeek">✦ Productions écrites</span>
+      <h1>Le Mur des Textes</h1>
+      <p class="lead">Les productions écrites des élèves de 1AM et 3AM. Chaque semaine, un groupe est mis à l'honneur.</p>
+      <div class="hero-actions">
+        <a href="/classe" class="btn-gold">🏆 Découvrir le gagnant</a>
+        <a href="#textes" class="btn-ghost">Lire les textes ↓</a>
       </div>
-
-      <div id="winningTeamPublic" class="hidden mb-8"></div>
-      <!-- Cartes de textes -->
-      <div id="textesContainer" class="space-y-4 mb-8">
-        <div class="text-center py-8">
-          <div class="text-2xl mb-2">📚</div>
-          <p class="text-sm text-gray-600">Chargement des textes...</p>
-        </div>
+      <div class="stats" id="stats" hidden>
+        <div class="stat"><b id="statTextes">0</b><span>textes publiés</span></div>
+        <div class="stat"><b id="statGroupes">0</b><span>groupes d'auteurs</span></div>
+        <div class="stat"><b id="statBadges">0</b><span>badges obtenus</span></div>
       </div>
-
     </div>
-  </div>
+  </section>
 
-  <!-- Lien vers l'admin (caché par défaut) -->
-  <div id="adminLink" class="fixed bottom-12 right-4 hidden">
-    <a href="/admin" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors">
-      Espace enseignant
-    </a>
+  <div class="page">
+    <!-- Gagnant de la semaine -->
+    <div id="winnerBox">
+      <div class="skeleton lift" style="height:260px"></div>
+    </div>
+
+    <!-- Consignes de la semaine -->
+    <div id="briefBox"></div>
+
+    <!-- Textes par semaine -->
+    <div class="section-title" id="textes">
+      <h2>Les textes de la classe</h2>
+      <span id="textesCount"></span>
+    </div>
+    <div id="textesContainer">
+      <div class="skeleton" style="height:64px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:64px"></div>
+    </div>
   </div>
 </BaseLayout>
 
 <script>
-  // Les fonctions Firebase sont chargées globalement via BaseLayout
+  const BADGES = {
+    '⭐': 'Texte de la semaine',
+    '🏆': 'Meilleure introduction',
+    '🔗': 'Connecteurs bien utilisés',
+    '✍️': 'Texte bien rédigé',
+    '🤝': 'Bon travail de groupe'
+  };
 
-  // Raccourci clavier pour afficher le lien admin (Ctrl+Shift+A)
-  let adminKeyPressed = {};
+  const esc = (v) => String(v ?? '')
+    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+
+  function dateFr(iso, withYear = false) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '').trim());
+    if (!m) return String(iso || '');
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', ...(withYear ? { year: 'numeric' } : {}), timeZone: 'UTC' }).format(d);
+  }
+
+  const weekRange = (w) => w?.startDate ? `Du ${dateFr(w.startDate)} au ${dateFr(w.endDate, true)}` : '';
+
+  function excerpt(text, max) {
+    const flat = String(text || '').split('\n').map((l) => l.trim()).filter(Boolean).join(' ');
+    return flat.length > max ? flat.slice(0, max).trimEnd() + '…' : flat;
+  }
+
+  const timeOf = (v) => {
+    if (v && typeof v.toDate === 'function') return v.toDate().getTime();
+    const t = new Date(v || 0).getTime();
+    return Number.isNaN(t) ? 0 : t;
+  };
+
+  function waitForFirebase() {
+    return new Promise((resolve) => {
+      const check = () => (typeof window.getWeeklyExpressionsData === 'function' && typeof window.subscribeWinningTeam === 'function')
+        ? resolve() : setTimeout(check, 80);
+      check();
+    });
+  }
+
+  // Raccourci Ctrl+Shift+A vers l'espace enseignant (conservé)
   document.addEventListener('keydown', (e) => {
-    adminKeyPressed[e.key] = true;
-    if (adminKeyPressed['Control'] && adminKeyPressed['Shift'] && adminKeyPressed['a']) {
-      document.getElementById('adminLink').classList.remove('hidden');
-    }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'a' || e.key === 'A')) window.location.href = '/admin';
   });
 
-  document.addEventListener('keyup', (e) => {
-    adminKeyPressed[e.key] = false;
-  });
+  let textesById = new Map();
 
-  // Charger les données au chargement de la page
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Attendre que Firebase soit initialisé
-    function waitForFirebase() {
-      if (typeof window.getWeeklyExpressionsData === 'undefined') {
-        setTimeout(waitForFirebase, 100);
-        return;
-      }
-      
-      Promise.all([
-        loadWinningTeamPublic(),
-        loadTextes()
-      ]);
-    }
-    
-    waitForFirebase();
-  });
-
-    let weeklyCache = null;
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
-
-  function renderExpressionsAsList(expressions) {
-    return expressions
-      .map((expression) => `
-        <li class="text-sm text-gray-700 leading-relaxed break-words overflow-hidden flex items-start">
-          <span class="text-indigo-500 mr-2 mt-0.5">•</span>
-          <span>${escapeHtml(expression)}</span>
-        </li>
-      `)
-      .join('');
-  }
-
-  function formatIsoDateFr(isoDate) {
-    const raw = String(isoDate || '').trim();
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-    if (!match) return raw;
-    const [, year, month, day] = match;
-    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC'
-    }).format(date);
-  }
-
-  async function loadTextes() {
+  (async () => {
+    await waitForFirebase();
     try {
-      const container = document.getElementById('textesContainer');
-      if (!weeklyCache?.weeks?.length) {
-        weeklyCache = await window.getWeeklyExpressionsData();
-      }
-
-      const [allTextes, allGroupes] = await Promise.all([
+      const [weekly, allTextes, allGroupes] = await Promise.all([
+        window.getWeeklyExpressionsData(),
         window.getTextes(),
         window.getGroupes()
       ]);
+      textesById = new Map(allTextes.map((t) => [t.id, t]));
+      const groupesVisibles = new Set(allGroupes.filter((g) => g.visible).map((g) => g.nom));
+      const textes = allTextes.filter((t) => t.visible && groupesVisibles.has(t.groupeNom));
 
-      const groupesVisibles = allGroupes.filter((groupe) => groupe.visible);
-      const groupesVisiblesNoms = new Set(groupesVisibles.map((groupe) => groupe.nom));
-      const textesVisibles = allTextes.filter((texte) => {
-        const texteVisible = texte.visible;
-        const groupeVisible = groupesVisiblesNoms.has(texte.groupeNom);
-        return texteVisible && groupeVisible;
-      });
-
-      const fallbackWeekId = (typeof window.getIsoWeekInfo === 'function')
-        ? window.getIsoWeekInfo(new Date()).weekId
-        : '1970-01';
-
-      const textesParSemaine = textesVisibles.reduce((acc, texte) => {
-        const cleanWeekId = String(texte.weekId || '').trim();
-        const weekId = cleanWeekId || fallbackWeekId;
-        if (!acc[weekId]) acc[weekId] = [];
-        acc[weekId].push(texte);
-        return acc;
-      }, {});
-
-      const weeks = Array.isArray(weeklyCache?.weeks) ? weeklyCache.weeks : [];
-      if (weeks.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-8">
-            <p class="text-sm text-gray-600">Aucune semaine disponible</p>
-          </div>
-        `;
-        return;
-      }
-
-      const badgesMap = {
-        '⭐': 'Texte de la semaine',
-        '🏆': 'Meilleure introduction',
-        '🔗': 'Connecteurs bien utilises',
-        '✍️': 'Texte bien redige',
-        '🤝': 'Bon travail de groupe'
-      };
-
-      const accentColors = ['indigo', 'emerald', 'amber', 'rose', 'purple'];
-      const currentWeekId = String(weeklyCache?.currentWeek?.weekId || '').trim();
-      let html = `
-        <div class="relative pl-8">
-          <div class="absolute left-3 top-0 bottom-0 w-px bg-indigo-200" aria-hidden="true"></div>
-      `;
-
-      weeks.forEach((week, weekIndex) => {
-        const isCurrentWeek = week.weekId === currentWeekId;
-        const dotClass = isCurrentWeek
-          ? 'bg-indigo-600 border-4 border-white shadow-md'
-          : 'bg-indigo-400 shadow-sm';
-        const weekContainerClass = isCurrentWeek
-          ? 'bg-indigo-50 border border-indigo-200 rounded-2xl shadow-sm p-4'
-          : 'bg-white border border-gray-200 rounded-2xl shadow-sm p-4';
-        const weekTextes = (textesParSemaine[week.weekId] || []).sort((a, b) => {
-          const getTime = (value) => {
-            if (value && typeof value.toDate === 'function') return value.toDate().getTime();
-            const parsed = new Date(value || 0);
-            return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
-          };
-          return getTime(b.createdAt) - getTime(a.createdAt);
-        });
-        const weekTitle = `Semaine ${week.weekId}`;
-        const formattedStartDate = formatIsoDateFr(week.startDate);
-        const formattedEndDate = formatIsoDateFr(week.endDate);
-        html += `
-          <section class="relative mb-12">
-            <span class="absolute left-[8px] top-2 h-4 w-4 rounded-full ${dotClass}" aria-hidden="true"></span>
-            <div class="${weekContainerClass}">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <h2 class="text-2xl font-bold text-indigo-800">${weekTitle}</h2>
-                <div class="flex items-center gap-2">
-                  ${isCurrentWeek ? '<span class="bg-green-50 text-green-700 rounded-full px-2 py-1 text-xs">Semaine courante</span>' : ''}
-                  <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2 py-1 text-xs">${week.weekId}</span>
-                </div>
-              </div>
-              <p class="text-sm text-gray-600 font-medium mb-3">${formattedStartDate} &ndash; ${formattedEndDate}</p>
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
-              <p class="text-sm font-semibold text-gray-900 mb-2">Expressions de la semaine</p>
-              <ul class="space-y-2 leading-relaxed">
-                ${renderExpressionsAsList(week.expressions)}
-              </ul>
-            </div>
-        `;
-
-        if (weekTextes.length === 0) {
-          html += `
-            <p class="text-sm text-gray-500">Aucune production cette semaine</p>
-          `;
-        } else {
-          html += `<div class="space-y-3">`;
-          weekTextes.forEach((texte, textIndex) => {
-            const accentColor = accentColors[(weekIndex + textIndex) % accentColors.length];
-            const badges = Array.isArray(texte.badges) ? texte.badges : [];
-            const badgesHtml = badges.length > 0
-              ? badges.map((badge) => `
-                  <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700" title="${escapeHtml(badge)}">
-                    ${escapeHtml(badgesMap[badge] || badge)}
-                  </span>
-                `).join('')
-              : '<span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-700">Aucun badge</span>';
-
-            let extrait = String(texte.contenu || '');
-            const lignes = extrait.split('\n').map((line) => line.trim()).filter(Boolean);
-            extrait = lignes.slice(0, 2).join(' ');
-            if (lignes.length > 2) extrait += '...';
-            if (extrait.length > 120) extrait = `${extrait.slice(0, 120)}...`;
-
-            html += `
-              <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 hover:shadow-md transition-shadow border-l-4 border-l-${accentColor}-400">
-                <div class="flex items-start justify-between mb-3">
-                  <span class="inline-flex items-center rounded-full border border-gray-200 px-2 py-1 text-xs font-medium bg-${accentColor}-50 text-${accentColor}-700">
-                    ${escapeHtml(texte.groupeNom || 'Groupe')}
-                  </span>
-                  <div class="flex flex-wrap gap-1 max-w-[200px]">
-                    ${badgesHtml}
-                  </div>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 mb-1 break-words overflow-hidden">
-                  ${escapeHtml(texte.titre || 'Sans titre')}
-                </h3>
-                <p class="text-xs text-gray-500 mb-2">${escapeHtml(texte.type || '')}</p>
-                <p class="text-sm text-gray-700 mb-3 leading-relaxed break-words overflow-hidden line-clamp-2">
-                  ${escapeHtml(extrait)}
-                </p>
-                <button 
-                  onclick="window.location.href='/texte/${texte.id}'"
-                  class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium py-3 px-4 rounded-xl text-sm hover:from-indigo-600 hover:to-indigo-700 transition-all min-h-[44px] shadow-sm"
-                >
-                  Lire le texte
-                </button>
-              </div>
-            `;
-          });
-          html += `</div>`;
-        }
-
-        html += `
-            </div>
-          </section>
-        `;
-      });
-
-      html += `</div>`;
-      container.innerHTML = html;
+      renderHero(weekly, textes);
+      renderBrief(weekly?.currentWeek);
+      renderWeeks(weekly, textes);
     } catch (error) {
-      console.error('Erreur lors du chargement des textes:', error);
-      document.getElementById('textesContainer').classList.remove('hidden');
-      document.getElementById('textesContainer').innerHTML = `
-        <div class="text-center py-8">
-          <div class="text-2xl mb-2">😅</div>
-          <p class="text-sm text-gray-600">Petit problème technique...</p>
-          <p class="text-xs text-gray-500 mt-1">Réessaie dans quelques instants !</p>
-        </div>
-      `;
+      console.error('Erreur chargement accueil:', error);
+      document.getElementById('textesContainer').innerHTML = '<div class="card state">Petit problème technique… Réessaie dans quelques instants.</div>';
     }
+    listenWinner();
+  })();
+
+  function renderHero(weekly, textes) {
+    const range = weekRange(weekly?.currentWeek);
+    if (range) document.getElementById('heroWeek').textContent = `✦ Semaine ${range.charAt(0).toLowerCase()}${range.slice(1)}`;
+    const badges = textes.reduce((n, t) => n + (Array.isArray(t.badges) ? t.badges.length : 0), 0);
+    document.getElementById('statTextes').textContent = textes.length;
+    document.getElementById('statGroupes').textContent = new Set(textes.map((t) => t.groupeNom)).size;
+    document.getElementById('statBadges').textContent = badges;
+    document.getElementById('stats').hidden = false;
   }
 
-  async function loadWinningTeamPublic() {
-    const container = document.getElementById('winningTeamPublic');
-    if (!container) return;
+  function renderBrief(week) {
+    const items = Array.isArray(week?.expressions) ? week.expressions.filter(Boolean) : [];
+    if (!items.length) return;
+    document.getElementById('briefBox').innerHTML = `
+      <div class="section-title"><h2>Consignes de la semaine</h2><span>${esc(weekRange(week))}</span></div>
+      <div class="card brief">
+        <ol>${items.map((e, i) => `<li><span class="n">${i + 1}</span><span>${esc(e)}</span></li>`).join('')}</ol>
+      </div>`;
+  }
 
-    const waitForWinningFns = async () => {
-      if (typeof window.subscribeWinningTeam !== 'function' || typeof window.getTexte !== 'function') {
-        await new Promise((r) => setTimeout(r, 80));
-        return waitForWinningFns();
-      }
-      return null;
-    };
+  function textCard(t) {
+    const icons = (Array.isArray(t.badges) ? t.badges : []).map((b) => `<span title="${esc(BADGES[b] || b)}">${esc(b)}</span>`).join('');
+    return `
+      <a class="card tcard" href="/texte/${encodeURIComponent(t.id)}">
+        <div class="top"><span class="chip">${esc(t.groupeNom || 'Groupe')}</span><span class="icons">${icons}</span></div>
+        <h3>${esc(t.titre || 'Sans titre')}</h3>
+        ${t.type ? `<div class="type">${esc(t.type)}</div>` : ''}
+        <p>${esc(excerpt(t.contenu, 180))}</p>
+        <span class="link-arrow">Lire le texte →</span>
+      </a>`;
+  }
 
-    await waitForWinningFns();
+  function renderWeeks(weekly, textes) {
+    const container = document.getElementById('textesContainer');
+    const weeks = Array.isArray(weekly?.weeks) ? weekly.weeks : [];
+    const currentId = String(weekly?.currentWeek?.weekId || '').trim();
+    const fallbackId = currentId || (window.getIsoWeekInfo?.(new Date()).weekId ?? '');
 
-    let lastRenderedKey = '';
+    const byWeek = {};
+    textes.forEach((t) => {
+      const id = String(t.weekId || '').trim() || fallbackId;
+      (byWeek[id] ||= []).push(t);
+    });
 
-    window.subscribeWinningTeam(async (winningData) => {
+    document.getElementById('textesCount').textContent = textes.length ? `${textes.length} texte${textes.length > 1 ? 's' : ''}` : '';
+
+    // Semaine en cours toujours affichée ; anciennes semaines seulement si elles ont des textes
+    const shown = weeks.filter((w) => w.weekId === currentId || (byWeek[w.weekId] || []).length);
+    if (!shown.length) {
+      container.innerHTML = '<div class="card state">Aucun texte publié pour le moment.</div>';
+      return;
+    }
+
+    container.innerHTML = shown.map((w, i) => {
+      const list = (byWeek[w.weekId] || []).sort((a, b) => timeOf(b.createdAt) - timeOf(a.createdAt));
+      const isNow = w.weekId === currentId;
+      return `
+        <details class="week" ${i === 0 ? 'open' : ''}>
+          <summary>
+            <span class="t">${esc(weekRange(w) || w.weekId)}</span>
+            <span class="c">
+              ${isNow ? '<span class="pill-now">Cette semaine</span>' : ''}
+              ${list.length} texte${list.length > 1 ? 's' : ''}
+              <span class="chev">▾</span>
+            </span>
+          </summary>
+          ${list.length ? `<div class="grid-texts">${list.map(textCard).join('')}</div>` : '<div class="empty">Pas encore de texte publié cette semaine.</div>'}
+        </details>`;
+    }).join('');
+  }
+
+  function listenWinner() {
+    const box = document.getElementById('winnerBox');
+    let lastKey = '';
+    window.subscribeWinningTeam(async (w) => {
       try {
-        if (!winningData || !winningData.winner) {
-          container.classList.add('hidden');
-          container.innerHTML = '';
-          return;
-        }
+        const key = w?.solo === true ? 'a' : String(w?.winner || '');
+        const team = key ? w?.teams?.[key] : null;
+        if (!team) { box.innerHTML = ''; return; }
 
-        const winnerKey = String(winningData.winner);
-        const team = winningData?.teams?.[winnerKey];
-        const members = Array.isArray(team?.members) ? team.members : [];
-        const texteId = String(team?.texteId || '');
+        const members = (Array.isArray(team.members) ? team.members : []).filter((m) => m?.prenom || m?.photoUrl).slice(0, 4);
+        const renderKey = JSON.stringify([key, team.texteId, team.groupeId, members]);
+        if (renderKey === lastKey) return;
+        lastKey = renderKey;
 
-        const renderKey = `${winnerKey}:${texteId}:${members.map((m) => `${m?.prenom || ''}|${m?.photoUrl || ''}`).join(',')}`;
-        if (renderKey === lastRenderedKey) return;
-        lastRenderedKey = renderKey;
+        const texte = team.texteId ? (textesById.get(team.texteId) || await window.getTexte(team.texteId)) : null;
+        const groupe = texte?.groupeNom || 'Groupe gagnant';
+        const faces = members.map((m) => `
+          <div class="face">
+            <div class="ph">${m.photoUrl ? `<img src="${esc(m.photoUrl)}" alt="${esc(m.prenom)}" loading="lazy">` : '👤'}</div>
+            ${esc(m.prenom || '')}
+          </div>`).join('');
 
-        const texte = texteId ? await window.getTexte(texteId) : null;
-        const title = 'Équipe Gagnante !';
-
-        const photosHtml = members.slice(0, 4).map((m) => {
-          const url = String(m?.photoUrl || '');
-          const prenom = String(m?.prenom || '');
-          return `
-            <div class="flex flex-col items-center">
-              <div class="w-20 h-20 rounded-full bg-white border border-amber-200 shadow-sm overflow-hidden flex items-center justify-center">
-                ${url ? `<img src="${url}" alt="${escapeHtml(prenom)}" class="w-full h-full object-cover" />` : `<span class="text-2xl">👤</span>`}
-              </div>
-              <div class="mt-2 text-sm font-medium text-gray-800">${escapeHtml(prenom)}</div>
+        box.innerHTML = `
+          <div class="card winner lift">
+            <div class="winner-left">
+              <span class="winner-badge">🏆 Groupe de la semaine</span>
+              <div class="winner-group">${esc(groupe)}</div>
+              <div class="faces">${faces}</div>
             </div>
-          `;
-        }).join('');
-
-        const texteHtml = texte ? `
-          <div class="mt-5 bg-white border border-gray-200 rounded-2xl p-4">
-            <div class="text-xs font-semibold text-indigo-700 mb-1">${escapeHtml(texte.groupeNom || '')}</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">${escapeHtml(texte.titre || '')}</h3>
-            <p class="text-sm text-gray-600 mb-3">${escapeHtml(texte.type || '')}</p>
-            <div class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">${escapeHtml(texte.contenu || '')}</div>
-          </div>
-        ` : '';
-
-        container.classList.remove('hidden');
-        container.innerHTML = `
-          <div class="bg-gradient-to-r from-amber-50 to-white border border-amber-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-3 mb-4">
-              <div class="flex items-center gap-2">
-                <div class="text-2xl">🏆</div>
-                <h2 class="text-xl font-bold text-amber-900">${title}</h2>
-              </div>
-              <div class="text-xs font-medium text-amber-800 bg-amber-100 border border-amber-200 rounded-full px-3 py-1">Félicitations</div>
+            <div class="winner-right">
+              ${texte ? `
+                ${texte.type ? `<span class="type">${esc(texte.type)}</span>` : ''}
+                <h3>${esc(texte.titre || 'Sans titre')}</h3>
+                <p class="excerpt">${esc(excerpt(texte.contenu, 420))}</p>
+                <a class="link-arrow" href="/texte/${encodeURIComponent(texte.id)}">Lire le texte en entier →</a>
+              ` : `<h3>Bravo à toute l'équipe !</h3>`}
             </div>
-            <div class="flex flex-wrap items-start justify-center gap-6">
-              ${photosHtml}
-            </div>
-            ${texteHtml}
-          </div>
-        `;
+          </div>`;
       } catch (error) {
-        console.error('Erreur affichage winningTeam:', error);
+        console.error('Erreur affichage gagnant:', error);
       }
     });
   }

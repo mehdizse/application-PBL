@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/globals.css';
+import '../styles/site.css';
 
 const { bare = false, pageTitle } = Astro.props;
 const title = pageTitle || 'Écrire & Créer';
@@ -49,6 +50,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
     <!-- Preload des polices -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Literata:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <style>
       body {
@@ -59,7 +61,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
       }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="site min-h-screen flex flex-col">
     {!bare && <Header />}
     <main class="flex-grow">
         <slot />

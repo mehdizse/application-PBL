@@ -4,22 +4,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const { id } = Astro.params;
 ---
 
-<BaseLayout>
-  <div class="min-h-screen bg-gradient-to-b from-indigo-50/50 to-white pt-16">
-    <div class="max-w-3xl mx-auto px-4 py-6">
-      <button
-        onclick="history.back()"
-        class="mb-8 bg-white border border-gray-200 rounded-xl shadow-sm px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-      >
-        <span class="mr-2">&larr;</span>
-        Retour aux productions
-      </button>
-
-      <div id="texteContainer" class="space-y-6">
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
-          <p class="text-gray-600 font-medium">Chargement du texte...</p>
-        </div>
-      </div>
+<BaseLayout pageTitle="Lire un texte · Le Mur des Textes">
+  <div class="reader">
+    <button onclick="history.length > 1 ? history.back() : (location.href = '/')" class="back">← Retour aux textes</button>
+    <div id="texteContainer">
+      <div class="skeleton" style="height:48px;width:60%;margin:22px 0 16px"></div>
+      <div class="skeleton" style="height:320px"></div>
     </div>
   </div>
 </BaseLayout>
@@ -68,9 +58,7 @@ const { id } = Astro.params;
 
       if (!texteId || texteId === 'undefined') {
         container.innerHTML = `
-          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
-            <p class="text-gray-600 font-medium">Texte non trouvé</p>
-          </div>
+          <div class="card state"><p style="font-weight:600;color:var(--ink)">Texte non trouvé</p></div>
         `;
         return;
       }
@@ -78,10 +66,7 @@ const { id } = Astro.params;
       const texte = await window.getTexte(texteId);
       if (!texte) {
         container.innerHTML = `
-          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
-            <p class="text-gray-600 font-medium">Texte non trouvé</p>
-            <p class="text-gray-500 text-sm mt-2">Ce texte n'est pas encore disponible.</p>
-          </div>
+          <div class="card state"><p style="font-weight:600;color:var(--ink)">Texte non trouvé</p><p>Ce texte n'est pas encore disponible.</p></div>
         `;
         return;
       }
@@ -97,51 +82,33 @@ const { id } = Astro.params;
       const cleanedContent = cleanupContent(texte.contenu, texte.groupeNom);
       const remarque = String(texte.remarqueEnseignant || '').trim();
 
+      const badges = Array.isArray(texte.badges) ? texte.badges : [];
+      document.title = `${texte.titre || 'Texte'} · Le Mur des Textes`;
       container.innerHTML = `
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
-          <div class="flex items-center justify-between gap-2">
-            <span class="inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium bg-gray-50 text-gray-700">
-              ${escapeHtml(texte.groupeNom)}
-            </span>
-            <span class="text-xs text-gray-500">${escapeHtml(texte.type || '')}</span>
+        <header class="reader-head">
+          <div class="reader-meta">
+            <span class="chip">${escapeHtml(texte.groupeNom || 'Groupe')}</span>
+            ${texte.type ? `<span>${escapeHtml(texte.type)}</span>` : ''}
           </div>
+          <h1>${escapeHtml(texte.titre || 'Sans titre')}</h1>
+          ${badges.length ? `
+            <div class="badges">
+              ${badges.map((b) => `<span class="badge">${escapeHtml(b)} ${escapeHtml(badgesMap[b] || '')}</span>`).join('')}
+            </div>` : ''}
+        </header>
 
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 break-words" style="overflow-wrap:anywhere;">
-            ${escapeHtml(texte.titre)}
-          </h1>
-
-          ${Array.isArray(texte.badges) && texte.badges.length > 0 ? `
-            <div class="flex flex-wrap gap-2">
-              ${texte.badges.map((badge) => `
-                <span class="px-2 py-1 rounded-full bg-gray-100 text-sm text-gray-700" title="${escapeHtml(badge)}">
-                  ${escapeHtml(badgesMap[badge] || badge)}
-                </span>
-              `).join('')}
-            </div>
-          ` : ''}
-        </div>
-
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 leading-relaxed whitespace-pre-line text-gray-800" style="overflow-wrap:anywhere;">
-          ${escapeHtml(cleanedContent)}
-        </div>
+        <article class="sheet"><div class="body">${escapeHtml(cleanedContent)}</div></article>
 
         ${remarque ? `
-          <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">💬</span>
-              <p class="text-sm font-semibold text-indigo-900">Remarque de l'enseignant</p>
-            </div>
-            <p class="text-sm text-indigo-900 whitespace-pre-line">${escapeHtml(remarque)}</p>
-          </div>
-        ` : ''}
+          <aside class="remark">
+            <div class="h">💬 Remarque de l'enseignant</div>
+            <p>${escapeHtml(remarque)}</p>
+          </aside>` : ''}
       `;
     } catch (error) {
       console.error('Erreur lors du chargement du texte:', error);
       container.innerHTML = `
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
-          <p class="text-red-500 font-medium">Petit problème technique...</p>
-          <p class="text-gray-500 text-sm mt-2">Réessaie dans quelques instants.</p>
-        </div>
+        <div class="card state"><p style="font-weight:600;color:var(--ink)">Petit problème technique...</p><p>Réessaie dans quelques instants.</p></div>
       `;
     }
   }
