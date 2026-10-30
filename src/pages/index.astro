@@ -31,7 +31,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div id="briefBox"></div>
 
     <!-- Textes par semaine -->
-    <div class="section-title" id="textes">
+    <div class="sec-head" id="textes">
       <h2>Les textes de la classe</h2>
       <span id="textesCount"></span>
     </div>
@@ -126,7 +126,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const items = Array.isArray(week?.expressions) ? week.expressions.filter(Boolean) : [];
     if (!items.length) return;
     document.getElementById('briefBox').innerHTML = `
-      <div class="section-title"><h2>Consignes de la semaine</h2><span>${esc(weekRange(week))}</span></div>
+      <div class="sec-head"><h2>Consignes de la semaine</h2><span>${esc(weekRange(week))}</span></div>
       <div class="card brief">
         <ol>${items.map((e, i) => `<li><span class="n">${i + 1}</span><span>${esc(e)}</span></li>`).join('')}</ol>
       </div>`;

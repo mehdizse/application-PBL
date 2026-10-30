@@ -135,7 +135,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
           const createdAt = new Date();
           const weeklyData = await getWeeklyExpressionsData();
           const fallbackWeek = getIsoWeekInfo(createdAt);
-          const currentWeekId = String(weeklyData?.currentWeek?.weekId || fallbackWeek.weekId).trim();
+          const currentWeekId = String(texte.weekId || weeklyData?.currentWeek?.weekId || fallbackWeek.weekId).trim();
           const docRef = await addDoc(collection(db, 'textes'), { 
             ...texte, 
             visible: true,

@@ -239,9 +239,14 @@ const memberSlots = [0, 1, 2, 3];
               </select>
             </label>
           </div>
-          <label class="field"><span>Titre</span>
-            <input type="text" id="texteTitreInput" />
-          </label>
+          <div class="grid-2">
+            <label class="field"><span>Titre</span>
+              <input type="text" id="texteTitreInput" />
+            </label>
+            <label class="field"><span>Semaine</span>
+              <select id="texteWeekSelect"></select>
+            </label>
+          </div>
           <label class="field"><span>Texte de l'élève (tel qu'il est écrit)</span>
             <textarea id="texteContenuInput" rows="10"></textarea>
           </label>
@@ -260,12 +265,12 @@ const memberSlots = [0, 1, 2, 3];
       <div class="modal-card">
         <div class="confirm-head">
           <div class="danger-ico">!</div>
-          <div><h3>Confirmer la suppression</h3><p class="muted small">Cette action est irréversible.</p></div>
+          <div><h3 id="confirmTitle">Confirmer la suppression</h3><p id="confirmSub" class="muted small">Cette action est irréversible.</p></div>
         </div>
         <div id="confirmMessage" class="confirm-msg"></div>
         <div class="row-actions end">
           <button onclick="closeConfirmModal()" class="btn btn-ghost">Annuler</button>
-          <button onclick="confirmAction()" class="btn btn-danger">Supprimer</button>
+          <button onclick="confirmAction()" id="confirmOkBtn" class="btn btn-danger">Supprimer</button>
         </div>
       </div>
     </div>
@@ -528,6 +533,8 @@ const memberSlots = [0, 1, 2, 3];
     document.querySelectorAll('#sideNav button').forEach((b) => b.classList.toggle('active', b.dataset.panel === name));
     document.getElementById('panelTitle').textContent = PANELS[name][0];
     document.getElementById('panelSub').textContent = PANELS[name][1];
+    // Les onglets Textes et Groupes ont déjà leur propre bouton « Nouveau »
+    document.querySelector('.top-actions')?.classList.toggle('hidden', name === 'textes' || name === 'groupes');
     if (name === 'badges') window.loadBadges();
     try { localStorage.setItem('adminPanel', name); } catch (e) {}
     window.scrollTo({ top: 0 });
@@ -679,7 +686,11 @@ const memberSlots = [0, 1, 2, 3];
   }
 
   async function logout() {
-    await window.signOut();
+    window.showConfirmModal('', () => window.signOut(), {
+      title: 'Se déconnecter ?',
+      sub: 'Vous devrez saisir à nouveau votre email et votre mot de passe.',
+      ok: 'Se déconnecter'
+    });
   }
 
   // Rendre logout disponible globalement
@@ -736,6 +747,11 @@ const memberSlots = [0, 1, 2, 3];
     }
   }
 
+  function weekLabel(weekId) {
+    const w = (weeklyExpressionsData?.weeks || []).find((x) => x.weekId === weekId);
+    return w?.startDate ? `semaine du ${frDate(w.startDate)}` : `semaine ${weekId}`;
+  }
+
   function renderTextesList() {
     const container = document.getElementById('textesList');
     if (!container || !textes.length) return;
@@ -756,7 +772,7 @@ const memberSlots = [0, 1, 2, 3];
             <div class="meta">
               <span class="chip-g">${esc(texte.groupeNom || '')}</span>
               ${texte.type ? `<span>${esc(texte.type)}</span>` : ''}
-              ${date ? `<span>· ${date}</span>` : ''}
+              ${texte.weekId ? `<span>· ${esc(weekLabel(texte.weekId))}</span>` : ''}
               <span class="status ${texte.visible ? 'on' : 'off'}">${texte.visible ? 'Visible' : 'Masqué'}</span>
               ${badges ? `<span>${badges}</span>` : ''}
             </div>
@@ -1031,7 +1047,18 @@ const memberSlots = [0, 1, 2, 3];
   }
 
   // Retire la photo d'un élève (fichier supprimé du stockage + fiche vidée)
-  window.removeWinningPhoto = async function(teamKey, index) {
+  window.removeWinningPhoto = function(teamKey, index) {
+    const member = winningTeamData?.teams?.[teamKey]?.members?.[index];
+    if (!member) return;
+    const prenom = String(member.prenom || '').trim();
+    window.showConfirmModal(
+      `<p>La photo ${prenom ? `de <b>${esc(prenom)}</b> ` : ''}sera supprimée.</p>`,
+      () => doRemoveWinningPhoto(teamKey, index),
+      { title: 'Supprimer la photo ?', ok: 'Supprimer la photo' }
+    );
+  };
+
+  async function doRemoveWinningPhoto(teamKey, index) {
     const member = winningTeamData?.teams?.[teamKey]?.members?.[index];
     if (!member) return;
     const storagePath = String(member.storagePath || '');
@@ -1048,7 +1075,7 @@ const memberSlots = [0, 1, 2, 3];
         console.error('Erreur suppression photo:', error);
       }
     }
-  };
+  }
 
   async function saveWinningTeam() {
     try {
@@ -1198,7 +1225,21 @@ const memberSlots = [0, 1, 2, 3];
   }
 
   window.showAddTexteModal = function() {
+    const current = weeklyExpressionsData?.currentWeek?.weekId || '';
+    document.getElementById('texteWeekSelect').innerHTML = weekOptions(current);
     document.getElementById('addTexteModal').classList.remove('hidden');
+  }
+
+  // Liste des semaines pour les menus déroulants (la plus récente d'abord)
+  function weekOptions(selected) {
+    const weeks = Array.isArray(weeklyExpressionsData?.weeks) ? [...weeklyExpressionsData.weeks] : [];
+    weeks.sort((a, b) => String(b.startDate || b.weekId).localeCompare(String(a.startDate || a.weekId)));
+    if (selected && !weeks.some((w) => w.weekId === selected)) weeks.unshift({ weekId: selected });
+    const current = weeklyExpressionsData?.currentWeek?.weekId;
+    return weeks.map((w) => {
+      const label = w.startDate ? `Du ${frDate(w.startDate)} au ${frDate(w.endDate)}` : `Semaine ${w.weekId}`;
+      return `<option value="${esc(w.weekId)}" ${w.weekId === selected ? 'selected' : ''}>${label}${w.weekId === current ? ' (en cours)' : ''}</option>`;
+    }).join('');
   }
 
   window.showBadgesModal = function() {
@@ -1212,8 +1253,12 @@ const memberSlots = [0, 1, 2, 3];
   // Fonctions pour le modal de confirmation
   let pendingAction = null;
 
-  window.showConfirmModal = function(message, action) {
+  window.showConfirmModal = function(message, action, opts = {}) {
+    document.getElementById('confirmTitle').textContent = opts.title || 'Confirmer la suppression';
+    document.getElementById('confirmSub').textContent = opts.sub ?? 'Cette action est irréversible.';
+    document.getElementById('confirmOkBtn').textContent = opts.ok || 'Supprimer';
     document.getElementById('confirmMessage').innerHTML = message;
+    document.getElementById('confirmMessage').classList.toggle('hidden', !message);
     document.getElementById('confirmModal').classList.remove('hidden');
     pendingAction = action;
   }
@@ -1254,6 +1299,7 @@ const memberSlots = [0, 1, 2, 3];
     const contenu = document.getElementById('texteContenuInput').value.trim();
     const remarqueEnseignant = document.getElementById('texteRemarqueInput').value.trim();
     
+    const weekId = document.getElementById('texteWeekSelect').value;
     if (!groupeId || !titre || !contenu) return;
 
     const groupe = groupes.find(g => g.id === groupeId);
@@ -1267,6 +1313,7 @@ const memberSlots = [0, 1, 2, 3];
         contenu,
         badges: []
       };
+      if (weekId) payload.weekId = weekId;
 
       if (remarqueEnseignant) {
         payload.remarqueEnseignant = remarqueEnseignant;
@@ -1305,13 +1352,12 @@ const memberSlots = [0, 1, 2, 3];
     if (!groupe) return;
     
     const message = `
-      <div class="space-y-2">
-        <p class="font-medium">Êtes-vous sûr de vouloir supprimer ce groupe ?</p>
-        <div class="bg-white p-2 rounded border border-gray-200">
-          <p class="font-medium text-gray-900">${groupe.nom}</p>
-          <p class="text-xs text-gray-500">Statut: ${groupe.visible ? 'Visible' : 'Masqué'}</p>
+      <div>
+        <p>Supprimer le groupe <b>${esc(groupe.nom)}</b> ?</p>
+        <div>
+          <p class="muted small">${groupe.visible ? 'Visible' : 'Masqué'} sur le site</p>
         </div>
-        <p class="text-red-600 text-xs">⚠️ Cette action est irréversible</p>
+
       </div>
     `;
     
@@ -1331,14 +1377,12 @@ const memberSlots = [0, 1, 2, 3];
     if (!texte) return;
     
     const message = `
-      <div class="space-y-2">
-        <p class="font-medium">Êtes-vous sûr de vouloir supprimer ce texte ?</p>
-        <div class="bg-white p-2 rounded border border-gray-200">
-          <p class="font-medium text-gray-900">${texte.titre}</p>
-          <p class="text-xs text-gray-500">Groupe: ${texte.groupeNom}</p>
-          <p class="text-xs text-gray-500">Type: ${texte.type}</p>
+      <div>
+        <p>Supprimer le texte <b>${esc(texte.titre)}</b> ?</p>
+        <div>
+          <p class="muted small">${esc(texte.groupeNom)} · ${esc(texte.type)}</p>
         </div>
-        <p class="text-red-600 text-xs">⚠️ Cette action est irréversible</p>
+
       </div>
     `;
     
@@ -1451,9 +1495,14 @@ const memberSlots = [0, 1, 2, 3];
     const editForm = `
       <div id="editForm-${id}" class="edit-box">
         <h4>Modifier le texte</h4>
-        <label class="field"><span>Titre</span>
-          <input type="text" id="editTitle-${id}" value="${esc(texte.titre)}">
-        </label>
+        <div class="grid-2">
+          <label class="field"><span>Titre</span>
+            <input type="text" id="editTitle-${id}" value="${esc(texte.titre)}">
+          </label>
+          <label class="field"><span>Semaine</span>
+            <select id="editWeek-${id}">${weekOptions(String(texte.weekId || ''))}</select>
+          </label>
+        </div>
         <label class="field"><span>Contenu</span>
           <textarea id="editContent-${id}" rows="8">${esc(texte.contenu)}</textarea>
         </label>
@@ -1479,6 +1528,7 @@ const memberSlots = [0, 1, 2, 3];
     const titre = document.getElementById(`editTitle-${id}`).value.trim();
     const contenu = document.getElementById(`editContent-${id}`).value.trim();
     const remarqueEnseignant = document.getElementById(`editRemarque-${id}`).value.trim();
+    const weekId = document.getElementById(`editWeek-${id}`)?.value || '';
     
     if (!titre || !contenu) {
       alert('Le titre et le contenu ne peuvent pas être vides');
@@ -1486,7 +1536,7 @@ const memberSlots = [0, 1, 2, 3];
     }
 
     try {
-      await window.updateTexte(id, { titre, contenu, remarqueEnseignant });
+      await window.updateTexte(id, { titre, contenu, remarqueEnseignant, ...(weekId ? { weekId } : {}) });
       window.loadTextes();
     } catch (error) {
       alert('Erreur lors de la sauvegarde: ' + error.message);
