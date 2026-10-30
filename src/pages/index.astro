@@ -144,6 +144,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </a>`;
   }
 
+
+  // Semaine d'un texte : le choix manuel de l'enseignant compte en priorité ;
+  // sinon, la semaine dont les dates contiennent le jour d'ajout du texte.
+  function effectiveWeekId(texte, weeks) {
+    const stored = String(texte?.weekId || '').trim();
+    if (texte?.weekManual) return stored;
+    const raw = texte?.createdAt;
+    const d = raw && typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw || 0);
+    if (Number.isNaN(d.getTime()) || d.getTime() === 0) return stored;
+    const pad = (n) => String(n).padStart(2, '0');
+    const day = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const plus2 = (iso) => {
+      const t = new Date(`${iso}T00:00:00Z`); t.setUTCDate(t.getUTCDate() + 2);
+      return t.toISOString().slice(0, 10);
+    };
+    const inside = (w) => w?.startDate && w?.endDate && w.startDate <= day && day <= plus2(w.endDate);
+    const own = (weeks || []).find((w) => w.weekId === stored);
+    if (own && inside(own)) return stored;
+    const match = (weeks || []).find(inside);
+    return match ? match.weekId : stored;
+  }
+
   function renderWeeks(weekly, textes) {
     const container = document.getElementById('textesContainer');
     const weeks = Array.isArray(weekly?.weeks) ? weekly.weeks : [];
@@ -152,7 +174,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     const byWeek = {};
     textes.forEach((t) => {
-      const id = String(t.weekId || '').trim() || fallbackId;
+      const id = effectiveWeekId(t, weeks) || fallbackId;
       (byWeek[id] ||= []).push(t);
     });
 
