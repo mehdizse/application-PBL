@@ -223,7 +223,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const groupe = texte?.groupeNom || 'Groupe gagnant';
         const faces = members.map((m) => `
           <div class="face">
-            <div class="ph">${m.photoUrl ? `<img src="${esc(m.photoUrl)}" alt="${esc(m.prenom)}" loading="lazy">` : '👤'}</div>
+            <div class="ph initial">${esc(String(m.prenom || '').trim().charAt(0).toUpperCase() || '★')}</div>
             ${esc(m.prenom || '')}
           </div>`).join('');
 

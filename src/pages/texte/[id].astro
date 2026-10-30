@@ -31,7 +31,7 @@ const { id } = Astro.params;
         line
           .replace(/^Excellent travail.*!$/gm, '')
           .replace(/^Très bon travail.*!$/gm, '')
-          .replace(new RegExp(`^${groupeNom}$`, 'gm'), '')
+          .replace(new RegExp(`^${String(groupeNom || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'gm'), '')
       )
       .join('\n')
       .trim();

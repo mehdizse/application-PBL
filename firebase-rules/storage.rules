@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Storage → Règles : coller ce texte puis « Publier »
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isTeacher() {
+      return request.auth != null
+        && request.auth.token.email == 'mehdi.ghomari@outlook.fr';
+    }
+
+    // Photos des élèves (Mode Classe)
+    match /winningTeam/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if isTeacher()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isTeacher();
+    }
+
+    // Tout le reste : fermé
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

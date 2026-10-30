@@ -5,8 +5,8 @@ import '../styles/globals.css';
 import '../styles/site.css';
 
 const { bare = false, pageTitle } = Astro.props;
-const title = pageTitle || 'Écrire & Créer';
-const description = 'Blog d\'apprentissage par projet - Développement, création et partage de connaissances';
+const title = pageTitle || 'Le Mur des Textes';
+const description = "Les productions écrites des élèves de 1AM et 3AM. Chaque semaine, un groupe est mis à l'honneur.";
 ---
 
 <!DOCTYPE html>
@@ -19,7 +19,6 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     
     <!-- Preload critical CSS -->
     <link rel="preload" href="/styles/globals.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -27,22 +26,18 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://votresite.com/" />
+    <meta property="og:site_name" content="Le Mur des Textes" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/images/og-image.jpg" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://votresite.com/" />
+    <meta property="twitter:card" content="summary" />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content="/images/og-image.jpg" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     
     <title>{title}</title>
     <slot name="head" />
@@ -374,7 +369,8 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
             });
 
             if (updates.length > 0) {
-              await Promise.all(updates);
+              // Refusé pour un visiteur non connecté : sans gravité, la page continue
+              await Promise.allSettled(updates);
             }
           })();
 
@@ -506,7 +502,7 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
               weeks = [migratedWeek];
             } else {
               weeks = buildSeedWeeks();
-              await saveWeeks(weeks);
+              await saveWeeks(weeks).catch(() => {});
             }
           }
 
@@ -538,15 +534,19 @@ const description = 'Blog d\'apprentissage par projet - Développement, créatio
               _endTime: parseFlexibleDate(fallbackWeek.endDate).getTime()
             };
             weeks = [currentWeek];
-            await saveWeeks(weeks);
+            await saveWeeks(weeks).catch(() => {});
             selectionMode = 'current';
           }
 
           if (selectionMode === 'current' && metaWeekId !== currentWeek.weekId) {
-            await setDoc(metaRef, {
-              currentWeekId: currentWeek.weekId,
-              updatedAt: new Date()
-            }, { merge: true });
+            try {
+              await setDoc(metaRef, {
+                currentWeekId: currentWeek.weekId,
+                updatedAt: new Date()
+              }, { merge: true });
+            } catch (error) {
+              // Visiteur non connecté : écriture refusée, sans gravité
+            }
           }
 
           return {

@@ -148,7 +148,7 @@ const memberSlots = [0, 1, 2, 3];
                     <select id={`winningTexte${k}Select`}><option value="">Choisir un texte</option></select>
                   </label>
                 </div>
-                <p class="field-title">Élèves du groupe</p>
+                <p class="field-title">Élèves du groupe <span class="muted small" style="font-weight:400">— les photos s'affichent seulement dans le Mode Classe, le site public montre les prénoms</span></p>
                 <div class="members">
                   {memberSlots.map((i) => (
                     <div class="member">
@@ -1211,7 +1211,7 @@ const memberSlots = [0, 1, 2, 3];
         data-week-id="${week.weekId}"
         title="Semaine ${esc(week.weekId)}"
       >
-        ${frDate(week.startDate) || esc(week.weekId)}
+        ${frDate(week.startDate) || esc(week.weekId)} <span style="opacity:.6">· S${esc(String(week.weekId).split('-')[1] || week.weekId)}</span>
       </button>
     `).join('');
 
