@@ -88,6 +88,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     padding: 8px 24px; text-align: center; overflow: hidden;
   }
 
+  .fit { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: center center; flex: none; }
+  .expr-list.cols2 { grid-template-columns: 1fr 1fr; }
+  .expr-list.cols2 .expr { font-size: clamp(18px, 2.1vw, 32px); }
   .navbar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px 16px 18px; z-index: 10; }
   .navbtn {
     width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--card-border);
@@ -117,15 +120,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .cta {
     margin-top: 36px; padding: 16px 40px; border-radius: 999px; border: none; cursor: pointer;
     background: var(--gold); color: #3a2600; font-family: inherit; font-weight: 800; font-size: clamp(20px, 2.4vw, 30px);
-    box-shadow: 0 8px 0 var(--gold-dark); animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 8px 0 var(--gold-dark); transition: transform .15s, box-shadow .15s, background-color .15s;
   }
+  .cta:hover { background: #ffd666; transform: translateY(-2px); box-shadow: 0 10px 0 var(--gold-dark); }
+  .cta:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
   .cta:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--gold-dark); }
 
   .pop { animation: pop .6s cubic-bezier(.2, 1.4, .4, 1) both; }
   .rise { animation: rise .6s ease-out both; }
 
   /* Intro */
-  .intro-emoji { font-size: clamp(60px, 10vw, 140px); animation: float 3s ease-in-out infinite; margin-bottom: 8px; }
+  .intro-emoji { font-size: clamp(44px, 7vw, 96px); line-height: 1.1; margin-bottom: 8px; }
 
   /* Expressions */
   .expr-list { display: grid; gap: 14px; width: min(1100px, 100%); margin-top: 18px; }
@@ -142,7 +147,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /* Classement */
   .board { width: min(1100px, 100%); display: grid; gap: 12px; margin-top: 18px; }
   .row {
-    display: grid; grid-template-columns: 64px minmax(120px, 260px) 1fr 90px; align-items: center; gap: 16px;
+    display: grid; grid-template-columns: 64px minmax(120px, 260px) 1fr minmax(90px, auto); align-items: center; gap: 16px;
     font-size: clamp(18px, 2.4vw, 32px); font-weight: 700;
   }
   .row .rank { font-size: 1.4em; text-align: center; }
@@ -176,7 +181,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .mystery {
     width: clamp(160px, 22vw, 280px); height: clamp(160px, 22vw, 280px); border-radius: 50%;
     display: grid; place-items: center; font-size: clamp(90px, 14vw, 180px); font-weight: 800; color: var(--gold);
-    background: var(--card); border: 4px dashed rgba(255, 201, 60, .6); animation: pulse 1.6s ease-in-out infinite;
+    background: var(--card); border: 4px dashed rgba(255, 201, 60, .6);
   }
   .mystery .countdown { font-size: inherit; }
   .solo-faces { display: flex; justify-content: center; gap: clamp(14px, 3vw, 40px); flex-wrap: wrap; }
@@ -214,6 +219,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   @keyframes pulse { 50% { transform: scale(1.05); } }
   @keyframes beat { from { opacity: 0; transform: scale(2.2); } 40% { opacity: 1; transform: scale(1); } to { opacity: .2; transform: scale(.85); } }
 
+  @media (max-width: 900px) {
+    .expr-list.cols2 { grid-template-columns: 1fr; }
+  }
   @media (max-width: 640px) {
     .row { grid-template-columns: 40px 1fr 60px; }
     .row .track { grid-column: 1 / -1; order: 4; }
@@ -410,7 +418,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function buildSlides() {
     const s = ['intro'];
     if (data.current?.expressions?.length) s.push('expressions');
-    if (data.scores.length) s.push('classement');
+    if (data.scores.length && !data.duel?.solo) s.push('classement');
     if (data.duel) s.push('duel');
     if (data.duel?.texte) s.push('texte');
     s.push('fin');
@@ -438,10 +446,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="expr rise" style="animation-delay:${0.2 + i * 0.25}s">
         <span class="num">${i + 1}</span><span>${esc(e)}</span>
       </div>`).join('');
+    const cols = data.current.expressions.length > 4 ? 'cols2' : '';
     return `
       <div class="kicker pop">📚 À utiliser dans vos textes</div>
       <h2 class="big-title" style="font-size:clamp(34px,5vw,72px)">Les expressions de la semaine</h2>
-      <div class="expr-list">${items}</div>
+      <div class="expr-list ${cols}">${items}</div>
     `;
   }
 
@@ -492,7 +501,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="vs pop" id="vs">VS</div>
         ${teamCard(b)}
       </div>
-      <button class="cta" data-action="reveal" id="revealBtn">🥁 Révéler le gagnant</button>
+      <button class="cta" data-action="reveal" id="revealBtn">Révéler le gagnant</button>
     `;
   }
 
@@ -513,7 +522,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="solo-faces">${faces}</div>
         </div>
       </div>
-      <button class="cta" data-action="reveal" id="revealBtn">🥁 Révéler le gagnant</button>
+      <button class="cta" data-action="reveal" id="revealBtn">Révéler le gagnant</button>
     `;
   }
 
@@ -529,6 +538,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     mystery.remove();
     document.getElementById('soloReveal').hidden = false;
+    fitSlide();
     const title = document.getElementById('duelTitle');
     title.innerHTML = `Bravo <span style="color:var(--gold)">${esc(data.duel.a.nom)}</span> !`;
     title.classList.add('pop');
@@ -581,7 +591,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function show(i) {
     index = Math.max(0, Math.min(slides.length - 1, i));
     const name = slides[index];
-    slideEl.innerHTML = renderers[name]();
+    const html = renderers[name]();
+    // Le texte gagnant défile ; les autres écrans sont réduits pour tenir dans l'écran
+    slideEl.innerHTML = name === 'texte' ? html : `<div class="fit">${html}</div>`;
+    fitSlide();
     dotsEl.innerHTML = slides.map((_, k) => `<span class="dot ${k === index ? 'on' : ''}"></span>`).join('');
     prevBtn.disabled = index === 0;
     nextBtn.disabled = index === slides.length - 1;
@@ -589,6 +602,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (name === 'classement') animateBoard();
     if (name === 'fin') setTimeout(() => confetti(160), 300);
   }
+
+  function fitSlide() {
+    const fit = slideEl.querySelector('.fit');
+    if (!fit) return;
+    fit.style.transform = 'none';
+    const cs = getComputedStyle(slideEl);
+    const availH = slideEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const availW = slideEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const scale = Math.min(1, availH / fit.scrollHeight, availW / fit.scrollWidth);
+    fit.style.transform = scale < 1 ? `scale(${scale})` : 'none';
+  }
+  window.addEventListener('resize', fitSlide);
+  document.addEventListener('fullscreenchange', () => setTimeout(fitSlide, 100));
+  document.fonts?.ready.then(fitSlide);
 
   function animateBoard() {
     const rows = [...slideEl.querySelectorAll('.row')];
@@ -634,7 +661,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const nom = winKey === 'a' ? data.duel.a.nom : data.duel.b.nom;
     title.innerHTML = `Bravo <span style="color:var(--gold)">${esc(nom)}</span> !`;
     title.classList.add('pop');
-    zone.scrollIntoView({ block: 'nearest' });
+    fitSlide();
     playFanfare();
     confetti(260);
     setTimeout(() => confetti(160), 900);
